@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { strings } from '@/lib/strings'
 import { AuthLayout } from '../auth-layout'
 import { ForgotPasswordForm } from './components/forgot-password-form'
 
@@ -16,26 +17,21 @@ export function ForgotPassword() {
       <Card className='max-w-sm gap-4 sm:min-w-sm'>
         <CardHeader>
           <CardTitle className='text-lg tracking-tight'>
-            Forgot Password
+            {strings.auth.forgotTitle}
           </CardTitle>
-          <CardDescription>
-            Enter your registered email and <br /> we will send you a link to
-            reset your password.
-          </CardDescription>
+          <CardDescription>{strings.auth.forgotSubtitle}</CardDescription>
         </CardHeader>
         <CardContent>
           <ForgotPasswordForm />
         </CardContent>
         <CardFooter>
           <p className='mx-auto px-8 text-center text-sm text-balance text-muted-foreground'>
-            Don't have an account?{' '}
             <Link
-              to='/sign-up'
+              to='/sign-in'
               className='underline underline-offset-4 hover:text-primary'
             >
-              Sign up
+              {strings.common.back} para entrar
             </Link>
-            .
           </p>
         </CardFooter>
       </Card>

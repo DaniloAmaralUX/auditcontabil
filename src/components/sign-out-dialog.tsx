@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from '@tanstack/react-router'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth-store'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 
@@ -12,9 +13,9 @@ export function SignOutDialog({ open, onOpenChange }: SignOutDialogProps) {
   const location = useLocation()
   const { auth } = useAuthStore()
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
     auth.reset()
-    // Preserve current location for redirect after sign-in
     const currentPath = location.href
     navigate({
       to: '/sign-in',
@@ -27,9 +28,9 @@ export function SignOutDialog({ open, onOpenChange }: SignOutDialogProps) {
     <ConfirmDialog
       open={open}
       onOpenChange={onOpenChange}
-      title='Sign out'
-      desc='Are you sure you want to sign out? You will need to sign in again to access your account.'
-      confirmText='Sign out'
+      title='Sair'
+      desc='Tem certeza que deseja sair? Você precisará entrar novamente para acessar sua conta.'
+      confirmText='Sair'
       destructive
       handleConfirm={handleSignOut}
       className='sm:max-w-sm'
