@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Arquitetura da informação, funcionalidades, user stories e requisitos funcionais da Plataforma de Auditoria Contábil Visual." />
+  <title>Arquitetura do Produto — Plataforma de Auditoria Contábil Visual</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-soft: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #475569;
+      --subtle: #64748b;
+      --primary: #0f172a;
+      --primary-soft: #e2e8f0;
+      --success: #166534;
+      --success-bg: #dcfce7;
+      --warn: #92400e;
+      --warn-bg: #fef3c7;
+      --danger: #991b1b;
+      --danger-bg: #fee2e2;
+      --info: #1d4ed8;
+      --info-bg: #dbeafe;
+      --radius: 14px;
+      --shadow: 0 12px 30px rgba(15, 23, 42, .08);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.55;
+    }
+
+    a { color: inherit; }
+    button, input { font: inherit; }
+
+    .layout {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px 18px;
+      border-right: 1px solid var(--border);
+      background: rgba(255,255,255,.96);
+      overflow: auto;
+    }
+
+    .brand {
+      padding: 6px 10px 22px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 18px;
+    }
+
+    .brand-mark {
+      display: inline-grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      color: white;
+      background: var(--primary);
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .brand h1 {
+      font-size: 16px;
+      line-height: 1.25;
+      margin: 0 0 6px;
+    }
+
+    .brand p {
+      margin: 0;
+      color: var(--subtle);
+      font-size: 12px;
+    }
+
+    .nav-title {
+      padding: 12px 10px 6px;
+      color: var(--subtle);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .nav a {
+      display: block;
+      padding: 9px 10px;
+      border-radius: 9px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      margin: 2px 0;
+    }
+
+    .nav a:hover, .nav a.active {
+      color: var(--text);
+      background: var(--surface-soft);
+      font-weight: 650;
+    }
+
+    .main {
+      min-width: 0;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      min-height: 68px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(248, 250, 252, .9);
+      backdrop-filter: blur(14px);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 32px;
+    }
+
+    .topbar .search {
+      flex: 1;
+      max-width: 520px;
+      position: relative;
+    }
+
+    .topbar input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+    }
+
+    .topbar input:focus {
+      border-color: #94a3b8;
+      box-shadow: 0 0 0 3px rgba(148,163,184,.18);
+    }
+
+    .version {
+      margin-left: auto;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .content {
+      width: min(1280px, 100%);
+      padding: 36px 32px 64px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      border-radius: 22px;
+      padding: 34px;
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: #cbd5e1;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .hero h2 {
+      font-size: clamp(28px, 4vw, 46px);
+      line-height: 1.08;
+      margin: 0 0 14px;
+      max-width: 900px;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 880px;
+      color: #e2e8f0;
+      font-size: 17px;
+    }
+
+    .hero-meta {
+      margin-top: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .hero-meta span {
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 12px;
+    }
+
+    section {
+      scroll-margin-top: 90px;
+      margin: 28px 0;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 20px;
+      margin-bottom: 14px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 25px;
+      letter-spacing: -.02em;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      margin: 5px 0 0;
+      max-width: 820px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 4px 16px rgba(15,23,42,.04);
+    }
+
+    .card h3 {
+      font-size: 17px;
+      margin: 0 0 8px;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .metric {
+      font-size: 31px;
+      line-height: 1;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 11px;
+      font-weight: 750;
+      margin: 0 5px 5px 0;
+    }
+
+    .tag.success { color: var(--success); background: var(--success-bg); }
+    .tag.warn { color: var(--warn); background: var(--warn-bg); }
+    .tag.danger { color: var(--danger); background: var(--danger-bg); }
+    .tag.info { color: var(--info); background: var(--info-bg); }
+    .tag.neutral { color: var(--muted); background: var(--surface-soft); }
+
+    .flow {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .flow-step {
+      flex: 1 0 145px;
+      min-height: 112px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      position: relative;
+    }
+
+    .flow-step strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+
+    .flow-step span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .flow-step:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -8px;
+      top: 42%;
+      width: 16px;
+      color: var(--subtle);
+      font-weight: 800;
+      z-index: 2;
+    }
+
+    .tree {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .tree > li {
+      margin: 9px 0;
+      padding: 13px 15px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: var(--surface);
+    }
+
+    .tree ul {
+      margin: 10px 0 0 18px;
+      padding-left: 18px;
+      border-left: 2px solid var(--border);
+    }
+
+    .tree ul li {
+      margin: 7px 0;
+      color: var(--muted);
+    }
+
+    .role-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .role-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--primary);
+    }
+
+    .role-card ul, .feature-card ul {
+      margin: 12px 0 0;
+      padding-left: 19px;
+      color: var(--muted);
+    }
+
+    .role-card li, .feature-card li {
+      margin: 5px 0;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--border);
+      padding: 12px 14px;
+      text-align: left;
+      vertical-align: top;
+      font-size: 13px;
+    }
+
+    th {
+      background: var(--surface-soft);
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .story {
+      border-left: 4px solid #94a3b8;
+    }
+
+    .story .as {
+      color: var(--subtle);
+      font-size: 12px;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .story blockquote {
+      margin: 8px 0 10px;
+      font-size: 16px;
+      font-weight: 650;
+    }
+
+    .story .acceptance {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    details {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin: 9px 0;
+      overflow: hidden;
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 14px 16px;
+      font-weight: 700;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    details > div {
+      padding: 0 16px 16px;
+      color: var(--muted);
+    }
+
+    .req-id {
+      display: inline-block;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: var(--text);
+      background: var(--surface-soft);
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-size: 12px;
+      margin-right: 6px;
+    }
+
+    .callout {
+      border: 1px solid #bfdbfe;
+      background: #eff6ff;
+      border-radius: var(--radius);
+      padding: 18px;
+      color: #1e3a8a;
+    }
+
+    .callout strong { color: #1e3a8a; }
+
+    .hide { display: none !important; }
+
+    footer {
+      padding: 26px 32px 40px;
+      color: var(--subtle);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 1000px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .content { padding: 24px 18px 50px; }
+      .topbar { padding: 10px 18px; }
+    }
+
+    @media (max-width: 680px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .hero { padding: 24px; border-radius: 16px; }
+      .hero h2 { font-size: 30px; }
+      .section-head { display: block; }
+      .topbar .version { display: none; }
+    }
+
+    @media print {
+      .sidebar, .topbar { display: none; }
+      .layout { display: block; }
+      .content { width: 100%; padding: 0; }
+      .hero { color: black; background: white; border: 1px solid #ddd; box-shadow: none; }
+      .hero p, .eyebrow { color: #333; }
+      .hero-meta span { border-color: #aaa; background: white; }
+      .card, details, .table-wrap { box-shadow: none; break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">AC</div>
+        <h1>Auditoria Contábil Visual</h1>
+        <p>Arquitetura funcional — versão 1</p>
+      </div>
+
+      <nav class="nav" id="nav">
+        <div class="nav-title">Produto</div>
+        <a href="#visao">Visão do produto</a>
+        <a href="#perfis">Perfis e permissões</a>
+        <a href="#arquitetura">Arquitetura da informação</a>
+        <a href="#fluxos">Fluxos principais</a>
+
+        <div class="nav-title">Especificação</div>
+        <a href="#funcionalidades">Funcionalidades</a>
+        <a href="#stories">User stories</a>
+        <a href="#requisitos">Requisitos funcionais</a>
+        <a href="#matriz">Matriz de permissões</a>
+
+        <div class="nav-title">Entrega</div>
+        <a href="#mvp">Escopo do MVP</a>
+        <a href="#aceite">Critérios de aceite</a>
+        <a href="#roadmap">Roadmap</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="search">
+          <input id="searchInput" type="search" placeholder="Buscar funcionalidade, requisito ou user story..." aria-label="Buscar no documento" />
+        </div>
+        <span class="version">Versão 1.0 · Julho/2026</span>
+      </header>
+
+      <div class="content">
+        <section class="hero" id="visao" data-search>
+          <p class="eyebrow">Documento funcional do produto</p>
+          <h2>Plataforma de Auditoria Contábil Visual para a operação completa do escritório</h2>
+          <p>
+            O produto será utilizado pela proprietária, contadores, analistas e funcionários do escritório para organizar clientes,
+            processar arquivos, revisar inconsistências, produzir relatórios e compartilhar resultados com segurança.
+          </p>
+          <div class="hero-meta">
+            <span>Base: satnaing/shadcn-admin</span>
+            <span>SaaS interno do escritório</span>
+            <span>Processamento determinístico</span>
+            <span>Revisão humana obrigatória</span>
+            <span>Cliente externo por link e senha</span>
+          </div>
+        </section>
+
+        <section data-search>
+          <div class="section-head">
+            <div>
+              <h2>Resultado esperado</h2>
+              <p>A plataforma deve sustentar um fluxo colaborativo, e não apenas o trabalho individual da dona do escritório.</p>
+            </div>
+          </div>
+          <div class="grid grid-4">
+            <article class="card">
+              <div class="metric">1</div>
+              <h3>Base central</h3>
+              <p>Clientes, auditorias, arquivos, comentários e relatórios em um único ambiente.</p>
+            </article>
+            <article class="card">
+              <div class="metric">4</div>
+              <h3>Perfis de acesso</h3>
+              <p>Proprietária, contador responsável, analista/funcionário e cliente externo.</p>
+            </article>
+            <article class="card">
+              <div class="metric">7</div>
+              <h3>Etapas da auditoria</h3>
+              <p>Criação, arquivos, mapeamento, processamento, revisão, relatório e compartilhamento.</p>
+            </article>
+            <article class="card">
+              <div class="metric">100%</div>
+              <h3>Rastreável</h3>
+              <p>Regras, alterações, comentários, publicações e acessos ficam registrados.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="perfis" data-search>
+          <div class="section-head">
+            <div>
+              <h2>Perfis e responsabilidades</h2>
+              <p>Permissões simples o suficiente para o MVP, mas adequadas ao trabalho em equipe.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-2">
+            <article class="card role-card">
+              <span class="tag info">Administradora</span>
+              <h3>Proprietária do escritório</h3>
+              <p>Possui visão completa da operação e controla usuários, clientes, auditorias e publicações.</p>
+              <ul>
+                <li>Convidar, editar e desativar usuários.</li>
+                <li>Acessar todas as auditorias do escritório.</li>
+                <li>Definir responsáveis e revisar atividades.</li>
+                <li>Aprovar, publicar e revogar relatórios.</li>
+                <li>Consultar histórico e indicadores da equipe.</li>
+                <li>Gerenciar configurações do escritório.</li>
+              </ul>
+            </article>
+
+            <article class="card role-card">
+              <span class="tag success">Responsável técnico</span>
+              <h3>Contador responsável</h3>
+              <p>Conduz auditorias, valida resultados e assume a revisão profissional.</p>
+              <ul>
+                <li>Criar e editar auditorias.</li>
+                <li>Enviar e mapear arquivos.</li>
+                <li>Revisar divergências e justificar resultados.</li>
+                <li>Adicionar conclusões técnicas.</li>
+                <li>Preparar relatórios para aprovação.</li>
+                <li>Compartilhar quando autorizado.</li>
+              </ul>
+            </article>
+
+            <article class="card role-card">
+              <span class="tag warn">Operacional</span>
+              <h3>Analista ou funcionário</h3>
+              <p>Executa tarefas operacionais sob supervisão, sem controle administrativo do escritório.</p>
+              <ul>
+                <li>Cadastrar e atualizar clientes.</li>
+                <li>Criar rascunhos de auditoria.</li>
+                <li>Enviar arquivos e corrigir mapeamentos.</li>
+                <li>Analisar linhas com falha.</li>
+                <li>Adicionar notas internas.</li>
+                <li>Não gerenciar usuários nem configurações críticas.</li>
+              </ul>
+            </article>
+
+            <article class="card role-card">
+              <span class="tag neutral">Externo</span>
+              <h3>Cliente final</h3>
+              <p>Acessa somente a auditoria publicada, por link protegido por senha.</p>
+              <ul>
+                <li>Visualizar KPIs e gráficos publicados.</li>
+                <li>Ler observações e conclusão.</li>
+                <li>Baixar PDF, quando autorizado.</li>
+                <li>Não criar conta.</li>
+                <li>Não editar nem acessar dados internos.</li>
+                <li>Não visualizar outras auditorias.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="arquitetura" data-search>
+          <div class="section-head">
+            <div>
+              <h2>Arquitetura da informação</h2>
+              <p>Estrutura principal de navegação interna e da experiência externa.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-2">
+            <article class="card">
+              <h3>Área interna do escritório</h3>
+              <ul class="tree">
+                <li><strong>Visão geral</strong>
+                  <ul>
+                    <li>Indicadores do escritório</li>
+                    <li>Auditorias que exigem atenção</li>
+                    <li>Atividades recentes</li>
+                    <li>Desempenho operacional da equipe</li>
+                  </ul>
+                </li>
+                <li><strong>Clientes</strong>
+                  <ul>
+                    <li>Listagem</li>
+                    <li>Novo cliente</li>
+                    <li>Detalhes e histórico</li>
+                    <li>Edição</li>
+                  </ul>
+                </li>
+                <li><strong>Auditorias</strong>
+                  <ul>
+                    <li>Listagem e filtros</li>
+                    <li>Criação</li>
+                    <li>Arquivos</li>
+                    <li>Mapeamento</li>
+                    <li>Processamento</li>
+                    <li>Revisão</li>
+                    <li>Relatório</li>
+                    <li>Compartilhamento</li>
+                  </ul>
+                </li>
+                <li><strong>Relatórios</strong>
+                  <ul>
+                    <li>Relatórios gerados</li>
+                    <li>Versões</li>
+                    <li>Downloads</li>
+                  </ul>
+                </li>
+                <li><strong>Compartilhamentos</strong>
+                  <ul>
+                    <li>Links ativos</li>
+                    <li>Links expirados</li>
+                    <li>Links revogados</li>
+                    <li>Histórico de acessos</li>
+                  </ul>
+                </li>
+                <li><strong>Equipe</strong>
+                  <ul>
+                    <li>Usuários</li>
+                    <li>Convites</li>
+                    <li>Status</li>
+                    <li>Funções</li>
+                  </ul>
+                </li>
+                <li><strong>Configurações</strong>
+                  <ul>
+                    <li>Dados do escritório</li>
+                    <li>Regras e tolerâncias</li>
+                    <li>Preferências de relatório</li>
+                    <li>Segurança</li>
+                  </ul>
+                </li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <h3>Área externa do cliente</h3>
+              <ul class="tree">
+                <li><strong>Acesso protegido</strong>
+                  <ul>
+                    <li>Identificação da auditoria</li>
+                    <li>Campo de senha</li>
+                    <li>Validação e limite de tentativas</li>
+                  </ul>
+                </li>
+                <li><strong>Resumo da auditoria</strong>
+                  <ul>
+                    <li>Cliente e período</li>
+                    <li>Situação geral</li>
+                    <li>KPIs principais</li>
+                  </ul>
+                </li>
+                <li><strong>Resultados</strong>
+                  <ul>
+                    <li>Gráficos simples</li>
+                    <li>Pontos de atenção publicados</li>
+                    <li>Comentários do contador</li>
+                  </ul>
+                </li>
+                <li><strong>Conclusão</strong>
+                  <ul>
+                    <li>Resumo em linguagem acessível</li>
+                    <li>Recomendações publicadas</li>
+                  </ul>
+                </li>
+                <li><strong>Documento</strong>
+                  <ul>
+                    <li>Download do PDF, quando permitido</li>
+                  </ul>
+                </li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="callout" style="margin-top:16px">
+            <strong>Decisão de arquitetura:</strong> o módulo “Equipe” passa a fazer parte da versão 1 porque o objetivo final é o uso colaborativo por proprietária, colegas e funcionários. As permissões continuam simples, sem granularidade enterprise.
+          </div>
+        </section>
+
+        <section id="fluxos" data-search>
+          <div class="section-head">
+            <div>
+              <h2>Fluxos principais</h2>
+              <p>Jornadas operacionais que o produto precisa suportar do início ao fim.</p>
+            </div>
+          </div>
+
+          <h3>Fluxo de produção da auditoria</h3>
+          <div class="flow">
+            <div class="flow-step"><strong>1. Criar</strong><span>Definir cliente, período, nome e responsável.</span></div>
+            <div class="flow-step"><strong>2. Arquivos</strong><span>Enviar Excel, CSV ou PDF estruturado.</span></div>
+            <div class="flow-step"><strong>3. Mapear</strong><span>Confirmar colunas e campos internos.</span></div>
+            <div class="flow-step"><strong>4. Processar</strong><span>Normalizar dados e executar regras.</span></div>
+            <div class="flow-step"><strong>5. Revisar</strong><span>Justificar, ocultar e comentar alertas.</span></div>
+            <div class="flow-step"><strong>6. Publicar</strong><span>Aprovar conteúdo e gerar relatório.</span></div>
+            <div class="flow-step"><strong>7. Compartilhar</strong><span>Criar link, senha e validade.</span></div>
+          </div>
+
+          <h3 style="margin-top:24px">Fluxo colaborativo interno</h3>
+          <div class="flow">
+            <div class="flow-step"><strong>Proprietária</strong><span>Distribui auditoria ou acompanha fila.</span></div>
+            <div class="flow-step"><strong>Analista</strong><span>Prepara cliente, arquivos e mapeamento.</span></div>
+            <div class="flow-step"><strong>Contador</strong><span>Revisa resultados e conclusão.</span></div>
+            <div class="flow-step"><strong>Proprietária</strong><span>Aprova ou solicita ajustes.</span></div>
+            <div class="flow-step"><strong>Cliente</strong><span>Acessa somente a versão publicada.</span></div>
+          </div>
+        </section>
+
+        <section id="funcionalidades" data-search>
+          <div class="section-head">
+            <div>
+              <h2>Mapa de funcionalidades</h2>
+              <p>Conjunto funcional da primeira versão do produto.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-3">
+            <article class="card feature-card">
+              <span class="tag info">Administração</span>
+              <h3>Equipe e acesso</h3>
+              <ul>
+                <li>Login e logout.</li>
+                <li>Convite de usuário.</li>
+                <li>Perfis predefinidos.</li>
+                <li>Ativação e desativação.</li>
+                <li>Recuperação de senha.</li>
+                <li>Registro de ações importantes.</li>
+              </ul>
+            </article>
+
+            <article class="card feature-card">
+              <span class="tag info">Cadastro</span>
+              <h3>Clientes</h3>
+              <ul>
+                <li>CRUD completo.</li>
+                <li>Documento e dados de contato.</li>
+                <li>Responsável pelo cliente.</li>
+                <li>Histórico de auditorias.</li>
+                <li>Última competência.</li>
+                <li>Busca e filtros.</li>
+              </ul>
+            </article>
+
+            <article class="card feature-card">
+              <span class="tag info">Core</span>
+              <h3>Auditorias</h3>
+              <ul>
+                <li>Criação por etapas.</li>
+                <li>Responsável e colaboradores.</li>
+                <li>Status operacional.</li>
+                <li>Prazo interno.</li>
+                <li>Notas internas.</li>
+                <li>Histórico de alterações.</li>
+              </ul>
+            </article>
+
+            <article class="card feature-card">
+              <span class="tag warn">Dados</span>
+              <h3>Arquivos e validação</h3>
+              <ul>
+                <li>Upload de XLSX e CSV.</li>
+                <li>PDF estruturado experimental.</li>
+                <li>Validação de formato e tamanho.</li>
+                <li>Progresso de envio.</li>
+                <li>Linhas válidas e inválidas.</li>
+                <li>Reprocessamento.</li>
+              </ul>
+            </article>
+
+            <article class="card feature-card">
+              <span class="tag warn">Dados</span>
+              <h3>Mapeamento e normalização</h3>
+              <ul>
+                <li>Sugestão de colunas.</li>
+                <li>Confirmação manual.</li>
+                <li>Conversão monetária.</li>
+                <li>Padronização de datas.</li>
+                <li>Preservação do original.</li>
+                <li>Log por linha.</li>
+              </ul>
+            </article>
+
+            <article class="card feature-card">
+              <span class="tag danger">Auditoria</span>
+              <h3>Regras determinísticas</h3>
+              <ul>
+                <li>Débito versus crédito.</li>
+                <li>Saldo final.</li>
+                <li>Campos ausentes.</li>
+                <li>Formatos inválidos.</li>
+                <li>Variação atípica.</li>
+                <li>Conta nova ou valor incomum.</li>
+              </ul>
+            </article>
+
+            <article class="card feature-card">
+              <span class="tag success">Análise</span>
+              <h3>Dashboard técnico</h3>
+              <ul>
+                <li>KPIs de processamento.</li>
+                <li>Gráficos de status.</li>
+                <li>Tabela de inconsistências.</li>
+                <li>Filtros e busca.</li>
+                <li>Origem do dado.</li>
+                <li>Detalhe da regra aplicada.</li>
+              </ul>
+            </article>
+
+            <article class="card feature-card">
+              <span class="tag success">Colaboração</span>
+              <h3>Revisão interna</h3>
+              <ul>
+                <li>Responsável pela revisão.</li>
+                <li>Comentários internos.</li>
+                <li>Justificativa.</li>
+                <li>Falso positivo.</li>
+                <li>Visibilidade para cliente.</li>
+                <li>Aprovação para publicação.</li>
+              </ul>
+            </article>
+
+            <article class="card feature-card">
+              <span class="tag neutral">Entrega</span>
+              <h3>Relatórios e compartilhamento</h3>
+              <ul>
+                <li>Dashboard simplificado.</li>
+                <li>PDF técnico e cliente.</li>
+                <li>Link único.</li>
+                <li>Senha e expiração.</li>
+                <li>Revogação.</li>
+                <li>Registro de acessos.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="stories" data-search>
+          <div class="section-head">
+            <div>
+              <h2>User stories prioritárias</h2>
+              <p>Histórias organizadas por perfil, com foco na versão 1.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-2">
+            <article class="card story">
+              <div class="as">Proprietária</div>
+              <blockquote>Como dona do escritório, quero convidar funcionários e definir seus perfis para que cada pessoa tenha o acesso adequado.</blockquote>
+              <div class="acceptance"><strong>Aceite:</strong> convite por e-mail, perfil definido, status do convite e possibilidade de desativar o usuário.</div>
+            </article>
+
+            <article class="card story">
+              <div class="as">Proprietária</div>
+              <blockquote>Como dona do escritório, quero visualizar todas as auditorias e seus responsáveis para acompanhar o andamento da operação.</blockquote>
+              <div class="acceptance"><strong>Aceite:</strong> listagem com cliente, responsável, status, prazo, alertas e última atualização.</div>
+            </article>
+
+            <article class="card story">
+              <div class="as">Proprietária</div>
+              <blockquote>Como dona do escritório, quero aprovar uma auditoria antes do compartilhamento para controlar a qualidade das entregas.</blockquote>
+              <div class="acceptance"><strong>Aceite:</strong> auditoria só pode ser publicada após revisão obrigatória e aprovação registrada.</div>
+            </article>
+
+            <article class="card story">
+              <div class="as">Contador responsável</div>
+              <blockquote>Como contador, quero criar uma auditoria e atribuir tarefas a um analista para dividir o trabalho.</blockquote>
+              <div class="acceptance"><strong>Aceite:</strong> responsável principal, colaboradores e histórico de atribuição.</div>
+            </article>
+
+            <article class="card story">
+              <div class="as">Analista</div>
+              <blockquote>Como analista, quero enviar arquivos e corrigir o mapeamento de colunas para preparar os dados sem depender de suporte técnico.</blockquote>
+              <div class="acceptance"><strong>Aceite:</strong> upload, mensagens simples, sugestão de colunas e confirmação manual.</div>
+            </article>
+
+            <article class="card story">
+              <div class="as">Analista</div>
+              <blockquote>Como analista, quero saber quais linhas não foram processadas para corrigir o arquivo sem perder dados silenciosamente.</blockquote>
+              <div class="acceptance"><strong>Aceite:</strong> número da linha, campo, valor original, motivo e opção de exportar erros.</div>
+            </article>
+
+            <article class="card story">
+              <div class="as">Contador responsável</div>
+              <blockquote>Como contador, quero revisar cada divergência e registrar minha conclusão para que o resultado tenha validação profissional.</blockquote>
+              <div class="acceptance"><strong>Aceite:</strong> justificar, marcar falso positivo, ocultar do cliente e adicionar comentário.</div>
+            </article>
+
+            <article class="card story">
+              <div class="as">Contador responsável</div>
+              <blockquote>Como contador, quero visualizar a fórmula e os valores usados em cada regra para conferir o cálculo.</blockquote>
+              <div class="acceptance"><strong>Aceite:</strong> regra, versão, tolerância, valores encontrados e registros de origem.</div>
+            </article>
+
+            <article class="card story">
+              <div class="as">Funcionário</div>
+              <blockquote>Como funcionário, quero retomar uma auditoria de onde parei para continuar o trabalho sem repetir etapas.</blockquote>
+              <div class="acceptance"><strong>Aceite:</strong> salvamento por etapa, status persistente e indicação da próxima ação.</div>
+            </article>
+
+            <article class="card story">
+              <div class="as">Proprietária</div>
+              <blockquote>Como dona do escritório, quero consultar quem alterou e publicou uma auditoria para manter rastreabilidade.</blockquote>
+              <div class="acceptance"><strong>Aceite:</strong> log com usuário, data, ação, valor anterior e valor posterior.</div>
+            </article>
+
+            <article class="card story">
+              <div class="as">Cliente final</div>
+              <blockquote>Como cliente, quero acessar a auditoria por link e senha para consultar os resultados sem criar uma conta.</blockquote>
+              <div class="acceptance"><strong>Aceite:</strong> acesso limitado a uma auditoria e sessão somente leitura.</div>
+            </article>
+
+            <article class="card story">
+              <div class="as">Cliente final</div>
+              <blockquote>Como cliente, quero ver explicações simples para compreender os pontos de atenção sem conhecer termos técnicos.</blockquote>
+              <div class="acceptance"><strong>Aceite:</strong> textos publicados pelo contador, KPIs claros e ausência de logs técnicos.</div>
+            </article>
+          </div>
+        </section>
+
+        <section id="requisitos" data-search>
+          <div class="section-head">
+            <div>
+              <h2>Requisitos funcionais</h2>
+              <p>Requisitos numerados para orientar design, desenvolvimento, testes e aceite.</p>
+            </div>
+          </div>
+
+          <details open>
+            <summary>RF-01 — Autenticação e equipe</summary>
+            <div>
+              <p><span class="req-id">RF-001</span>O sistema deve permitir login e logout de usuários internos.</p>
+              <p><span class="req-id">RF-002</span>A proprietária deve poder convidar usuários por e-mail.</p>
+              <p><span class="req-id">RF-003</span>O sistema deve permitir atribuir os perfis Administradora, Contador e Analista.</p>
+              <p><span class="req-id">RF-004</span>A proprietária deve poder ativar e desativar usuários.</p>
+              <p><span class="req-id">RF-005</span>O usuário deve poder recuperar a senha.</p>
+              <p><span class="req-id">RF-006</span>O sistema deve impedir que usuários desativados acessem o painel.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>RF-02 — Clientes</summary>
+            <div>
+              <p><span class="req-id">RF-007</span>Usuários autorizados devem poder cadastrar clientes.</p>
+              <p><span class="req-id">RF-008</span>O sistema deve validar CNPJ ou CPF quando informado.</p>
+              <p><span class="req-id">RF-009</span>O sistema deve permitir buscar clientes por razão social, nome fantasia ou documento.</p>
+              <p><span class="req-id">RF-010</span>A página do cliente deve exibir histórico de auditorias.</p>
+              <p><span class="req-id">RF-011</span>O sistema deve impedir exclusão definitiva quando houver auditorias vinculadas, oferecendo arquivamento.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>RF-03 — Auditorias e colaboração</summary>
+            <div>
+              <p><span class="req-id">RF-012</span>O usuário deve poder criar uma auditoria vinculada a um cliente.</p>
+              <p><span class="req-id">RF-013</span>A auditoria deve possuir responsável principal e colaboradores.</p>
+              <p><span class="req-id">RF-014</span>A auditoria deve possuir competência inicial e final.</p>
+              <p><span class="req-id">RF-015</span>O sistema deve manter status e etapa atual.</p>
+              <p><span class="req-id">RF-016</span>Usuários devem poder adicionar notas internas.</p>
+              <p><span class="req-id">RF-017</span>O sistema deve registrar mudanças de responsável e status.</p>
+              <p><span class="req-id">RF-018</span>A auditoria deve poder ser arquivada sem apagar seu histórico.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>RF-04 — Upload e arquivos</summary>
+            <div>
+              <p><span class="req-id">RF-019</span>O sistema deve aceitar arquivos XLSX e CSV.</p>
+              <p><span class="req-id">RF-020</span>O sistema pode aceitar PDF estruturado como funcionalidade experimental.</p>
+              <p><span class="req-id">RF-021</span>O sistema deve validar extensão, MIME type e tamanho.</p>
+              <p><span class="req-id">RF-022</span>O sistema deve mostrar progresso de upload.</p>
+              <p><span class="req-id">RF-023</span>O arquivo original deve ser preservado.</p>
+              <p><span class="req-id">RF-024</span>O sistema deve permitir remover ou substituir arquivos antes da publicação.</p>
+              <p><span class="req-id">RF-025</span>O sistema deve exibir total de linhas válidas, inválidas e não processadas.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>RF-05 — Mapeamento e normalização</summary>
+            <div>
+              <p><span class="req-id">RF-026</span>O sistema deve identificar as colunas disponíveis.</p>
+              <p><span class="req-id">RF-027</span>O sistema deve sugerir correspondências com campos internos.</p>
+              <p><span class="req-id">RF-028</span>O usuário deve confirmar ou corrigir o mapeamento.</p>
+              <p><span class="req-id">RF-029</span>O sistema deve destacar campos obrigatórios ausentes.</p>
+              <p><span class="req-id">RF-030</span>Valores monetários devem ser convertidos para formato interno único.</p>
+              <p><span class="req-id">RF-031</span>Datas devem ser padronizadas.</p>
+              <p><span class="req-id">RF-032</span>Campos vazios devem ser marcados como “não informado”.</p>
+              <p><span class="req-id">RF-033</span>Nenhuma linha pode ser descartada silenciosamente.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>RF-06 — Processamento e regras</summary>
+            <div>
+              <p><span class="req-id">RF-034</span>O sistema deve executar regras determinísticas sobre os dados normalizados.</p>
+              <p><span class="req-id">RF-035</span>O sistema deve comparar total de débitos e créditos.</p>
+              <p><span class="req-id">RF-036</span>O sistema deve validar saldo final quando os campos necessários estiverem disponíveis.</p>
+              <p><span class="req-id">RF-037</span>O sistema deve sinalizar campos obrigatórios ausentes.</p>
+              <p><span class="req-id">RF-038</span>O sistema deve sinalizar formatos inválidos.</p>
+              <p><span class="req-id">RF-039</span>O sistema deve detectar variações percentuais acima da tolerância configurada.</p>
+              <p><span class="req-id">RF-040</span>O sistema deve registrar regra, fórmula, versão, tolerância e valores utilizados.</p>
+              <p><span class="req-id">RF-041</span>O sistema deve permitir reprocessamento após correção.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>RF-07 — Dashboard e inconsistências</summary>
+            <div>
+              <p><span class="req-id">RF-042</span>O dashboard deve mostrar registros encontrados, processados e com erro.</p>
+              <p><span class="req-id">RF-043</span>O dashboard deve mostrar alertas e divergências por status.</p>
+              <p><span class="req-id">RF-044</span>O sistema deve exibir tabela de inconsistências com filtros.</p>
+              <p><span class="req-id">RF-045</span>O usuário deve poder abrir o detalhe da inconsistência.</p>
+              <p><span class="req-id">RF-046</span>O detalhe deve mostrar arquivo e linha de origem.</p>
+              <p><span class="req-id">RF-047</span>Status não deve ser comunicado apenas por cor.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>RF-08 — Revisão e aprovação</summary>
+            <div>
+              <p><span class="req-id">RF-048</span>O contador deve poder marcar um item como revisado.</p>
+              <p><span class="req-id">RF-049</span>O contador deve poder justificar uma divergência.</p>
+              <p><span class="req-id">RF-050</span>O contador deve poder marcar falso positivo.</p>
+              <p><span class="req-id">RF-051</span>O contador deve poder ocultar um item do cliente.</p>
+              <p><span class="req-id">RF-052</span>O contador deve poder adicionar conclusão geral.</p>
+              <p><span class="req-id">RF-053</span>O sistema deve exigir revisão antes da publicação.</p>
+              <p><span class="req-id">RF-054</span>A proprietária ou usuário autorizado deve aprovar a publicação.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>RF-09 — Relatórios e compartilhamento</summary>
+            <div>
+              <p><span class="req-id">RF-055</span>O sistema deve gerar relatório técnico para o escritório.</p>
+              <p><span class="req-id">RF-056</span>O sistema deve gerar relatório simplificado para o cliente.</p>
+              <p><span class="req-id">RF-057</span>O PDF deve refletir somente os dados publicados.</p>
+              <p><span class="req-id">RF-058</span>Cada auditoria publicada deve poder gerar link único.</p>
+              <p><span class="req-id">RF-059</span>O link deve exigir senha.</p>
+              <p><span class="req-id">RF-060</span>O link deve poder expirar e ser revogado.</p>
+              <p><span class="req-id">RF-061</span>O acesso deve ser somente leitura.</p>
+              <p><span class="req-id">RF-062</span>O sistema deve registrar data e hora de acesso.</p>
+              <p><span class="req-id">RF-063</span>O sistema deve permitir bloquear download do PDF.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>RF-10 — Auditoria de ações e gestão</summary>
+            <div>
+              <p><span class="req-id">RF-064</span>O sistema deve registrar ações críticas realizadas por usuários internos.</p>
+              <p><span class="req-id">RF-065</span>A proprietária deve poder consultar o histórico de alterações.</p>
+              <p><span class="req-id">RF-066</span>O dashboard da proprietária deve mostrar auditorias por responsável e status.</p>
+              <p><span class="req-id">RF-067</span>O sistema deve mostrar atividades recentes do escritório.</p>
+              <p><span class="req-id">RF-068</span>O sistema deve permitir filtrar auditorias por responsável, cliente, período e status.</p>
+            </div>
+          </details>
+        </section>
+
+        <section id="matriz" data-search>
+          <div class="section-head">
+            <div>
+              <h2>Matriz de permissões</h2>
+              <p>Modelo simplificado para a primeira versão.</p>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Funcionalidade</th>
+                  <th>Proprietária</th>
+                  <th>Contador</th>
+                  <th>Analista</th>
+                  <th>Cliente</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Gerenciar equipe</td><td>Completo</td><td>Não</td><td>Não</td><td>Não</td></tr>
+                <tr><td>Ver todos os clientes</td><td>Sim</td><td>Sim</td><td>Sim</td><td>Não</td></tr>
+                <tr><td>Cadastrar cliente</td><td>Sim</td><td>Sim</td><td>Sim</td><td>Não</td></tr>
+                <tr><td>Criar auditoria</td><td>Sim</td><td>Sim</td><td>Rascunho</td><td>Não</td></tr>
+                <tr><td>Enviar arquivos</td><td>Sim</td><td>Sim</td><td>Sim</td><td>Não</td></tr>
+                <tr><td>Mapear colunas</td><td>Sim</td><td>Sim</td><td>Sim</td><td>Não</td></tr>
+                <tr><td>Revisar divergências</td><td>Sim</td><td>Sim</td><td>Notas internas</td><td>Não</td></tr>
+                <tr><td>Aprovar publicação</td><td>Sim</td><td>Opcional</td><td>Não</td><td>Não</td></tr>
+                <tr><td>Gerar link</td><td>Sim</td><td>Quando autorizado</td><td>Não</td><td>Não</td></tr>
+                <tr><td>Revogar link</td><td>Sim</td><td>Quando autorizado</td><td>Não</td><td>Não</td></tr>
+                <tr><td>Consultar log interno</td><td>Sim</td><td>Da auditoria</td><td>Da própria atividade</td><td>Não</td></tr>
+                <tr><td>Visualizar relatório publicado</td><td>Sim</td><td>Sim</td><td>Sim</td><td>Sim, por link</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="mvp" data-search>
+          <div class="section-head">
+            <div>
+              <h2>Escopo final da versão 1</h2>
+              <p>O menor produto capaz de sustentar o uso real do escritório.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-2">
+            <article class="card">
+              <span class="tag success">Entrará</span>
+              <h3>Obrigatório no MVP</h3>
+              <ul>
+                <li>Login e equipe com três perfis internos.</li>
+                <li>Clientes e histórico.</li>
+                <li>Auditorias colaborativas.</li>
+                <li>XLSX e CSV.</li>
+                <li>Mapeamento e normalização.</li>
+                <li>Regras básicas e auditáveis.</li>
+                <li>Dashboard técnico.</li>
+                <li>Revisão, comentários e aprovação.</li>
+                <li>Dashboard do cliente.</li>
+                <li>PDF, link, senha e expiração.</li>
+                <li>Logs de ações e acessos.</li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <span class="tag danger">Não entrará</span>
+              <h3>Fora da versão 1</h3>
+              <ul>
+                <li>ERP completo.</li>
+                <li>Produtos e estoque.</li>
+                <li>Integrações com sistemas contábeis.</li>
+                <li>SPED e XML.</li>
+                <li>Cálculo fiscal.</li>
+                <li>Machine learning.</li>
+                <li>Chatbot sobre dados.</li>
+                <li>Permissões personalizadas por campo.</li>
+                <li>Workflow enterprise.</li>
+                <li>PowerPoint automático.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="aceite" data-search>
+          <div class="section-head">
+            <div>
+              <h2>Critérios de aceite do produto</h2>
+              <p>A versão 1 só é considerada utilizável quando cumprir o fluxo completo.</p>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Área</th>
+                  <th>Critério</th>
+                  <th>Resultado esperado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Equipe</td><td>A proprietária convida um funcionário</td><td>O funcionário recebe acesso com o perfil correto.</td></tr>
+                <tr><td>Cliente</td><td>Funcionário cadastra um cliente</td><td>Cliente aparece na listagem e pode receber auditorias.</td></tr>
+                <tr><td>Auditoria</td><td>Contador cria e atribui uma auditoria</td><td>Status, responsável e colaboradores ficam registrados.</td></tr>
+                <tr><td>Arquivo</td><td>Analista envia arquivo real</td><td>O sistema valida e informa o que foi reconhecido.</td></tr>
+                <tr><td>Dados</td><td>Analista corrige mapeamento</td><td>Dados são normalizados sem descarte silencioso.</td></tr>
+                <tr><td>Regras</td><td>Sistema executa verificações</td><td>Resultados exibem fórmula, origem e classificação.</td></tr>
+                <tr><td>Revisão</td><td>Contador justifica divergências</td><td>Comentários e decisões ficam salvos no histórico.</td></tr>
+                <tr><td>Aprovação</td><td>Proprietária aprova relatório</td><td>Somente a versão aprovada pode ser publicada.</td></tr>
+                <tr><td>Cliente</td><td>Cliente acessa link com senha</td><td>Visualiza apenas a auditoria publicada.</td></tr>
+                <tr><td>PDF</td><td>Cliente baixa o relatório</td><td>PDF contém somente dados autorizados.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="roadmap" data-search>
+          <div class="section-head">
+            <div>
+              <h2>Roadmap de implementação</h2>
+              <p>Ordem recomendada para reduzir risco e validar cedo.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-3">
+            <article class="card">
+              <span class="tag neutral">Fase 1</span>
+              <h3>Fundação interna</h3>
+              <p>Adaptar o shadcn-admin, autenticação, escritório, equipe, sidebar, rotas e clientes.</p>
+            </article>
+            <article class="card">
+              <span class="tag neutral">Fase 2</span>
+              <h3>Auditorias e arquivos</h3>
+              <p>Criação, responsáveis, etapas, upload, armazenamento e validação inicial.</p>
+            </article>
+            <article class="card">
+              <span class="tag neutral">Fase 3</span>
+              <h3>Processamento</h3>
+              <p>Mapeamento, normalização, regras, logs por linha e reprocessamento.</p>
+            </article>
+            <article class="card">
+              <span class="tag neutral">Fase 4</span>
+              <h3>Revisão colaborativa</h3>
+              <p>Dashboard técnico, comentários, justificativas, visibilidade e aprovação.</p>
+            </article>
+            <article class="card">
+              <span class="tag neutral">Fase 5</span>
+              <h3>Entrega ao cliente</h3>
+              <p>Dashboard externo, PDF, link, senha, expiração, revogação e acessos.</p>
+            </article>
+            <article class="card">
+              <span class="tag neutral">Fase 6</span>
+              <h3>Piloto real</h3>
+              <p>Uso pela proprietária e equipe, arquivos reais, correções e medição de economia de tempo.</p>
+            </article>
+          </div>
+        </section>
+
+        <section data-search>
+          <div class="callout">
+            <strong>Definição final:</strong> a versão 1 não é apenas um painel para a proprietária. É um sistema operacional leve para o escritório, com divisão de trabalho, revisão profissional, aprovação, rastreabilidade e entrega segura ao cliente.
+          </div>
+        </section>
+      </div>
+
+      <footer>
+        Plataforma de Auditoria Contábil Visual · Arquitetura da Informação e Especificação Funcional · Versão 1.0
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    const input = document.getElementById('searchInput');
+    const searchable = Array.from(document.querySelectorAll('[data-search], details'));
+    const navLinks = Array.from(document.querySelectorAll('#nav a'));
+
+    input.addEventListener('input', () => {
+      const term = input.value.trim().toLowerCase();
+      searchable.forEach((el) => {
+        const match = !term || el.innerText.toLowerCase().includes(term);
+        el.classList.toggle('hide', !match);
+        if (match && term && el.tagName === 'DETAILS') el.open = true;
+      });
+    });
+
+    const sections = Array.from(document.querySelectorAll('section[id]'));
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          navLinks.forEach((link) => {
+            link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id);
+          });
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+
+    sections.forEach((section) => observer.observe(section));
+  </script>
+</body>
+</html>
