@@ -1,53 +1,37 @@
+import { type Session } from '@supabase/supabase-js'
 import { create } from 'zustand'
-import { getCookie, setCookie, removeCookie } from '@/lib/cookies'
+import { claimsFromSession, type Role } from '@/lib/supabase'
 
-const ACCESS_TOKEN = 'thisisjustarandomstring'
-
-interface AuthUser {
-  accountNo: string
-  email: string
-  role: string[]
-  exp: number
-}
-
-interface AuthState {
+type AuthState = {
   auth: {
-    user: AuthUser | null
-    setUser: (user: AuthUser | null) => void
-    accessToken: string
-    setAccessToken: (accessToken: string) => void
-    resetAccessToken: () => void
+    session: Session | null
+    userId: string | null
+    email: string | null
+    escritorioId: string | null
+    role: Role | null
+    fullName: string | null
+    setSession: (session: Session | null) => void
     reset: () => void
   }
 }
 
-export const useAuthStore = create<AuthState>()((set) => {
-  const cookieState = getCookie(ACCESS_TOKEN)
-  const initToken = cookieState ? JSON.parse(cookieState) : ''
+function derive(session: Session | null) {
+  const c = claimsFromSession(session)
   return {
-    auth: {
-      user: null,
-      setUser: (user) =>
-        set((state) => ({ ...state, auth: { ...state.auth, user } })),
-      accessToken: initToken,
-      setAccessToken: (accessToken) =>
-        set((state) => {
-          setCookie(ACCESS_TOKEN, JSON.stringify(accessToken))
-          return { ...state, auth: { ...state.auth, accessToken } }
-        }),
-      resetAccessToken: () =>
-        set((state) => {
-          removeCookie(ACCESS_TOKEN)
-          return { ...state, auth: { ...state.auth, accessToken: '' } }
-        }),
-      reset: () =>
-        set((state) => {
-          removeCookie(ACCESS_TOKEN)
-          return {
-            ...state,
-            auth: { ...state.auth, user: null, accessToken: '' },
-          }
-        }),
-    },
+    session,
+    userId: c?.userId ?? null,
+    email: c?.email ?? null,
+    escritorioId: c?.escritorioId ?? null,
+    role: c?.role ?? null,
+    fullName: c?.fullName ?? null,
   }
-})
+}
+
+export const useAuthStore = create<AuthState>()((set) => ({
+  auth: {
+    ...derive(null),
+    setSession: (session) =>
+      set((state) => ({ auth: { ...state.auth, ...derive(session) } })),
+    reset: () => set((state) => ({ auth: { ...state.auth, ...derive(null) } })),
+  },
+}))

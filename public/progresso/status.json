@@ -1,0 +1,227 @@
+{
+  "updatedAt": "2026-07-12T01:09:43.574Z",
+  "now": "Specs do Auditview PRD concluídas ✅ — aguardando você concluir a janela do Supabase para publicar em auditcontabil.vercel.app",
+  "groups": [
+    {
+      "title": "🗄️ Backend (banco + funções)",
+      "items": [
+        {
+          "label": "Schema completo (23 tabelas + RLS multi-tenant)",
+          "state": "done"
+        },
+        {
+          "label": "7 regras de auditoria em SQL versionado",
+          "state": "done"
+        },
+        {
+          "label": "RPCs: importação, transição, publicação, share",
+          "state": "done"
+        },
+        {
+          "label": "Share seguro: senha bcrypt + rate limit + snapshot",
+          "state": "done"
+        },
+        {
+          "label": "Edge Functions: convite + Stripe (3)",
+          "state": "done"
+        },
+        {
+          "label": "Testes de banco (pgTAP)",
+          "state": "done"
+        },
+        {
+          "label": "Piloto: trial 90 dias + regras semeadas",
+          "state": "done"
+        }
+      ]
+    },
+    {
+      "title": "🖥️ Telas base",
+      "items": [
+        {
+          "label": "Login / recuperar senha / aceitar convite",
+          "state": "done"
+        },
+        {
+          "label": "Marca Espaço Ação (logo + favicon)",
+          "state": "done"
+        },
+        {
+          "label": "Menu por perfil (owner/contador/analista)",
+          "state": "done"
+        },
+        {
+          "label": "Clientes (cadastrar, editar, remover)",
+          "state": "done"
+        },
+        {
+          "label": "Início (visão geral)",
+          "state": "done"
+        }
+      ]
+    },
+    {
+      "title": "📊 Auditorias",
+      "items": [
+        {
+          "label": "Lista de auditorias + criar nova",
+          "state": "done"
+        },
+        {
+          "label": "Workspace com 6 abas",
+          "state": "done"
+        },
+        {
+          "label": "Importação: enviar arquivo + mapear colunas",
+          "state": "done"
+        },
+        {
+          "label": "Processamento com regras no banco",
+          "state": "done"
+        },
+        {
+          "label": "Revisão com justificativa",
+          "state": "done"
+        },
+        {
+          "label": "Aprovação e publicação",
+          "state": "done"
+        }
+      ]
+    },
+    {
+      "title": "🔗 Cliente final",
+      "items": [
+        {
+          "label": "Página pública /r/link com senha",
+          "state": "done"
+        },
+        {
+          "label": "Dashboard do cliente (linguagem simples)",
+          "state": "done"
+        },
+        {
+          "label": "PDF para download",
+          "state": "done"
+        }
+      ]
+    },
+    {
+      "title": "👥 Escritório",
+      "items": [
+        {
+          "label": "Equipe: convidar por e-mail",
+          "state": "done"
+        },
+        {
+          "label": "Faturamento: status do trial",
+          "state": "done"
+        }
+      ]
+    },
+    {
+      "title": "✨ Qualidade",
+      "items": [
+        {
+          "label": "Visual estilo Ramp (passada ui-skills)",
+          "state": "done"
+        },
+        {
+          "label": "Testes automatizados extras",
+          "state": "done"
+        },
+        {
+          "label": "Limpeza de código (knip + react-doctor)",
+          "state": "done"
+        }
+      ]
+    },
+    {
+      "title": "🚀 Deploy",
+      "items": [
+        {
+          "label": "Config Cloudflare Pages + CI",
+          "state": "done"
+        },
+        {
+          "label": "Runbook de deploy (passo a passo)",
+          "state": "done"
+        },
+        {
+          "label": "Planilha de teste de exemplo",
+          "state": "done"
+        }
+      ]
+    },
+    {
+      "title": "📋 Specs novas (Auditview PRD)",
+      "items": [
+        {
+          "label": "Conclusão geral da auditoria (revisão → cliente → PDF)",
+          "state": "done"
+        },
+        {
+          "label": "Verificação de linhas duplicadas (R008)",
+          "state": "done"
+        },
+        {
+          "label": "Regra sem dados = \"Não executada\" (nunca OK indevido)",
+          "state": "done"
+        },
+        {
+          "label": "Bloquear download do PDF por link",
+          "state": "done"
+        },
+        {
+          "label": "Expiração do link na tela de compartilhar",
+          "state": "done"
+        },
+        {
+          "label": "Remover arquivo antes da publicação",
+          "state": "done"
+        },
+        {
+          "label": "Ativar/desativar usuário + bloqueio de acesso",
+          "state": "done"
+        },
+        {
+          "label": "Validação de CPF/CNPJ",
+          "state": "done"
+        },
+        {
+          "label": "Histórico de auditorias na página do cliente",
+          "state": "done"
+        },
+        {
+          "label": "KPIs extras do dashboard técnico",
+          "state": "done"
+        }
+      ]
+    },
+    {
+      "title": "🔑 Seu checklist final (janela do PowerShell já aberta)",
+      "items": [
+        {
+          "label": "Janela: supabase login (browser) + senha do banco + functions",
+          "state": "doing"
+        },
+        {
+          "label": "Cloudflare/wrangler autenticado",
+          "state": "done"
+        },
+        {
+          "label": "Push no GitHub",
+          "state": "done"
+        },
+        {
+          "label": "Merge na main → Vercel publica auditcontabil.vercel.app",
+          "state": "todo"
+        },
+        {
+          "label": "Owner criado + LINK DE TESTE validado",
+          "state": "todo"
+        }
+      ]
+    }
+  ]
+}
