@@ -13,11 +13,13 @@ export function Overview() {
 
       <Main>
         <div className='mx-auto max-w-3xl'>
-          {/* Saudação discreta: o hero abaixo é o herói tipográfico */}
-          <p className='mb-4 text-sm text-muted-foreground'>
+          {/* Saudação como <h1> discreto (o hero abaixo é o herói tipográfico
+              e usa <h2>). Precisamos de um <h1> real para o outline do documento
+              — WCAG 1.3.1 e 2.4.6. Estilo pequeno preserva a hierarquia visual. */}
+          <h1 className='mb-4 text-sm font-normal text-muted-foreground'>
             Olá, <span className='font-medium text-foreground'>{firstName}</span>{' '}
             — seu próximo passo está logo abaixo.
-          </p>
+          </h1>
 
           <HomeOnboarding />
         </div>
