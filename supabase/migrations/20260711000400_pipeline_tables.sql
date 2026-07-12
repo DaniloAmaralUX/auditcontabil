@@ -80,7 +80,7 @@ create table rule_results (
   rule_code        text not null,               -- desnormalizado: sobrevive a mudanças
   rule_version     int  not null,
   scope            result_scope not null,
-  row_id           bigint references normalized_rows(id),
+  row_id           bigint references normalized_rows(id) on delete cascade,
   account_code     text,
   period           date,
   severity         severity not null,

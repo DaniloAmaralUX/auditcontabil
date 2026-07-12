@@ -9,6 +9,7 @@ export type PublicSnapshot = {
     period_start: string | null
     period_end: string | null
     version: number
+    conclusion?: string | null
     published_at: string
   }
   summary: {
@@ -30,10 +31,12 @@ export type PublicSnapshot = {
 
 const SESSION_KEY = 'share_session'
 
+export type SharedView = { payload: PublicSnapshot; allowDownload: boolean }
+
 export async function redeemShare(
   token: string,
   password: string
-): Promise<PublicSnapshot> {
+): Promise<SharedView> {
   const { data, error } = await supabase.rpc('redeem_share', {
     p_token: token,
     p_password: password,
@@ -41,6 +44,7 @@ export async function redeemShare(
   if (error) throw error
   const result = data as {
     payload: PublicSnapshot
+    allow_download: boolean
     session_token: string
     expires_at: string
   }
@@ -48,10 +52,10 @@ export async function redeemShare(
     SESSION_KEY,
     JSON.stringify({ token: result.session_token, expiresAt: result.expires_at })
   )
-  return result.payload
+  return { payload: result.payload, allowDownload: result.allow_download ?? true }
 }
 
-export async function getSharedSnapshot(): Promise<PublicSnapshot | null> {
+export async function getSharedSnapshot(): Promise<SharedView | null> {
   const raw = sessionStorage.getItem(SESSION_KEY)
   if (!raw) return null
   try {
@@ -70,7 +74,8 @@ export async function getSharedSnapshot(): Promise<PublicSnapshot | null> {
       sessionStorage.removeItem(SESSION_KEY)
       return null
     }
-    return data as PublicSnapshot
+    const r = data as { payload: PublicSnapshot; allow_download: boolean }
+    return { payload: r.payload, allowDownload: r.allow_download ?? true }
   } catch {
     sessionStorage.removeItem(SESSION_KEY)
     return null

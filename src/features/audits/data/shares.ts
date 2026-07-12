@@ -52,11 +52,13 @@ export function useCreateShare(auditId: string) {
     mutationFn: async (input: {
       password: string
       expires_at: string | null
+      allow_download: boolean
     }): Promise<{ token: string }> => {
       const { data, error } = await supabase.rpc('create_share', {
         p_audit_id: auditId,
         p_password: input.password,
         p_expires_at: input.expires_at,
+        p_allow_download: input.allow_download,
       })
       if (error) throw error
       return data as { token: string }

@@ -24,6 +24,7 @@ create table shares (
   token_hash    char(64) not null unique,  -- sha256 do token; token puro NUNCA persiste
   password_hash text not null,             -- crypt(senha, gen_salt('bf', 10))
   status        share_status not null default 'active',
+  allow_download boolean not null default true,  -- RF-063: bloqueio do download do PDF
   expires_at    timestamptz,               -- null = sem expiração
   created_by    uuid not null references profiles(id),
   created_at    timestamptz not null default now(),

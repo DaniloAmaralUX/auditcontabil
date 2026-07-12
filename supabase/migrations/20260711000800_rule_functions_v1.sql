@@ -19,6 +19,21 @@ begin
     order by version desc limit 1;
   if v_rule_id is null then return; end if;
 
+  -- RN-005: sem dados aplicáveis => "Não executada", nunca OK indevido.
+  if not exists (
+    select 1 from normalized_rows
+    where audit_id = p_audit_id and status in ('ok','coerced') and period is not null
+      and (debit is not null or credit is not null)
+  ) then
+    insert into rule_results (escritorio_id, audit_id, run_id, rule_id, rule_code, rule_version,
+      scope, severity, message, formula_snapshot, values_snapshot)
+    values (v_esc, p_audit_id, p_run_id, v_rule_id, v_code, v_version, 'audit', 'info',
+      'Não executada: não há dados suficientes (períodos com débito/crédito) para aplicar esta verificação.',
+      'ABS(SUM(debit) - SUM(credit)) <= ' || coalesce(p_params->>'tolerance_abs','0.01'),
+      jsonb_build_object('executed', false));
+    return;
+  end if;
+
   insert into rule_results (escritorio_id, audit_id, run_id, rule_id, rule_code, rule_version,
     scope, period, severity, message, formula_snapshot, values_snapshot)
   select v_esc, p_audit_id, p_run_id, v_rule_id, v_code, v_version,
@@ -65,6 +80,23 @@ begin
     from rules where escritorio_id = v_esc and code = 'R002_BALANCE_EQUATION' and enabled
     order by version desc limit 1;
   if v_rule_id is null then return; end if;
+
+  -- RN-005: a equação exige saldo inicial e final; sem eles => "Não executada".
+  if not exists (
+    select 1 from normalized_rows
+    where audit_id = p_audit_id and status in ('ok','coerced')
+      and account_code is not null and period is not null
+      and opening_balance is not null and closing_balance is not null
+  ) then
+    insert into rule_results (escritorio_id, audit_id, run_id, rule_id, rule_code, rule_version,
+      scope, severity, message, formula_snapshot, values_snapshot)
+    values (v_esc, p_audit_id, p_run_id, v_rule_id, v_code, v_version, 'audit', 'info',
+      'Não executada: o arquivo não traz saldo inicial e saldo final para aplicar a equação de saldos.',
+      'ABS(opening_balance + SUM(debit) - SUM(credit) - closing_balance) <= '
+        || coalesce(p_params->>'tolerance_abs','0.01'),
+      jsonb_build_object('executed', false));
+    return;
+  end if;
 
   insert into rule_results (escritorio_id, audit_id, run_id, rule_id, rule_code, rule_version,
     scope, account_code, period, severity, message, formula_snapshot, values_snapshot)
@@ -322,5 +354,38 @@ begin
       'Nenhum movimento fora do intervalo estatístico esperado.',
       'ABS(valor - media_conta) <= ' || v_k || ' * desvio_padrao_conta',
       jsonb_build_object('checked', true, 'k_stddev', v_k));
+  end if;
+end $$;
+
+-- ---------- R008: linha duplicada (VER-005) — ingest marca; regra dá visibilidade ----------
+create or replace function app.rule_r008_duplicate_rows_v1(
+  p_audit_id uuid, p_params jsonb, p_run_id uuid
+) returns void language plpgsql security definer set search_path = public, app as $$
+declare
+  v_esc uuid; v_rule_id uuid; v_code text; v_version int; v_found int;
+begin
+  select escritorio_id into v_esc from audits where id = p_audit_id;
+  select id, code, version into v_rule_id, v_code, v_version
+    from rules where escritorio_id = v_esc and code = 'R008_DUPLICATE_ROW' and enabled
+    order by version desc limit 1;
+  if v_rule_id is null then return; end if;
+
+  insert into rule_results (escritorio_id, audit_id, run_id, rule_id, rule_code, rule_version,
+    scope, row_id, account_code, period, severity, message, formula_snapshot, values_snapshot)
+  select v_esc, p_audit_id, p_run_id, v_rule_id, v_code, v_version,
+    'row', nr.id, nr.account_code, nr.period, 'attention',
+    coalesce(nullif(nr.message,''), 'Linha possivelmente duplicada dentro do arquivo.'),
+    'linha repetida (conta + período + valores) — nunca excluída automaticamente',
+    jsonb_build_object('row_number', nr.row_number, 'file_id', nr.file_id)
+  from normalized_rows nr
+  where nr.audit_id = p_audit_id and nr.status = 'duplicate';
+
+  get diagnostics v_found = row_count;
+  if v_found = 0 then
+    insert into rule_results (escritorio_id, audit_id, run_id, rule_id, rule_code, rule_version,
+      scope, severity, message, formula_snapshot, values_snapshot)
+    values (v_esc, p_audit_id, p_run_id, v_rule_id, v_code, v_version, 'audit', 'ok',
+      'Nenhuma linha duplicada detectada.',
+      'linha repetida (conta + período + valores)', jsonb_build_object('checked', true));
   end if;
 end $$;

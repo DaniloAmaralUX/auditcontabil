@@ -13,6 +13,7 @@ import { z } from 'zod'
 import { qk } from '@/lib/query-keys'
 import { roleLabels } from '@/lib/permissions'
 import { supabase, type Role } from '@/lib/supabase'
+import { useAuthStore } from '@/stores/auth-store'
 import { Main } from '@/components/layout/main'
 import { PageHeader, PageTitle } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
@@ -42,6 +43,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Switch } from '@/components/ui/switch'
 import {
   Table,
   TableBody,
@@ -106,6 +108,23 @@ export function Team() {
   const { data, isLoading } = useQuery(membersQuery())
   const [open, setOpen] = useState(false)
   const invite = useInvite()
+  const qc = useQueryClient()
+  const myId = useAuthStore((s) => s.auth.userId)
+
+  // RF-004/006: desativar bloqueia o acesso (guard verifica is_active no login/navegação)
+  const toggleActive = useMutation({
+    mutationFn: async (m: Member) => {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_active: !m.is_active })
+        .eq('id', m.id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      toast.success('Situação atualizada.')
+      qc.invalidateQueries({ queryKey: qk.team.members })
+    },
+  })
 
   const form = useForm<InviteForm>({
     resolver: zodResolver(inviteSchema),
@@ -171,9 +190,17 @@ export function Team() {
                     <Badge variant='outline'>{roleLabels[m.role]}</Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant='outline'>
-                      {m.is_active ? 'Ativo' : 'Desativado'}
-                    </Badge>
+                    <div className='flex items-center gap-2'>
+                      <Switch
+                        checked={m.is_active}
+                        onCheckedChange={() => toggleActive.mutate(m)}
+                        disabled={m.id === myId || toggleActive.isPending}
+                        aria-label={m.is_active ? 'Desativar usuário' : 'Ativar usuário'}
+                      />
+                      <span className='text-sm text-muted-foreground'>
+                        {m.is_active ? 'Ativo' : 'Desativado'}
+                      </span>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

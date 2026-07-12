@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
+import { auditsListQuery } from '@/features/audits/data/queries'
+import { AuditStatusBadge } from '@/features/audits/components/status-badge'
 import { Main } from '@/components/layout/main'
 import { PageHeader } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
@@ -18,6 +20,8 @@ import { clientQuery } from './data/queries'
 export function ClientDetail() {
   const { clientId } = useParams({ from: '/_authenticated/clients/$clientId' })
   const { data, isLoading, isError } = useQuery(clientQuery(clientId))
+  const audits = useQuery(auditsListQuery())
+  const clientAudits = (audits.data ?? []).filter((a) => a.cliente_id === clientId)
 
   return (
     <>
@@ -55,14 +59,37 @@ export function ClientDetail() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Auditorias</CardTitle>
+                <CardTitle>Histórico de auditorias</CardTitle>
               </CardHeader>
-              <CardContent className='text-sm text-muted-foreground'>
-                Crie auditorias para este cliente em{' '}
-                <Link to='/audits' className='underline'>
-                  Auditorias
-                </Link>
-                .
+              <CardContent>
+                {clientAudits.length === 0 ? (
+                  <p className='text-sm text-muted-foreground'>
+                    Este cliente ainda não tem auditorias. Crie a primeira em{' '}
+                    <Link to='/audits' className='underline'>
+                      Auditorias
+                    </Link>
+                    .
+                  </p>
+                ) : (
+                  <ul className='divide-y'>
+                    {clientAudits.map((a) => (
+                      <li
+                        key={a.id}
+                        className='flex items-center justify-between gap-2 py-2'
+                      >
+                        <Link
+                          to='/audits/$auditId'
+                          params={{ auditId: a.id }}
+                          search={{ tab: 'resumo' }}
+                          className='text-sm font-medium hover:underline'
+                        >
+                          {a.title || 'Auditoria sem nome'}
+                        </Link>
+                        <AuditStatusBadge status={a.status} />
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </CardContent>
             </Card>
           </div>

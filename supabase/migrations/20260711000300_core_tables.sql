@@ -66,6 +66,7 @@ create table audits (
   period_start  date,
   period_end    date,
   status        audit_status not null default 'draft',
+  conclusion    text,                              -- RF-052: conclusão geral (revisão → cliente → PDF)
   created_by    uuid references profiles(id),
   approved_by   uuid references profiles(id),
   approved_at   timestamptz,

@@ -22,6 +22,7 @@ export const auditSchema = z.object({
   period_start: z.string().nullable(),
   period_end: z.string().nullable(),
   status: z.enum(auditStatusValues),
+  conclusion: z.string().nullable().optional(),
   created_by: z.string().nullable(),
   approved_by: z.string().nullable(),
   created_at: z.string(),

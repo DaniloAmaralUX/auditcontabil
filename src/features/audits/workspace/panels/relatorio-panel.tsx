@@ -18,6 +18,7 @@ type SnapshotPayload = {
     period_start: string | null
     period_end: string | null
     version: number
+    conclusion?: string | null
   }
   summary: { total_rows: number; processed: number; invalid: number }
   items: Array<{
@@ -85,6 +86,17 @@ export function RelatorioPanel({ auditId }: { auditId: string }) {
           </p>
         </CardContent>
       </Card>
+
+      {data.audit.conclusion && (
+        <Card>
+          <CardHeader className='pb-2'>
+            <CardTitle className='text-base'>Conclusão do escritório</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className='text-sm whitespace-pre-wrap'>{data.audit.conclusion}</p>
+          </CardContent>
+        </Card>
+      )}
 
       {data.items.map((item, i) => (
         <Card key={i}>

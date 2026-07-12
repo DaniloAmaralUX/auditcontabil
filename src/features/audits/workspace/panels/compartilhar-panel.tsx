@@ -16,6 +16,7 @@ import { ConfirmDialog } from '@/components/confirm-dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Switch } from '@/components/ui/switch'
 import { auditDetailQuery } from '../../data/queries'
 import {
   sharesQuery,
@@ -33,6 +34,8 @@ export function CompartilharPanel({ auditId }: { auditId: string }) {
   const revoke = useRevokeShare(auditId)
 
   const [password, setPassword] = useState('')
+  const [expiresAt, setExpiresAt] = useState('')
+  const [allowDownload, setAllowDownload] = useState(true)
   const [freshUrl, setFreshUrl] = useState<string | null>(null)
   const [revokeId, setRevokeId] = useState<string | null>(null)
 
@@ -46,7 +49,8 @@ export function CompartilharPanel({ auditId }: { auditId: string }) {
   async function onCreate() {
     const { token } = await createShare.mutateAsync({
       password,
-      expires_at: null,
+      expires_at: expiresAt ? new Date(expiresAt + 'T23:59:59').toISOString() : null,
+      allow_download: allowDownload,
     })
     const url = `${window.location.origin}/r/${token}`
     setFreshUrl(url)
@@ -113,8 +117,8 @@ export function CompartilharPanel({ auditId }: { auditId: string }) {
                 </p>
               </div>
             )}
-            <div className='flex items-end gap-2'>
-              <div className='flex-1 space-y-1'>
+            <div className='grid gap-3 sm:grid-cols-2'>
+              <div className='space-y-1'>
                 <Label htmlFor='share-pass'>Senha do link</Label>
                 <Input
                   id='share-pass'
@@ -124,13 +128,31 @@ export function CompartilharPanel({ auditId }: { auditId: string }) {
                   placeholder='mínimo 8 caracteres'
                 />
               </div>
-              <Button
-                onClick={onCreate}
-                disabled={!canShare || password.length < 8 || createShare.isPending}
-              >
-                <LinkIcon className='size-4' /> Gerar link
-              </Button>
+              <div className='space-y-1'>
+                <Label htmlFor='share-exp'>Expira em (opcional)</Label>
+                <Input
+                  id='share-exp'
+                  type='date'
+                  value={expiresAt}
+                  onChange={(e) => setExpiresAt(e.target.value)}
+                />
+              </div>
             </div>
+            <div className='flex items-center justify-between rounded-md border p-3'>
+              <div>
+                <Label className='mb-0'>Permitir baixar o PDF</Label>
+                <p className='text-xs text-muted-foreground'>
+                  Desligado, o cliente só visualiza na tela.
+                </p>
+              </div>
+              <Switch checked={allowDownload} onCheckedChange={setAllowDownload} />
+            </div>
+            <Button
+              onClick={onCreate}
+              disabled={!canShare || password.length < 8 || createShare.isPending}
+            >
+              <LinkIcon className='size-4' /> Gerar link
+            </Button>
           </CardContent>
         </Card>
       )}

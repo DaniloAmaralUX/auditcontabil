@@ -74,6 +74,13 @@ function ReportPdf({ snapshot }: { snapshot: PublicSnapshot }) {
             ' Algumas linhas das planilhas enviadas não puderam ser lidas e não fazem parte desta análise.'}
         </Text>
 
+        {audit.conclusion ? (
+          <View style={styles.item} wrap={false}>
+            <Text style={styles.itemBadge}>CONCLUSÃO DO ESCRITÓRIO</Text>
+            <Text>{audit.conclusion}</Text>
+          </View>
+        ) : null}
+
         {items.map((item, i) => (
           <View key={i} style={styles.item} wrap={false}>
             <Text

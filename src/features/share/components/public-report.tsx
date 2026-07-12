@@ -49,7 +49,13 @@ function fmtMoney(v: unknown): string | null {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
-export function PublicReport({ snapshot }: { snapshot: PublicSnapshot }) {
+export function PublicReport({
+  snapshot,
+  allowDownload = true,
+}: {
+  snapshot: PublicSnapshot
+  allowDownload?: boolean
+}) {
   const { audit, summary, items } = snapshot
   const attention = items.length
 
@@ -92,9 +98,11 @@ export function PublicReport({ snapshot }: { snapshot: PublicSnapshot }) {
               casos.
             </p>
           )}
-          <Suspense fallback={<Skeleton className='h-9 w-36' />}>
-            <DownloadPdfButton snapshot={snapshot} />
-          </Suspense>
+          {allowDownload && (
+            <Suspense fallback={<Skeleton className='h-9 w-36' />}>
+              <DownloadPdfButton snapshot={snapshot} />
+            </Suspense>
+          )}
         </CardContent>
       </Card>
 
@@ -126,6 +134,17 @@ export function PublicReport({ snapshot }: { snapshot: PublicSnapshot }) {
           </Card>
         )
       })}
+
+      {audit.conclusion && (
+        <Card>
+          <CardHeader className='pb-2'>
+            <CardTitle className='text-base'>Conclusão do escritório</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className='text-sm whitespace-pre-wrap'>{audit.conclusion}</p>
+          </CardContent>
+        </Card>
+      )}
 
       <footer className='mt-auto pt-6 text-center text-xs text-muted-foreground'>
         Relatório publicado em{' '}

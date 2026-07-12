@@ -431,7 +431,7 @@ begin
   v_payload := jsonb_build_object(
     'audit', (select jsonb_build_object('title', a.title, 'period_start', a.period_start,
                 'period_end', a.period_end, 'cliente', v_cliente, 'version', v_version,
-                'published_at', now())
+                'conclusion', a.conclusion, 'published_at', now())
               from audits a where a.id = p_audit_id),
     'summary', (select jsonb_build_object(
                   'total_rows', count(*),
@@ -468,7 +468,8 @@ end $$;
 -- create_share (retorna token uma única vez)
 -- ============================================================
 create or replace function public.create_share(
-  p_audit_id uuid, p_password text, p_expires_at timestamptz default null
+  p_audit_id uuid, p_password text, p_expires_at timestamptz default null,
+  p_allow_download boolean default true
 ) returns jsonb
 language plpgsql security definer set search_path = public, app, extensions as $$
 declare v_esc uuid; v_role user_role; v_status audit_status; v_snap uuid; v_token text; v_share_id uuid;
@@ -488,11 +489,12 @@ begin
   if v_snap is null then raise exception 'no_snapshot' using errcode = 'P0001'; end if;
 
   v_token := replace(replace(replace(encode(gen_random_bytes(32), 'base64'), '+', '-'), '/', '_'), '=', '');
-  insert into shares (escritorio_id, audit_id, snapshot_id, token_hash, password_hash, expires_at, created_by)
+  insert into shares (escritorio_id, audit_id, snapshot_id, token_hash, password_hash,
+                      allow_download, expires_at, created_by)
   values (v_esc, p_audit_id, v_snap,
     encode(digest(v_token, 'sha256'), 'hex'),
     crypt(p_password, gen_salt('bf', 10)),
-    p_expires_at, auth.uid())
+    coalesce(p_allow_download, true), p_expires_at, auth.uid())
   returning id into v_share_id;
 
   perform app.log_event(v_esc, 'share.created', 'share', v_share_id::text,
@@ -584,21 +586,22 @@ begin
   perform app.log_event(v_share.escritorio_id, 'share.accessed', 'share', v_share.id::text,
     '{}'::jsonb, 'share_client', null);
   return jsonb_build_object('payload', v_share.snap_payload,
+    'allow_download', v_share.allow_download,
     'session_token', v_session_token, 'expires_at', v_expires);
 end $$;
 
 create or replace function public.get_shared_snapshot(p_session_token text) returns jsonb
 language plpgsql security definer set search_path = public, app, extensions as $$
-declare v_hash char(64); v_payload jsonb;
+declare v_hash char(64); v_payload jsonb; v_allow boolean;
 begin
   v_hash := encode(digest(coalesce(p_session_token, ''), 'sha256'), 'hex');
-  select ps.payload into v_payload
+  select ps.payload, s.allow_download into v_payload, v_allow
     from share_sessions ss
     join shares s on s.id = ss.share_id and s.status = 'active'
     join published_snapshots ps on ps.id = s.snapshot_id
     where ss.token_hash = v_hash and ss.expires_at > now();
   if v_payload is null then raise exception 'session_invalid' using errcode = 'P0001'; end if;
-  return v_payload;
+  return jsonb_build_object('payload', v_payload, 'allow_download', v_allow);
 end $$;
 
 -- ============================================================
@@ -617,5 +620,5 @@ revoke execute on function public.run_rules(uuid) from anon;
 revoke execute on function public.run_single_rule(uuid, text) from anon;
 revoke execute on function public.transition_audit(uuid, audit_status) from anon;
 revoke execute on function public.publish_audit(uuid) from anon;
-revoke execute on function public.create_share(uuid, text, timestamptz) from anon;
+revoke execute on function public.create_share(uuid, text, timestamptz, boolean) from anon;
 revoke execute on function public.revoke_share(uuid) from anon;

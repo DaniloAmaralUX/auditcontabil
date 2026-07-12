@@ -3,20 +3,20 @@ import { useParams } from '@tanstack/react-router'
 import { Loader2 } from 'lucide-react'
 import { PasswordGate } from './components/password-gate'
 import { PublicReport } from './components/public-report'
-import { getSharedSnapshot, type PublicSnapshot } from './data/api'
+import { getSharedSnapshot, type SharedView } from './data/api'
 
 // Página pública: nunca usa sessão Supabase; sessionStorage guarda o token
 // de sessão de 60 min (revalida sem re-pedir senha em refresh).
 export function PublicReportPage() {
   const { token } = useParams({ from: '/r/$token' })
-  const [snapshot, setSnapshot] = useState<PublicSnapshot | null>(null)
+  const [view, setView] = useState<SharedView | null>(null)
   const [checking, setChecking] = useState(true)
 
   useEffect(() => {
     let alive = true
     getSharedSnapshot().then((s) => {
       if (!alive) return
-      if (s) setSnapshot(s)
+      if (s) setView(s)
       setChecking(false)
     })
     return () => {
@@ -33,9 +33,9 @@ export function PublicReportPage() {
     )
   }
 
-  if (!snapshot) {
-    return <PasswordGate token={token} onUnlocked={setSnapshot} />
+  if (!view) {
+    return <PasswordGate token={token} onUnlocked={setView} />
   }
 
-  return <PublicReport snapshot={snapshot} />
+  return <PublicReport snapshot={view.payload} allowDownload={view.allowDownload} />
 }

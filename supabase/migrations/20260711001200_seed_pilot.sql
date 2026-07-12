@@ -42,6 +42,10 @@ begin
     (v_esc, 'R007_UNUSUAL_VALUE', 1, 'Valor incomum',
       'Movimento fora de k desvios-padrão da média da conta.',
       'attention', 'ABS(valor - media_conta) <= :k_stddev * desvio_padrao_conta',
-      'rule_r007_unusual_value_v1', jsonb_build_object('k_stddev', 3))
+      'rule_r007_unusual_value_v1', jsonb_build_object('k_stddev', 3)),
+    (v_esc, 'R008_DUPLICATE_ROW', 1, 'Linha duplicada',
+      'Registros possivelmente repetidos (conta + período + valores). Nunca excluídos automaticamente.',
+      'attention', 'linha repetida (conta + período + valores)',
+      'rule_r008_duplicate_rows_v1', '{}'::jsonb)
   on conflict (escritorio_id, code, version) do nothing;
 end $$;

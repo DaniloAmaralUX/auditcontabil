@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { redeemShare, type PublicSnapshot } from '../data/api'
+import { redeemShare, type SharedView } from '../data/api'
 
 // Erro sempre genérico: não revela se o link existe/expirou (§8.5.2).
 const GENERIC_ERROR =
@@ -23,7 +23,7 @@ export function PasswordGate({
   onUnlocked,
 }: {
   token: string
-  onUnlocked: (snapshot: PublicSnapshot) => void
+  onUnlocked: (view: SharedView) => void
 }) {
   const [password, setPassword] = useState('')
   const [show, setShow] = useState(false)
@@ -35,8 +35,8 @@ export function PasswordGate({
     setError(null)
     setLoading(true)
     try {
-      const snapshot = await redeemShare(token, password)
-      onUnlocked(snapshot)
+      const view = await redeemShare(token, password)
+      onUnlocked(view)
     } catch (err) {
       const msg = err instanceof Error ? err.message : ''
       setError(msg.includes('too_many_attempts') ? RATE_ERROR : GENERIC_ERROR)

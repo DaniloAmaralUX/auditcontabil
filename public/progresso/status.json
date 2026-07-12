@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-07-12T00:43:35.379Z",
-  "now": "✅ Código 100% pronto — falta só o SEU checklist de ~5 min (runbook) para o link nascer",
+  "updatedAt": "2026-07-12T01:09:43.574Z",
+  "now": "Specs do Auditview PRD concluídas ✅ — aguardando você concluir a janela do Supabase para publicar em auditcontabil.vercel.app",
   "groups": [
     {
       "title": "🗄️ Backend (banco + funções)",
@@ -154,26 +154,71 @@
       ]
     },
     {
-      "title": "🔑 Seu checklist final (~5 min, só você pode)",
+      "title": "📋 Specs novas (Auditview PRD)",
       "items": [
         {
-          "label": "supabase db push (senha do banco)",
+          "label": "Conclusão geral da auditoria (revisão → cliente → PDF)",
+          "state": "done"
+        },
+        {
+          "label": "Verificação de linhas duplicadas (R008)",
+          "state": "done"
+        },
+        {
+          "label": "Regra sem dados = \"Não executada\" (nunca OK indevido)",
+          "state": "done"
+        },
+        {
+          "label": "Bloquear download do PDF por link",
+          "state": "done"
+        },
+        {
+          "label": "Expiração do link na tela de compartilhar",
+          "state": "done"
+        },
+        {
+          "label": "Remover arquivo antes da publicação",
+          "state": "done"
+        },
+        {
+          "label": "Ativar/desativar usuário + bloqueio de acesso",
+          "state": "done"
+        },
+        {
+          "label": "Validação de CPF/CNPJ",
+          "state": "done"
+        },
+        {
+          "label": "Histórico de auditorias na página do cliente",
+          "state": "done"
+        },
+        {
+          "label": "KPIs extras do dashboard técnico",
+          "state": "done"
+        }
+      ]
+    },
+    {
+      "title": "🔑 Seu checklist final (janela do PowerShell já aberta)",
+      "items": [
+        {
+          "label": "Janela: supabase login (browser) + senha do banco + functions",
+          "state": "doing"
+        },
+        {
+          "label": "Cloudflare/wrangler autenticado",
+          "state": "done"
+        },
+        {
+          "label": "Push no GitHub",
+          "state": "done"
+        },
+        {
+          "label": "Merge na main → Vercel publica auditcontabil.vercel.app",
           "state": "todo"
         },
         {
-          "label": "supabase functions deploy",
-          "state": "todo"
-        },
-        {
-          "label": "Colar a anon key no .env",
-          "state": "todo"
-        },
-        {
-          "label": "Criar owner no dashboard + bind_pilot_owner.sql",
-          "state": "todo"
-        },
-        {
-          "label": "wrangler pages deploy → LINK DE TESTE",
+          "label": "Owner criado + LINK DE TESTE validado",
           "state": "todo"
         }
       ]

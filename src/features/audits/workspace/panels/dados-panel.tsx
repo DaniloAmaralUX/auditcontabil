@@ -1,7 +1,14 @@
-import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { FileSpreadsheet, Upload } from 'lucide-react'
+import { FileSpreadsheet, Trash2, Upload } from 'lucide-react'
+import { toast } from 'sonner'
+import { qk } from '@/lib/query-keys'
+import { can } from '@/lib/permissions'
+import { supabase } from '@/lib/supabase'
+import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
@@ -11,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { auditFilesQuery } from '../../data/queries'
+import { auditDetailQuery, auditFilesQuery } from '../../data/queries'
 
 const FILE_STATUS_LABEL: Record<string, string> = {
   uploading: 'Enviando',
@@ -25,6 +32,26 @@ const FILE_STATUS_LABEL: Record<string, string> = {
 
 export function DadosPanel({ auditId }: { auditId: string }) {
   const { data, isLoading } = useQuery(auditFilesQuery(auditId))
+  const audit = useQuery(auditDetailQuery(auditId))
+  const role = useAuthStore((s) => s.auth.role)
+  const qc = useQueryClient()
+  const [removeId, setRemoveId] = useState<string | null>(null)
+
+  // RF-024: remoção antes da publicação (linhas e resultados saem em cascata)
+  const removeFile = useMutation({
+    mutationFn: async (fileId: string) => {
+      const { error } = await supabase.from('files').delete().eq('id', fileId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      toast.success('Arquivo removido.')
+      qc.invalidateQueries({ queryKey: qk.audits.files(auditId) })
+      qc.invalidateQueries({ queryKey: qk.audits.inconsistencies(auditId, 'all') })
+      qc.invalidateQueries({ queryKey: qk.audits.detail(auditId) })
+    },
+  })
+  const canRemove =
+    can(role ?? undefined, 'share') && audit.data?.status !== 'published'
 
   return (
     <div className='space-y-4'>
@@ -61,6 +88,7 @@ export function DadosPanel({ auditId }: { auditId: string }) {
                 <TableHead>Arquivo</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className='text-end'>Linhas</TableHead>
+                <TableHead className='w-10' />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -80,12 +108,38 @@ export function DadosPanel({ auditId }: { auditId: string }) {
                   <TableCell className='text-end tabular-nums'>
                     {f.row_count ?? '—'}
                   </TableCell>
+                  <TableCell>
+                    {canRemove && (
+                      <Button
+                        size='icon'
+                        variant='ghost'
+                        className='size-8 text-destructive'
+                        onClick={() => setRemoveId(f.id)}
+                      >
+                        <Trash2 className='size-4' />
+                        <span className='sr-only'>Remover arquivo</span>
+                      </Button>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
       )}
+      <ConfirmDialog
+        open={!!removeId}
+        onOpenChange={(v) => !v && setRemoveId(null)}
+        title='Remover este arquivo?'
+        desc='As linhas processadas a partir dele e as inconsistências relacionadas serão removidas desta auditoria. Esta ação não pode ser desfeita.'
+        confirmText='Remover arquivo'
+        destructive
+        isLoading={removeFile.isPending}
+        handleConfirm={async () => {
+          if (removeId) await removeFile.mutateAsync(removeId)
+          setRemoveId(null)
+        }}
+      />
     </div>
   )
 }

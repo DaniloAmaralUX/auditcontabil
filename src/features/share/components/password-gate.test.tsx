@@ -41,7 +41,12 @@ describe('PasswordGate — erro genérico, sem vazar dados (§8.5.2)', () => {
       items: [],
     }
     mocks.rpc.mockResolvedValueOnce({
-      data: { payload, session_token: 'sess', expires_at: '2099-01-01' },
+      data: {
+        payload,
+        allow_download: true,
+        session_token: 'sess',
+        expires_at: '2099-01-01',
+      },
       error: null,
     })
     const onUnlocked = vi.fn()
@@ -52,6 +57,8 @@ describe('PasswordGate — erro genérico, sem vazar dados (§8.5.2)', () => {
     await userEvent.fill(screen.getByLabelText('Senha'), 'senha1234')
     await userEvent.click(screen.getByRole('button', { name: 'Acessar' }))
 
-    await vi.waitFor(() => expect(onUnlocked).toHaveBeenCalledWith(payload))
+    await vi.waitFor(() =>
+      expect(onUnlocked).toHaveBeenCalledWith({ payload, allowDownload: true })
+    )
   })
 })

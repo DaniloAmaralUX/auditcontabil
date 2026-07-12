@@ -1,6 +1,10 @@
-import { useQuery } from '@tanstack/react-query'
-import { ShieldCheck } from 'lucide-react'
+import { useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Loader2, ShieldCheck } from 'lucide-react'
+import { toast } from 'sonner'
+import { qk } from '@/lib/query-keys'
 import { can } from '@/lib/permissions'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,9 +15,64 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Textarea } from '@/components/ui/textarea'
 import { auditDetailQuery } from '../../data/queries'
 import { inconsistenciesQuery } from '../../data/inconsistencies'
 import { useTransitionAudit } from '../../data/mutations'
+
+// RF-052: conclusão geral — vai para o snapshot, o cliente e o PDF.
+function ConclusionCard({
+  auditId,
+  initial,
+}: {
+  auditId: string
+  initial: string
+}) {
+  const qc = useQueryClient()
+  const [text, setText] = useState(initial)
+  const save = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from('audits')
+        .update({ conclusion: text.trim() || null })
+        .eq('id', auditId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      toast.success('Conclusão salva.')
+      qc.invalidateQueries({ queryKey: qk.audits.detail(auditId) })
+    },
+  })
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Conclusão geral</CardTitle>
+        <CardDescription>
+          Texto que fecha o relatório — aparece para o cliente e no PDF, em
+          linguagem simples.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className='space-y-2'>
+        <Textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder='Ex.: A análise do período indicou 3 pontos que precisam de ajuste. Recomendamos…'
+          rows={4}
+        />
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={() => save.mutate()}
+          disabled={save.isPending || text === initial}
+        >
+          {save.isPending && <Loader2 className='size-4 animate-spin' />}
+          Salvar conclusão
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
 
 export function RevisaoPanel({ auditId }: { auditId: string }) {
   const role = useAuthStore((s) => s.auth.role)
@@ -71,6 +130,12 @@ export function RevisaoPanel({ auditId }: { auditId: string }) {
           )}
         </CardContent>
       </Card>
+
+      <ConclusionCard
+        key={audit.data?.conclusion ?? ''}
+        auditId={auditId}
+        initial={audit.data?.conclusion ?? ''}
+      />
 
       <Card>
         <CardHeader>
