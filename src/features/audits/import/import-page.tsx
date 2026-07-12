@@ -42,8 +42,10 @@ import {
   type DetectedDocument,
 } from '@/workers/parse-protocol'
 import { auditDetailQuery } from '../data/queries'
-import { useIngestPipeline } from '../data/use-ingest-pipeline'
+import { derivePhaseView, useIngestPipeline } from '../data/use-ingest-pipeline'
 
+// `satisfies` amarra as chaves em `keyof ColumnMapping` — renomear um campo
+// do mapping (ou perder um) quebra em compile-time, não em runtime.
 const TARGETS = [
   { key: 'account_code', label: 'Código da conta' },
   { key: 'account_name', label: 'Descrição da conta' },
@@ -56,15 +58,15 @@ const TARGETS = [
   { key: 'entity', label: 'Empresa (coluna)' },
   { key: 'category', label: 'Grupo de despesa' },
   { key: 'kind', label: 'Natureza (receita/despesa)' },
-] as const
+] as const satisfies ReadonlyArray<{ key: keyof ColumnMapping; label: string }>
 
 const NONE = '__none__'
 
 const brlFromString = (v: string) =>
   Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
-function guessMapping(headers: string[]): Record<string, string> {
-  const guess: Record<string, string> = {}
+function guessMapping(headers: string[]): ColumnMapping {
+  const guess: ColumnMapping = {}
   for (const h of headers) {
     const l = h.toLowerCase()
     if (!guess.account_code && /(c[oó]digo|^conta$)/.test(l)) guess.account_code = h
@@ -100,7 +102,7 @@ export function ImportPage() {
   const [detected, setDetected] = useState<DetectedDocument | null>(null)
   const [headers, setHeaders] = useState<string[]>([])
   const [sheets, setSheets] = useState<{ name: string; rows: number }[]>([])
-  const [map, setMap] = useState<Record<string, string>>({})
+  const [map, setMap] = useState<ColumnMapping>({})
   const [fileError, setFileError] = useState<string | null>(null)
   const [dragOver, setDragOver] = useState(false)
 
@@ -165,15 +167,11 @@ export function ImportPage() {
   const ready = !!file && (!!detected || (hasAccount && hasValue))
   const defaultPeriod =
     audit.data?.period_end ?? audit.data?.period_start ?? undefined
-  const busy = !['idle', 'done', 'error'].includes(state.phase)
+  const phase = derivePhaseView(state.phase)
 
   function onGenerate() {
     if (!file) return
-    start(
-      file,
-      map as unknown as ColumnMapping,
-      map.period ? undefined : defaultPeriod
-    )
+    start(file, map, map.period ? undefined : defaultPeriod)
   }
 
   return (
@@ -221,7 +219,7 @@ export function ImportPage() {
               setDragOver(false)
               onPick(e.dataTransfer.files?.[0])
             }}
-            onClick={() => !busy && inputRef.current?.click()}
+            onClick={() => !phase.busy && inputRef.current?.click()}
             className={`flex w-full cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed p-10 text-center transition-colors ${
               dragOver
                 ? 'border-primary bg-primary/5'
@@ -281,9 +279,9 @@ export function ImportPage() {
               variant={state.phase === 'done' ? 'outline' : 'default'}
               className='w-full text-base'
               onClick={onGenerate}
-              disabled={!ready || busy}
+              disabled={!ready || phase.busy}
             >
-              {busy ? (
+              {phase.busy ? (
                 <Loader2 className='size-5 animate-spin' />
               ) : state.phase === 'done' ? (
                 <RefreshCw className='size-5' />
@@ -386,7 +384,7 @@ export function ImportPage() {
                                 return next
                               })
                             }
-                            disabled={busy}
+                            disabled={phase.busy}
                           >
                             <SelectTrigger id={`map-${t.key}`} className='h-8'>
                               <SelectValue placeholder='Não mapear' />
@@ -414,7 +412,7 @@ export function ImportPage() {
             <Card>
               <CardContent className='space-y-1.5 pt-6 text-sm'>
                 <PhaseLine
-                  active={['hashing', 'uploading'].includes(state.phase)}
+                  active={phase.busy && !phase.uploadDone}
                   done={
                     !['hashing', 'uploading', 'idle', 'error'].includes(
                       state.phase
@@ -427,13 +425,13 @@ export function ImportPage() {
                   }
                 />
                 <PhaseLine
-                  active={['registering', 'ingesting'].includes(state.phase)}
-                  done={['rules', 'done'].includes(state.phase)}
+                  active={phase.uploadDone && !phase.ingestDone}
+                  done={phase.ingestDone}
                   label={`Lendo as linhas (${state.ingestedRows.toLocaleString('pt-BR')}${state.totalRows ? ` de ${state.totalRows.toLocaleString('pt-BR')}` : ''})`}
                 />
                 <PhaseLine
-                  active={state.phase === 'rules'}
-                  done={state.phase === 'done'}
+                  active={phase.rulesActive}
+                  done={phase.rulesDone}
                   label='Executando as verificações contábeis'
                 />
                 {state.phase === 'done' && (
@@ -484,7 +482,7 @@ export function ImportPage() {
                     </Button>
                   </div>
                 )}
-                {busy && (
+                {phase.busy && (
                   <div className='pt-2'>
                     <Button
                       variant='ghost'

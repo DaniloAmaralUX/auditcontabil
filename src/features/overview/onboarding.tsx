@@ -303,7 +303,64 @@ export function HomeOnboarding() {
   )
 }
 
-/** CTA do passo ativo — leva direto para a ação, não para uma explicação. */
+/**
+ * CTA por step. Cada entrada devolve o Button pronto ou `null` quando não há
+ * alvo — o fallback "Ver auditorias" fecha o switch. Tabela em vez de
+ * `if/else` fall-through: adicionar um step novo é preencher uma entrada.
+ */
+const STEP_CTA: Record<
+  OnboardingStep['key'],
+  (audits: AuditListItem[]) => React.ReactElement | null
+> = {
+  client: () => (
+    <Button size='sm' asChild>
+      <Link to='/clients'>
+        <Users className='size-4' /> Cadastrar
+      </Link>
+    </Button>
+  ),
+  audit: () => (
+    <Button size='sm' asChild>
+      <Link to='/audits'>Criar auditoria</Link>
+    </Button>
+  ),
+  import: (audits) => {
+    const target = audits.find((a) =>
+      ['draft', 'awaiting_files', 'awaiting_mapping'].includes(a.status)
+    )
+    if (!target) return null
+    return (
+      <Button size='sm' asChild>
+        <Link to='/audits/$auditId/import' params={{ auditId: target.id }}>
+          <Upload className='size-4' /> Importar
+        </Link>
+      </Button>
+    )
+  },
+  review: (audits) => ctaForStatus(audits, ['processed', 'in_review']),
+  publish: (audits) => ctaForStatus(audits, ['approved']),
+}
+
+function ctaForStatus(
+  audits: AuditListItem[],
+  statuses: string[]
+): React.ReactElement | null {
+  const target = audits.find((a) => statuses.includes(a.status))
+  if (!target) return null
+  const na = nextAction(target.status)
+  return (
+    <Button size='sm' asChild>
+      <Link
+        to='/audits/$auditId'
+        params={{ auditId: target.id }}
+        search={{ tab: na.tab ?? 'resumo' }}
+      >
+        {na.label}
+      </Link>
+    </Button>
+  )
+}
+
 function StepCta({
   step,
   audits,
@@ -311,60 +368,12 @@ function StepCta({
   step: OnboardingStep['key']
   audits: AuditListItem[]
 }) {
-  if (step === 'client') {
-    return (
-      <Button size='sm' asChild>
-        <Link to='/clients'>
-          <Users className='size-4' /> Cadastrar
-        </Link>
-      </Button>
-    )
-  }
-  if (step === 'audit') {
-    return (
-      <Button size='sm' asChild>
-        <Link to='/audits'>Criar auditoria</Link>
-      </Button>
-    )
-  }
-  if (step === 'import') {
-    const target = audits.find((a) =>
-      ['draft', 'awaiting_files', 'awaiting_mapping'].includes(a.status)
-    )
-    if (target) {
-      return (
-        <Button size='sm' asChild>
-          <Link to='/audits/$auditId/import' params={{ auditId: target.id }}>
-            <Upload className='size-4' /> Importar
-          </Link>
-        </Button>
-      )
-    }
-  }
-  // review/publish: a próxima ação certa por auditoria já existe — reusa.
-  const target = audits.find((a) =>
-    step === 'review'
-      ? ['processed', 'in_review'].includes(a.status)
-      : a.status === 'approved'
-  )
-  if (target) {
-    const na = nextAction(target.status)
-    return (
-      <Button size='sm' asChild>
-        <Link
-          to='/audits/$auditId'
-          params={{ auditId: target.id }}
-          search={{ tab: na.tab ?? 'resumo' }}
-        >
-          {na.label}
-        </Link>
-      </Button>
-    )
-  }
   return (
-    <Button size='sm' variant='outline' asChild>
-      <Link to='/audits'>Ver auditorias</Link>
-    </Button>
+    STEP_CTA[step](audits) ?? (
+      <Button size='sm' variant='outline' asChild>
+        <Link to='/audits'>Ver auditorias</Link>
+      </Button>
+    )
   )
 }
 

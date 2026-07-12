@@ -3,10 +3,13 @@
 // a menos que a coluna `entity` seja mapeada explicitamente.
 
 export type ColumnMapping = {
-  // campo destino -> header de origem (todos opcionais exceto os validados no save_mapping)
-  account_code: string
+  // Campo destino -> header de origem. TODOS opcionais na UI:
+  // `save_mapping` (SQL) valida que pelo menos uma conta (code|name) E um valor
+  // (amount|debit|credit|opening_balance|closing_balance) foram mapeados.
+  // Ausência de `period` é OK: o pipeline usa `defaultPeriod` da auditoria.
+  account_code?: string
   account_name?: string
-  period: string
+  period?: string
   opening_balance?: string
   debit?: string
   credit?: string

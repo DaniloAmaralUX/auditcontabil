@@ -23,6 +23,38 @@ type PipelinePhase =
   | 'done'
   | 'error'
 
+/**
+ * Visão derivada da fase do pipeline consumida pela UI. Um `switch` exaustivo
+ * sobre `PipelinePhase` — se uma fase nova for adicionada, o TypeScript aponta
+ * aqui, e não ao caçar `.includes(...)` espalhados pelo componente.
+ */
+type PipelinePhaseView = {
+  busy: boolean
+  uploadDone: boolean
+  ingestDone: boolean
+  rulesActive: boolean
+  rulesDone: boolean
+}
+
+export function derivePhaseView(phase: PipelinePhase): PipelinePhaseView {
+  switch (phase) {
+    case 'idle':
+      return { busy: false, uploadDone: false, ingestDone: false, rulesActive: false, rulesDone: false }
+    case 'hashing':
+    case 'uploading':
+      return { busy: true, uploadDone: false, ingestDone: false, rulesActive: false, rulesDone: false }
+    case 'registering':
+    case 'ingesting':
+      return { busy: true, uploadDone: true, ingestDone: false, rulesActive: false, rulesDone: false }
+    case 'rules':
+      return { busy: true, uploadDone: true, ingestDone: true, rulesActive: true, rulesDone: false }
+    case 'done':
+      return { busy: false, uploadDone: true, ingestDone: true, rulesActive: false, rulesDone: true }
+    case 'error':
+      return { busy: false, uploadDone: false, ingestDone: false, rulesActive: false, rulesDone: false }
+  }
+}
+
 type PipelineState = {
   phase: PipelinePhase
   uploadPct: number

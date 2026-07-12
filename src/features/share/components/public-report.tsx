@@ -1,7 +1,7 @@
 // O deck "O Fechamento" — /r/:token como apresentação editorial: capa com
 // veredito, DRE tipografada, gráficos com insight por seção e reveal-once.
 // Composição declarativa de <DeckSection>; narrativa vem de insights.ts.
-import { lazy, Suspense, useRef } from 'react'
+import { lazy, Suspense, useEffect, useRef } from 'react'
 import { CircleCheck, Info, TriangleAlert } from 'lucide-react'
 import { Logo } from '@/assets/logo'
 import { Badge } from '@/components/ui/badge'
@@ -72,6 +72,16 @@ export function PublicReport({
   const gastos = a ? principalGastoPorEmpresa(a.top_despesa_por_grupo) : []
   const deckRef = useRef<HTMLDivElement>(null)
   useRevealOnScroll(deckRef)
+
+  // Título da aba com o nome do cliente — ajuda a Janaina a distinguir múltiplos
+  // decks abertos e faz o histórico do navegador do cliente ficar legível.
+  useEffect(() => {
+    const prev = document.title
+    document.title = `${audit.cliente} · ${audit.title} — AuditView`
+    return () => {
+      document.title = prev
+    }
+  }, [audit.cliente, audit.title])
 
   return (
     <div className='min-h-svh'>
