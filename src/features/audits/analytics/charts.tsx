@@ -466,19 +466,24 @@ export function PeriodTrend({
               dataKey='despesas'
               stroke='var(--chart-1)'
               strokeWidth={2.5}
+              strokeDasharray='6 3'
               dot={{ r: 3 }}
               name='despesas'
             />
           </LineChart>
         </ResponsiveContainer>
+        {/* Legenda: cor + padrão de traço (não só cor) para daltônicos */}
         <div className='mt-1 flex gap-4 text-xs text-muted-foreground'>
           <span className='flex items-center gap-1.5'>
             <span className='h-0.5 w-4 rounded' style={{ background: 'var(--success)' }} />
-            Receita líquida
+            Receita líquida (linha cheia)
           </span>
           <span className='flex items-center gap-1.5'>
-            <span className='h-0.5 w-4 rounded' style={{ background: 'var(--chart-1)' }} />
-            Despesas
+            <span
+              className='h-0 w-4'
+              style={{ borderTop: '2px dashed var(--chart-1)' }}
+            />
+            Despesas (tracejada)
           </span>
         </div>
         {/* Equivalente textual do gráfico para leitores de tela. */}

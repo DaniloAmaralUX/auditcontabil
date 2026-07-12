@@ -42,7 +42,7 @@ function clientBadge(severity: string) {
   }
   if (severity === 'info') {
     return (
-      <Badge variant='outline' className='gap-1 text-info'>
+      <Badge variant='outline' className='gap-1 text-info-text'>
         <Info className='size-3.5' aria-hidden /> Informativo
       </Badge>
     )
@@ -187,10 +187,10 @@ export function PublicReport({
       )}
 
       {items.length > 0 && (
+      <section className='space-y-4'>
         <h2 className='text-lg font-semibold tracking-tight'>
           Pontos que precisam da sua atenção
         </h2>
-      )}
 
       {items.map((item, i) => {
         const money = Object.entries(item.values ?? {})
@@ -222,6 +222,8 @@ export function PublicReport({
           </Card>
         )
       })}
+      </section>
+      )}
 
       {audit.conclusion && (
         <Card>

@@ -71,6 +71,8 @@ export function PasswordGate({
                   id='share-password'
                   type={show ? 'text' : 'password'}
                   autoComplete='current-password'
+                  aria-invalid={error ? true : undefined}
+                  aria-describedby={error ? 'share-password-error' : undefined}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -85,7 +87,11 @@ export function PasswordGate({
               </div>
             </div>
             {error && (
-              <p role='alert' className='text-sm text-destructive'>
+              <p
+                id='share-password-error'
+                role='alert'
+                className='text-sm text-destructive'
+              >
                 {error}
               </p>
             )}

@@ -16,7 +16,7 @@ import { type PublicSnapshot } from '../data/api'
 const styles = StyleSheet.create({
   page: { padding: 40, fontSize: 11, fontFamily: 'Helvetica', color: '#1a1a1a' },
   header: { marginBottom: 16 },
-  brand: { fontSize: 9, letterSpacing: 2, color: '#EE7D2B' },
+  brand: { fontSize: 9, letterSpacing: 2, color: '#E97318' },
   title: { fontSize: 18, fontFamily: 'Helvetica-Bold', marginTop: 2 },
   meta: { fontSize: 10, color: '#666', marginTop: 2 },
   summary: { marginVertical: 12, lineHeight: 1.5 },
@@ -71,7 +71,7 @@ function ReportPdf({ snapshot }: { snapshot: PublicSnapshot }) {
           período.{' '}
           {items.length === 0
             ? 'Está tudo certo: não encontramos pontos que precisem da sua atenção.'
-            : `${items.length} ponto(s) precisam da sua atenção.`}
+            : `${items.length} ponto${items.length > 1 ? 's' : ''} ${items.length > 1 ? 'precisam' : 'precisa'} da sua atenção.`}
           {summary.invalid > 0 &&
             ' Algumas linhas das planilhas enviadas não puderam ser lidas e não fazem parte desta análise.'}
         </Text>

@@ -39,6 +39,7 @@
      alias das cores base, que já são claras o bastante. */
   --success-text: oklch(0.5 0.13 155);
   --warning-text: oklch(0.52 0.12 65);
+  --info-text: oklch(0.52 0.17 258);
 
   --border: oklch(0.918 0.005 85);
   --input: oklch(0.918 0.005 85);
@@ -106,6 +107,7 @@
   /* No escuro as cores base já contrastam como texto. */
   --success-text: var(--success);
   --warning-text: var(--warning);
+  --info-text: var(--info);
 
   --border: oklch(1 0 0 / 9%);
   --input: oklch(1 0 0 / 13%);
@@ -167,6 +169,7 @@
   --color-warning-text: var(--warning-text);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
+  --color-info-text: var(--info-text);
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
   --color-brand-2: var(--brand-2);

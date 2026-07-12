@@ -16,6 +16,7 @@ import { ConfirmDialog } from '@/components/confirm-dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
+import { PanelErrorState } from './panel-error-state'
 import { Switch } from '@/components/ui/switch'
 import { auditDetailQuery } from '../../data/queries'
 import {
@@ -40,6 +41,15 @@ export function CompartilharPanel({ auditId }: { auditId: string }) {
   const [revokeId, setRevokeId] = useState<string | null>(null)
 
   if (audit.isLoading) return <Skeleton className='h-40 w-full' />
+  if (audit.isError || shares.isError)
+    return (
+      <PanelErrorState
+        onRetry={() => {
+          void audit.refetch()
+          void shares.refetch()
+        }}
+      />
+    )
 
   const status = audit.data?.status
   const canPublish = can(role ?? undefined, 'publish')

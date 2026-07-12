@@ -2,7 +2,7 @@
 // real (nunca reseta), boas-vindas one-time e — quando o loop está aprendido —
 // "Continue de onde parou". Padrões: checklist 5 itens com progresso, primeiro
 // passo fácil, dispensável, celebração ao completar, sem nag.
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import {
@@ -16,6 +16,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useAuthStore } from '@/stores/auth-store'
 import { track } from '@/lib/track'
 import { cn } from '@/lib/utils'
 import { clientsQuery } from '@/features/clients/data/queries'
@@ -31,9 +32,16 @@ import {
 
 /* ------------------------------ Persistência ------------------------------ */
 
-const LS_WELCOME = 'auditview.onboarding.welcome'
-const LS_DISMISSED = 'auditview.onboarding.dismissed'
-const LS_CELEBRATED = 'auditview.onboarding.celebrated'
+// Chaves escopadas por usuário — o mesmo dispositivo pode ter várias contas.
+function lsKeys(userId: string) {
+  const base = `auditview.onboarding.${userId}`
+  return {
+    welcome: `${base}.welcome`,
+    dismissed: `${base}.dismissed`,
+    celebrated: `${base}.celebrated`,
+    tracked: `${base}.completed_tracked`,
+  }
+}
 
 function lsGet(key: string): boolean {
   try {
@@ -60,11 +68,26 @@ function lsRemove(key: string) {
 /* -------------------------------- Componente ------------------------------ */
 
 export function HomeOnboarding() {
+  const userId = useAuthStore((s) => s.auth.userId) ?? 'anon'
+  const K = lsKeys(userId)
   const clients = useQuery(clientsQuery())
   const audits = useQuery(auditsListQuery())
-  const [dismissed, setDismissed] = useState(() => lsGet(LS_DISMISSED))
-  const [welcomed, setWelcomed] = useState(() => lsGet(LS_WELCOME))
-  const [celebrated, setCelebrated] = useState(() => lsGet(LS_CELEBRATED))
+  const [dismissed, setDismissed] = useState(() => lsGet(K.dismissed))
+  const [welcomed, setWelcomed] = useState(() => lsGet(K.welcome))
+  const [celebrated, setCelebrated] = useState(() => lsGet(K.celebrated))
+
+  // Mede a ativação assim que o ciclo fica completo (uma vez por usuário),
+  // independente de por onde o usuário saiu.
+  const clientCount = clients.data?.length ?? 0
+  const auditsData = audits.data
+  useEffect(() => {
+    if (!auditsData) return
+    const done = deriveOnboarding(clientCount, auditsData).complete
+    if (done && !lsGet(K.tracked)) {
+      lsSet(K.tracked)
+      track('onboarding_completed')
+    }
+  }, [clientCount, auditsData, K.tracked])
 
   if (clients.isLoading || audits.isLoading) {
     return (
@@ -74,7 +97,15 @@ export function HomeOnboarding() {
       </div>
     )
   }
-  if (clients.isError || audits.isError) return <ContinueFallback />
+  if (clients.isError || audits.isError)
+    return (
+      <ContinueFallback
+        onRetry={() => {
+          void clients.refetch()
+          void audits.refetch()
+        }}
+      />
+    )
 
   const state = deriveOnboarding(clients.data?.length ?? 0, audits.data ?? [])
   const pending = auditsNeedingAction(audits.data ?? [])
@@ -88,7 +119,7 @@ export function HomeOnboarding() {
         onRestore={
           dismissed && !state.complete
             ? () => {
-                lsRemove(LS_DISMISSED)
+                lsRemove(K.dismissed)
                 setDismissed(false)
               }
             : undefined
@@ -113,9 +144,8 @@ export function HomeOnboarding() {
           </div>
           <Button
             onClick={() => {
-              lsSet(LS_CELEBRATED)
+              lsSet(K.celebrated)
               setCelebrated(true)
-              track('onboarding_completed')
             }}
           >
             Começar a próxima <ArrowRight className='size-4' />
@@ -144,9 +174,10 @@ export function HomeOnboarding() {
           </p>
           <Button
             size='sm'
+            variant='outline'
             className='mt-4'
             onClick={() => {
-              lsSet(LS_WELCOME)
+              lsSet(K.welcome)
               setWelcomed(true)
               track('onboarding_welcome_started')
             }}
@@ -240,7 +271,7 @@ export function HomeOnboarding() {
               size='sm'
               className='text-muted-foreground'
               onClick={() => {
-                lsSet(LS_DISMISSED)
+                lsSet(K.dismissed)
                 setDismissed(true)
                 track('onboarding_dismissed', { doneCount: state.doneCount })
               }}
@@ -415,12 +446,18 @@ function ContinuePanel({
   )
 }
 
-function ContinueFallback() {
+function ContinueFallback({ onRetry }: { onRetry: () => void }) {
   return (
     <Card>
-      <CardContent className='py-8 text-center text-sm text-muted-foreground'>
+      <CardContent
+        role='alert'
+        className='flex flex-col items-center gap-3 py-8 text-center text-sm text-muted-foreground'
+      >
         Não foi possível carregar seu resumo agora. Use o menu ao lado para
         navegar — nada foi perdido.
+        <Button variant='outline' size='sm' onClick={onRetry}>
+          Tentar de novo
+        </Button>
       </CardContent>
     </Card>
   )

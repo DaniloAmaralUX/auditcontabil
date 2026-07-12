@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader2, ShieldCheck } from 'lucide-react'
 import { qk } from '@/lib/query-keys'
@@ -59,6 +59,18 @@ function ConclusionCard({
     return () => clearTimeout(t)
   }, [text, lastSaved, saveNow])
 
+  // Flush ao desmontar (ex.: trocar de aba antes do debounce): salva pendências.
+  const pending = useRef({ text, lastSaved })
+  useEffect(() => {
+    pending.current = { text, lastSaved }
+  }, [text, lastSaved])
+  useEffect(() => {
+    return () => {
+      const p = pending.current
+      if (p.text !== p.lastSaved) saveNow(p.text)
+    }
+  }, [saveNow])
+
   const saved = text === lastSaved
   return (
     <Card>
@@ -89,11 +101,13 @@ function ConclusionCard({
           <span aria-live='polite' className='text-xs text-muted-foreground'>
             {save.isPending
               ? 'Salvando…'
-              : !saved
-                ? 'Alterações não salvas — salvamos sozinhos em instantes.'
-                : text !== initial
-                  ? 'Salvo.'
-                  : ''}
+              : save.isError && !saved
+                ? 'Não foi possível salvar — use o botão Salvar conclusão.'
+                : !saved
+                  ? 'Alterações não salvas — salvamos sozinhos em instantes.'
+                  : text !== initial
+                    ? 'Salvo.'
+                    : ''}
           </span>
         </div>
       </CardContent>
