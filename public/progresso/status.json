@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-07-12T01:09:43.574Z",
-  "now": "Specs do Auditview PRD concluídas ✅ — aguardando você concluir a janela do Supabase para publicar em auditcontabil.vercel.app",
+  "updatedAt": "2026-07-12T11:59:57.901Z",
+  "now": "🎉 PRONTO! Entre em auditcontabil.vercel.app com danilo.productdesigner@gmail.com e sua senha",
   "groups": [
     {
       "title": "🗄️ Backend (banco + funções)",
@@ -199,26 +199,26 @@
       ]
     },
     {
-      "title": "🔑 Seu checklist final (janela do PowerShell já aberta)",
+      "title": "🔑 Checklist final",
       "items": [
         {
-          "label": "Janela: supabase login (browser) + senha do banco + functions",
-          "state": "doing"
-        },
-        {
-          "label": "Cloudflare/wrangler autenticado",
+          "label": "Banco criado (schema completo via SQL Editor)",
           "state": "done"
         },
         {
-          "label": "Push no GitHub",
+          "label": "Conta owner criada e vinculada ao piloto",
           "state": "done"
         },
         {
-          "label": "Merge na main → Vercel publica auditcontabil.vercel.app",
-          "state": "todo"
+          "label": "Anon key no build + Vercel publicado",
+          "state": "done"
         },
         {
-          "label": "Owner criado + LINK DE TESTE validado",
+          "label": "Push GitHub + PRs #1-#3 mergeados",
+          "state": "done"
+        },
+        {
+          "label": "Edge Functions (convite/Stripe) — opcional, via janela PowerShell",
           "state": "todo"
         }
       ]

@@ -8,7 +8,7 @@
 do $$
 declare
   v_esc   uuid := 'a0000000-0000-4000-8000-000000000001';
-  v_email text := 'labsl@pitang.com';
+  v_email text := 'danilo.productdesigner@gmail.com';
   v_uid   uuid;
 begin
   select id into v_uid from auth.users where email = v_email;
