@@ -1,0 +1,227 @@
+:root {
+  /* Cantos contidos (Firecrawl: técnico e afiado, não bolha) */
+  --radius: 0.625rem;
+
+  /* Motion · Emil: UI ≤300ms, ease-out sempre (começa rápido = parece rápido) */
+  --dur-fast: 140ms;
+  --dur-base: 200ms;
+  --dur-slow: 300ms;
+  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+
+  /* Neutros Firecrawl light: papel levemente quente, texto charcoal (#333) */
+  --background: oklch(0.988 0.0035 85);
+  --foreground: oklch(0.32 0.005 80);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.32 0.005 80);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.32 0.005 80);
+
+  /* A assinatura: laranja Firecrawl #E97318 como cor de ação única.
+     Texto ESCURO sobre o laranja (6.9:1) — branco não passaria de 3.1:1. */
+  --primary: oklch(0.69 0.17 48);
+  --primary-foreground: oklch(0.185 0.005 80);
+  --secondary: oklch(0.966 0.0025 85);
+  --secondary-foreground: oklch(0.32 0.005 80);
+  --muted: oklch(0.962 0.003 85);
+  --muted-foreground: oklch(0.55 0.008 80);
+  --accent: oklch(0.955 0.009 60);
+  --accent-foreground: oklch(0.32 0.005 80);
+
+  --destructive: oklch(0.585 0.22 25);
+  --success: oklch(0.62 0.14 155);
+  --success-foreground: oklch(0.985 0 0);
+  --warning: oklch(0.72 0.15 65);
+  --warning-foreground: oklch(0.27 0.05 65);
+  --info: oklch(0.58 0.17 258);
+  --info-foreground: oklch(0.985 0 0);
+
+  /* Variantes para TEXTO pequeno (>=4.5:1 sobre card claro); no dark viram
+     alias das cores base, que já são claras o bastante. */
+  --success-text: oklch(0.5 0.13 155);
+  --warning-text: oklch(0.52 0.12 65);
+  --info-text: oklch(0.52 0.17 258);
+
+  --border: oklch(0.918 0.005 85);
+  --input: oklch(0.918 0.005 85);
+  --ring: oklch(0.69 0.17 48);
+
+  /* Marca: laranja Firecrawl + chama (vermelho-alaranjado #FF3A00) */
+  --brand: oklch(0.69 0.17 48);
+  --brand-foreground: oklch(0.185 0.005 80);
+  --brand-2: oklch(0.63 0.22 32);
+
+  /* Gráficos: laranja assinatura · teal (contraponto) · âmbar · vermelho
+     quente · azul-ardósia técnico — distinguíveis, calor Firecrawl */
+  --chart-1: oklch(0.69 0.17 48);
+  --chart-2: oklch(0.68 0.13 190);
+  --chart-3: oklch(0.75 0.14 75);
+  --chart-4: oklch(0.55 0.16 25);
+  --chart-5: oklch(0.58 0.1 260);
+
+  /* Sombras compostas · Jakub: anel 1px como 1ª camada (sombra-como-borda,
+     adapta a qualquer fundo), profundidade quente e suave em cima */
+  --shadow-soft:
+    0 0 0 1px oklch(0 0 0 / 0.04), 0 1px 2px oklch(0.25 0.02 60 / 0.04),
+    0 4px 12px oklch(0.25 0.02 60 / 0.06);
+  --shadow-lift:
+    0 0 0 1px oklch(0 0 0 / 0.05), 0 2px 4px oklch(0.25 0.02 60 / 0.05),
+    0 12px 28px oklch(0.25 0.02 60 / 0.1);
+
+  /* Paleta nomeada do deck "O Fechamento" (deriva do Firecrawl).
+     Contrastes medidos sobre Papel #FBFAF7 — ver docs/design/CRAFT.md. */
+  --paper: oklch(0.985 0.004 91.4); /* Papel — canvas do deck */
+  --ink: oklch(0.233 0.007 67.5); /* Tinta — 16.1:1 sobre papel */
+  --brasa: var(--brand); /* Brasa = laranja assinatura */
+  --receita: oklch(0.631 0.105 175.2); /* Verde — fills / figura grande (3.17:1) */
+  --receita-text: oklch(0.522 0.089 174.4); /* texto pequeno 4.99:1 */
+  --despesa: oklch(0.553 0.168 30.9); /* Vermelho — 4.98:1, texto E fill */
+  --despesa-text: var(--despesa);
+  --mist: oklch(0.62 0.013 71.8); /* Névoa — leader dots (decorativo 3.5:1) */
+  --mist-text: oklch(0.521 0.012 67.6); /* caption/label 5.27:1 */
+
+  --sidebar: oklch(0.97 0.003 85);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
+.dark {
+  /* Firecrawl dark: #1e1e1e de editor, superfícies #252526/#2a2a2a */
+  --background: oklch(0.235 0.002 80);
+  --foreground: oklch(0.87 0.002 80);
+  --card: oklch(0.268 0.002 80);
+  --card-foreground: oklch(0.87 0.002 80);
+  --popover: oklch(0.28 0.002 80);
+  --popover-foreground: oklch(0.87 0.002 80);
+
+  /* O mesmo laranja vivo; texto escuro em cima continua 6.9:1 */
+  --primary: oklch(0.69 0.17 48);
+  --primary-foreground: oklch(0.185 0.005 80);
+  --secondary: oklch(0.3 0.003 80);
+  --secondary-foreground: oklch(0.87 0.002 80);
+  --muted: oklch(0.3 0.003 80);
+  --muted-foreground: oklch(0.71 0.005 80);
+  --accent: oklch(0.32 0.01 60);
+  --accent-foreground: oklch(0.87 0.002 80);
+
+  --destructive: oklch(0.7 0.19 22);
+  --success: oklch(0.72 0.15 155);
+  --success-foreground: oklch(0.16 0.02 155);
+  --warning: oklch(0.8 0.14 70);
+  --warning-foreground: oklch(0.2 0.04 70);
+  --info: oklch(0.7 0.14 255);
+  --info-foreground: oklch(0.16 0.02 255);
+
+  /* No escuro as cores base já contrastam como texto. */
+  --success-text: var(--success);
+  --warning-text: var(--warning);
+  --info-text: var(--info);
+
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 13%);
+  --ring: oklch(0.73 0.16 50);
+
+  /* Laranja um ponto mais claro no escuro; chama vira âmbar (#fdba74) */
+  --brand: oklch(0.73 0.16 50);
+  --brand-foreground: oklch(0.185 0.005 80);
+  --brand-2: oklch(0.83 0.11 65);
+
+  --chart-1: oklch(0.73 0.16 50);
+  --chart-2: oklch(0.72 0.13 190);
+  --chart-3: oklch(0.8 0.13 75);
+  --chart-4: oklch(0.65 0.15 25);
+  --chart-5: oklch(0.68 0.09 260);
+
+  --shadow-soft: 0 1px 2px oklch(0 0 0 / 0.3), 0 4px 12px oklch(0 0 0 / 0.4);
+  --shadow-lift: 0 2px 4px oklch(0 0 0 / 0.35), 0 14px 32px oklch(0 0 0 / 0.55);
+
+  /* Deck no escuro: papel vira a superfície charcoal; tons clareados
+     (medidos sobre card oklch(0.268)): receita 6.85:1 · despesa 6.33:1 ·
+     névoa 5.66:1 — já servem como texto. */
+  --paper: var(--card);
+  --ink: oklch(0.921 0.008 73.7);
+  --brasa: var(--brand);
+  --receita: oklch(0.734 0.114 176);
+  --receita-text: var(--receita);
+  --despesa: oklch(0.74 0.128 32.7);
+  --despesa-text: var(--despesa);
+  --mist: oklch(0.696 0.014 71.3);
+  --mist-text: var(--mist);
+
+  --sidebar: oklch(0.252 0.002 80);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
+@theme inline {
+  --font-inter: 'Inter', 'sans-serif';
+  --font-manrope: 'Manrope', 'sans-serif';
+  --font-display: 'Fraunces', 'Georgia', serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-text: var(--success-text);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-text: var(--warning-text);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-text: var(--info-text);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-2: var(--brand-2);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-brasa: var(--brasa);
+  --color-receita: var(--receita);
+  --color-receita-text: var(--receita-text);
+  --color-despesa: var(--despesa);
+  --color-despesa-text: var(--despesa-text);
+  --color-mist: var(--mist);
+  --color-mist-text: var(--mist-text);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}

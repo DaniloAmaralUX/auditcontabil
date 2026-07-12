@@ -1,0 +1,330 @@
+[
+ {
+  "section": "Visual Hierarchy",
+  "totals": {
+   "checks": 10,
+   "pass": 7,
+   "na": 0,
+   "confirmedIssues": 3,
+   "refuted": 0
+  },
+  "confirmed": [
+   {
+    "label": "CTA primário óbvio (uma ação dominante por tela)",
+    "status": "warn",
+    "severity": "medium",
+    "evidence": "src/features/audits/import/import-page.tsx:246-260 e 359-371 — quando state.phase === 'done', busy volta a false (linha 145) e ready continua true (file e map intactos, linha 142), então 'Gerar dashboard' (size='lg', w-full, variante primária, ícone Sparkles) fica reabilitado ao mesmo tempo em que 'Ver o dashboard' (também size='lg', w-full, primário, Sparkles) aparece abaixo. Dois CTAs primários idênticos em peso, tamanho e ícone competem na mesma tela — viola 'Primary action obvious' e a lei da similaridade (elementos iguais leem como igualmente importantes).",
+    "fix": "Menor mudança correta, dentro do JSX existente do botão em import-page.tsx:246-260: derivar const done = state.phase === 'done' e no Button trocar props condicionalmente — variant={done ? 'outline' : 'default'} e o rótulo {done ? 'Gerar novamente' : 'Gerar dashboard'}; manter o ícone Sparkles apenas no estado não-done (em done, usar RefreshCw ou nenhum ícone, para não repetir o Sparkles do CTA 'Ver o dashboard'). Nenhuma mudança de estado/lógica é necessária: 'Ver o dashboard' (linha 359) permanece o único primário full-width quando phase==='done'.",
+    "reason": "Confirmado no código. Em src/features/audits/import/import-page.tsx: linha 145 define busy = !['idle','done','error'].includes(state.phase), então em phase==='done' busy volta a false; linha 142 mantém ready=true (file e map não são resetados após conclusão — nenhum setFile(null)/reset em 'done' existe no arquivo). Assim o botão 'Gerar dashboard' (linhas 246-260: Button size='lg', className='w-full text-base', variante default/primária, ícone Sparkles, disabled={!ready || busy} → habilitado) fica ativo exatamente quando o bloco de 'done' (linhas 351-373) renderiza 'Ver o dashboard' (linhas 359-371: também Button default size='lg' w-full com Sparkles). Dois CTAs primários idênticos em peso/tamanho/ícone na mesma tela — o achado procede."
+   },
+   {
+    "label": "Contraste mínimo 4.5:1 em elementos importantes (rótulos de dados)",
+    "status": "warn",
+    "severity": "medium",
+    "evidence": "src/features/audits/analytics/charts.tsx:280 — ResultBarLabel usa fill hardcoded 'oklch(1 0 0)' (branco puro, 11px) sobre barras var(--success) (L 0.62 no claro, 0.72 no escuro — theme.css:24,81) e var(--destructive) (L 0.585/0.7 — theme.css:23,79). Branco 11px sobre verde L 0.62 fica em torno de 2.5-3:1, abaixo dos 4.5:1 exigidos pela referência ('Ensure 4.5:1 contrast ratio minimum' / 'DON'T use low contrast for important elements'); no dark mode (barras mais claras) piora. São os valores monetários por empresa — informação primária do gráfico.",
+    "fix": "Mudança mínima em src/features/audits/analytics/charts.tsx:280 — trocar o fill interno de 'oklch(1 0 0)' para um escuro fixo: fill={inside ? 'oklch(0.145 0 0)' : 'var(--muted-foreground)'}. Texto escuro sobre as barras funciona nos dois temas, pois as barras são médias/claras em ambos (L 0.585-0.72), rendendo >=4.7:1 no pior caso (destructive light) e melhor no dark. NÃO usar var(--success-foreground): no light mode ela é quase branca (oklch(0.985 0 0), theme.css:25) e reproduziria o mesmo problema. Não é preciso mexer no limiar de 64px.",
+    "reason": "Confirmado em charts.tsx:280: ResultBarLabel usa fill 'oklch(1 0 0)' a 11px quando o rótulo fica dentro da barra (largura >= 64px), e as barras usam var(--success)/var(--destructive) (charts.tsx:333). Com theme.css:23-24 (light: success L 0.62, destructive L 0.585) o contraste calculado (Y ~= L^3) fica ~3.6:1 (success) e ~4.2:1 (destructive); no dark (theme.css:79-80, L 0.7-0.72) cai para ~2.5-2.8:1. Todos abaixo de 4.5:1 para texto de 11px, e são os valores monetários primários do gráfico. Nenhum tratamento existente mitiga isso; o fontWeight 600 não altera o requisito (11px não é 'large text')."
+   },
+   {
+    "label": "Headings distintos do corpo (peso E tamanho, não só um)",
+    "status": "warn",
+    "severity": "low",
+    "evidence": "src/features/overview/onboarding.tsx:139 e 321 — os h2 de seção ('Comece por aqui', 'Continue de onde parou') usam apenas className='font-semibold' no tamanho herdado (16px) sobre corpo text-sm (14px): 1.14x de diferença, contra o mínimo recomendado bem maior da referência ('DON'T make headings barely bigger than body'; 'Weight AND size differences'). A diferenciação recai quase só no peso.",
+    "fix": "Menor mudança correta: trocar `className='font-semibold'` por `className='text-lg font-semibold'` nos dois h2 (onboarding.tsx:139 e 321), alinhando ao padrão H2 já usado em dados-panel.tsx:60. `tracking-tight` é opcional (usado só em public-report); não é necessário para resolver o defeito. Nenhum ajuste de espaçamento é preciso — os headers já ficam em blocos flex com gap próprio dentro dos cards.",
+    "reason": "Confirmado no código. src/features/overview/onboarding.tsx:139 (`<h2 className='font-semibold'>Comece por aqui</h2>`) e :321 (`<h2 className='font-semibold'>Continue de onde parou</h2>`) diferenciam-se do corpo apenas por peso: herdam o tamanho base (16px) enquanto o conteúdo dos cards é majoritariamente text-sm (14px) — ex. linhas 140, 307, 337. Todos os demais h2 de seção do app usam tamanho explícito maior: dados-panel.tsx:60 (`text-lg font-semibold`) e public-report.tsx:130 e 170 (`text-lg font-semibold tracking-tight`); o único h2 sem esse padrão além dos dois citados é o hero do onboarding (linha 113, text-xl font-bold). O achado é real tanto pela regra de hierarquia (peso E tamanho) quanto por inconsistência interna."
+   }
+  ]
+ },
+ {
+  "section": "Visual Style",
+  "totals": {
+   "checks": 10,
+   "pass": 7,
+   "na": 0,
+   "confirmedIssues": 3,
+   "refuted": 0
+  },
+  "confirmed": [
+   {
+    "label": "Cores hardcoded contornando tokens (logo e rótulo de barra)",
+    "status": "warn",
+    "severity": "medium",
+    "evidence": "src/assets/logo.tsx:7 usa ACCENT '#EE7D2B' fixo apesar de existir o token --brand-2 (theme.css:38 light / :93 dark, que muda por tema); src/features/audits/analytics/charts.tsx:280 usa fill 'oklch(1 0 0)' literal para o rótulo dentro da barra; charts.tsx:556 hardcoda borderRadius: 8 no tooltip em vez de var(--radius-sm).",
+    "fix": "Mudança mínima: em src/features/audits/analytics/charts.tsx:280, trocar fill={inside ? 'oklch(1 0 0)' : 'var(--muted-foreground)'} por fill={inside ? 'var(--card)' : 'var(--muted-foreground)'} — var(--card) é quase branco no tema claro (barras escuras) e escuro no tema escuro (barras claras), corrigindo o contraste nos dois temas. NÃO usar var(--primary-foreground): no dark ele é escuro mas o token correto por semântica de fundo é --card. Opcional (baixa prioridade): charts.tsx:556 borderRadius: 'var(--radius-sm)'. Não alterar logo.tsx — acento fixo é intencional e documentado.",
+    "reason": "Evidência confirmada nos três pontos, mas só um é defeito real. (1) charts.tsx:280 usa fill 'oklch(1 0 0)' fixo para o rótulo dentro da barra; as barras usam var(--success)/var(--destructive) (charts.tsx:333), que no tema escuro são CLARAS (theme.css:79-80, oklch 0.7/0.72) — texto branco sobre barra clara tem contraste fraco no dark mode. Defeito confirmado. (2) logo.tsx:7 de fato hardcoda '#EE7D2B', porém o comentário nas linhas 4-7 documenta que o acento fixo é intencional ('1 acento fixo'), e o valor é visualmente quase idêntico a --brand-2; não é defeito, é decisão de marca. (3) charts.tsx:556 borderRadius: 8 é numericamente igual a var(--radius-sm) hoje (0.75rem-4px=8px); apenas fragilidade de tokenização, sem impacto visual."
+   },
+   {
+    "label": "Contraste de texto semântico pequeno (4.5:1) em light mode",
+    "status": "warn",
+    "severity": "high",
+    "evidence": "theme.css:24-26 — --success oklch(0.62 0.14 155) e --warning oklch(0.72 0.15 65) sobre card branco rendem ~3.1:1 e ~2.3:1; usados em texto pequeno: charts.tsx:474-476 (statusBadge text-warning/text-success em badge text-xs), charts.tsx:531-537 (TableCell text-success/text-destructive tabular-nums); charts.tsx:277-280 rótulo branco fontSize 11 dentro de barra --success fica ~3.1:1. Nos KPIs (charts.tsx:109, 1.7rem bold) o texto é grande, então 3:1 passa.",
+    "fix": "Menor mudança correta: (1) Em src/styles/theme.css adicionar dois tokens no bloco light — --success-text: oklch(0.50 0.13 155) e --warning-text: oklch(0.52 0.12 65) (ambos >=4.6:1 sobre branco) — e no bloco dark aliasar aos valores já claros: --success-text: var(--success); --warning-text: var(--warning). Registrar no @theme: --color-success-text: var(--success-text); --color-warning-text: var(--warning-text). (2) Em src/features/audits/analytics/charts.tsx trocar 'text-success'→'text-success-text' e 'text-warning'→'text-warning-text' nas linhas 474-475 (statusBadge) e na linha 534 (TableCell do resultado). text-destructive já tem contraste adequado e não precisa mudar. (3) Para o rótulo da barra (linha 280), a mudança mínima é remover o branch 'inside' de cor e sempre usar fill='var(--muted-foreground)' posicionando o texto fora da barra (o código já tem o posicionamento externo pronto no ternário da linha 269 — basta forçar inside=false para a cor/posição, ou simplesmente trocar o fill inside para 'var(--success-foreground)' no dark e um oklch escuro no light via CSS var). A opção mais simples e segura: sempre rotular fora da barra com --muted-foreground.",
+    "reason": "Confirmado no código. src/styles/theme.css:24 define --success: oklch(0.62 0.14 155) e :26 --warning: oklch(0.72 0.15 65); --card no light mode é branco. Cálculo exato (conversão OKLCH→sRGB + luminância WCAG): success/branco = 3.42:1, warning/branco = 2.57:1, ambos abaixo de 4.5:1. Esses tokens são de fato usados como cor de texto pequeno: charts.tsx:474-476 (Badge variant outline text-xs com text-success/text-warning), charts.tsx:531-537 (TableCell text-sm com text-success). E charts.tsx:277-280 renderiza rótulo fontSize 11 com fill 'oklch(1 0 0)' (branco) dentro da barra — quando a barra usa --success, o contraste é 3.42:1, também insuficiente para texto de 11px. Não há nenhuma variante -text/-foreground escura aplicada nesses pontos (--success-foreground é 0.985, quase branco). O achado do auditor é real; apenas os valores numéricos estavam levemente subestimados (3.42 vs ~3.1 e 2.57 vs ~2.3)."
+   },
+   {
+    "label": "Escala tipográfica: valores arbitrários fora da escala no KPI",
+    "status": "warn",
+    "severity": "low",
+    "evidence": "charts.tsx:102 usa text-[0.7rem] (11.2px) e :109 text-[1.7rem] (27.2px) — fora da escala Tailwind (xs=12/2xl=24/3xl=30) e usados só ali; restante é consistente: text-base para CardTitle de gráfico (charts.tsx:148, 212...), text-sm/text-xs para corpo e apoio, tabular-nums aplicado em todos os números (index.css:24-27, charts.tsx:109,184,369).",
+    "fix": "Menor mudança correta em src/features/audits/analytics/charts.tsx: na linha 102 trocar text-[0.7rem] por text-xs (mantendo font-semibold tracking-[0.08em] uppercase); na linha 109 trocar text-[1.7rem] por text-2xl (mantendo leading-none font-bold tracking-tight tabular-nums). text-2xl (24px) alinha o KPI ao padrão já usado em resumo-panel.tsx:31, dispensando a criação de token --text-kpi.",
+    "reason": "Confirmado no código: src/features/audits/analytics/charts.tsx:102 usa text-[0.7rem] no label do KPI e :109 usa text-[1.7rem] no valor — ambos valores arbitrários fora da escala Tailwind, sem token correspondente (nenhum --text-* definido em @theme; grep por '--text-' no src retorna vazio). Além disso, o próprio produto já tem um padrão de KPI na escala: src/features/audits/workspace/panels/resumo-panel.tsx:31 usa 'text-2xl font-bold tabular-nums' para valores equivalentes, provando inconsistência interna, não escolha intencional sistematizada."
+   }
+  ]
+ },
+ {
+  "section": "Accessibility",
+  "totals": {
+   "checks": 10,
+   "pass": 4,
+   "na": 0,
+   "confirmedIssues": 6,
+   "refuted": 0
+  },
+  "confirmed": [
+   {
+    "label": "Skip link aponta para âncora inexistente (quebrado)",
+    "status": "fail",
+    "severity": "medium",
+    "evidence": "src/components/skip-to-main.tsx:5 — href='#content', mas nenhum elemento no src tem id=\"content\" (grep por id='content'/id=\"content\" retorna vazio; src/components/layout/main.tsx:11 renderiza <main> sem id). O link 'Skip to Main' aparece no foco (authenticated-layout.tsx:20) mas não move o foco para lugar nenhum.",
+    "fix": "Em src/components/layout/main.tsx, adicionar id='content' e tabIndex={-1} ao elemento <main> (antes do spread {...props}, para que um id explícito passado por prop ainda possa sobrescrever): <main id='content' tabIndex={-1} data-layout={...} className={...} {...props} />. O tabIndex={-1} garante que o foco realmente se mova para o <main> em todos os navegadores/leitores de tela. Opcional (fora do escopo mínimo): trocar o texto 'Skip to Main' por 'Pular para o conteúdo' em src/components/skip-to-main.tsx:7, já que o app é PT-BR.",
+    "reason": "Defeito confirmado por leitura direta: src/components/skip-to-main.tsx:5 tem href='#content', mas grep por id=\"content\" (e variantes) em todo o src retorna zero resultados. O <main> em src/components/layout/main.tsx:11-25 é renderizado sem id, e nenhum call site de <Main> (features/overview, clients, audits, billing, settings, team, import) passa id via props. O SkipToMain é renderizado em authenticated-layout.tsx:20, então o link aparece no foco mas a âncora não existe — navegação de fragmento não faz nada. Não há tratamento alternativo (nenhum handler de clique, nenhum id em outro container)."
+   },
+   {
+    "label": "Contraste 4.5:1 em texto colorido pequeno (light theme)",
+    "status": "fail",
+    "severity": "medium",
+    "evidence": "src/styles/theme.css:26 — --warning: oklch(0.72 0.15 65) usado como cor de texto pequeno em status-badge.tsx:74 ('Atenção') e charts.tsx:476 ('Deficitária') sobre card branco ≈ 2.5:1; --success oklch(0.62 …) ≈ 3.6:1 em texto sm/xs (charts.tsx:533-537, import-page.tsx:353); rótulo branco fill 'oklch(1 0 0)' sobre barra --success a 11px (charts.tsx:280,333) ≈ 3.6:1. Todos abaixo de 4.5:1 para texto normal.",
+    "fix": "Menor mudança correta: (1) Em src/styles/theme.css adicionar em :root `--warning-text: oklch(0.55 0.13 65)` (5.0:1) e `--success-text: oklch(0.50 0.12 155)` (6.4:1); em `.dark`, mapear `--warning-text: var(--warning)` e `--success-text: var(--success)` (as versões claras já passam sobre fundo escuro). Registrar os utilitários Tailwind correspondentes (--color-warning-text / --color-success-text no bloco @theme onde --color-warning já é mapeado). (2) Trocar `text-warning`→`text-warning-text` e `text-success`→`text-success-text` apenas nos usos como cor de TEXTO: status-badge.tsx:45,49,50,72,74; charts.tsx:474-475,534; import-page.tsx:267,353,406 (manter --warning/--success como fill de barras/ícones decorativos, onde 3:1 de gráficos é atendido). (3) Em charts.tsx ResultBarLabel (linhas 267-280), remover o branch `inside` e renderizar o rótulo sempre fora da barra com fill 'var(--muted-foreground)' — elimina o branco 3.42:1 sobre a barra verde sem criar novo token; alternativa maior (fundo escuro atrás do label) não compensa para um rótulo de 11px.",
+    "reason": "Confirmado no código e por cálculo OKLCH→sRGB→WCAG. (1) theme.css:26 define --warning: oklch(0.72 0.15 65); contraste medido sobre card branco = 2.57:1. Usado como cor de texto pequeno em src/features/audits/components/status-badge.tsx:74 ('Atenção', badge text-xs) e src/features/audits/analytics/charts.tsx:475 ('Deficitária'). (2) theme.css:24 --success: oklch(0.62 0.14 155) = 3.42:1, usado como texto em charts.tsx:534 (célula tabular text-sm) e import-page.tsx:353/267/406. (3) charts.tsx:280 usa fill 'oklch(1 0 0)' (branco) em rótulo de 11px dentro de barra --success (charts.tsx:333) = 3.42:1. Todos abaixo de 4.5:1 para texto normal (11–14px não qualifica como 'large text'). Obs.: --destructive (0.585 0.22 25) mede 4.69:1 e passa, então o problema é restrito a warning/success como texto."
+   },
+   {
+    "label": "Gráficos com dados acessíveis (SVG sem semântica; PeriodTrend sem fallback textual)",
+    "status": "warn",
+    "severity": "medium",
+    "evidence": "src/features/audits/analytics/charts.tsx — GroupDonut tem lista textual completa com valores e % (175-190) e CompanyTable (485-551) cobre os dados de CompanyRanking/CompanyResults; porém os SVGs recharts não têm role='img'/aria-label (153, 216, 307, 413) e PeriodTrend (395-468) não tem equivalente textual — os valores mensais só existem no tooltip de hover, invisível para teclado e leitor de tela.",
+    "fix": "Menor mudança correta em charts.tsx: (1) No PeriodTrend, adicionar após o ResponsiveContainer uma tabela sr-only com os dados já disponíveis em `data`: <table className='sr-only'><caption>{title} — valores mensais</caption> com linhas mês × brl(receita_liquida) × brl(despesas)</table>. (2) Dar nome acessível aos gráficos que NÃO têm fallback textual completo: envolver o LineChart do PeriodTrend e o BarChart do CompanyRanking/CompanyResults em aria-label descritivo — como recharts v3 já usa accessibilityLayer (role=application, navegável por teclado), basta passar a prop `aria-label` diretamente ao LineChart/BarChart (recharts repassa ao svg), ex.: aria-label={`${title}: ${description}`}. (3) No GroupDonut, marcar o wrapper do PieChart (div linha 152) com aria-hidden='true', pois a lista textual ao lado (175-190) já é o equivalente completo — evita ruído duplicado no leitor de tela. Não é preciso habilitar accessibilityLayer (já é default no recharts 3) nem criar tabela para CompanyRanking/CompanyResults (CompanyTable já cobre os dados).",
+    "reason": "Confirmado em src/features/audits/analytics/charts.tsx: nenhum gráfico recharts tem role/aria-label (linhas 153, 216, 307, 413) e PeriodTrend (395-468) não tem equivalente textual — os valores mensais só existem no Tooltip (430-436); a legenda (455-464) mostra apenas as séries, não os dados. GroupDonut (175-190) e CompanyTable (485-551) de fato já cobrem seus dados textualmente. Correção ao achado: o projeto usa recharts ^3.9.2 (package.json:59), onde accessibilityLayer é habilitado por padrão — logo navegação por teclado com tooltip JÁ funciona e a alternativa 'habilitar accessibilityLayer (v2.13+)' do fix original é desnecessária. O defeito real remanescente é a falta de alternativa textual (WCAG 1.1.1) para leitores de tela no PeriodTrend e a ausência de nome acessível nos gráficos."
+   },
+   {
+    "label": "Labels de formulário associados aos controles",
+    "status": "fail",
+    "severity": "medium",
+    "evidence": "src/features/audits/import/import-page.tsx:290 — <Label className='text-xs'>{t.label}</Label> sem htmlFor, e o SelectTrigger irmão (303) sem id: os 11 selects de mapeamento não têm nome acessível (leitor de tela anuncia só o valor atual). Contraste: password-gate.tsx:68 faz certo (Label htmlFor='share-password' + Input id).",
+    "fix": "Menor mudança correta, em src/features/audits/import/import-page.tsx dentro do TARGETS.map (linhas 290 e 303): trocar a linha 290 para <Label htmlFor={`map-${t.key}`} className='text-xs'>{t.label}</Label> e a linha 303 para <SelectTrigger id={`map-${t.key}`} className='h-8'>. t.key é único por entrada, então os ids não colidem; nenhuma mudança necessária em select.tsx pois o id já é propagado via {...props} ao button do Radix.",
+    "reason": "Confirmado no código: import-page.tsx:290 tem <Label className='text-xs'>{t.label}</Label> sem htmlFor e sem envolver o controle (é irmão dentro do div), e import-page.tsx:303 tem <SelectTrigger className='h-8'> sem id nem aria-label. Nenhum outro mecanismo dá nome acessível aos 11 selects (TARGETS tem 11 entradas, linhas 43-55). O componente SelectTrigger (src/components/ui/select.tsx:24-47) faz spread de ...props no Radix Trigger (um <button> nativo), então id passado no call site funciona e label[for] fornece o nome acessível."
+   },
+   {
+    "label": "Erros e mudanças dinâmicas anunciados (aria-live/role=alert)",
+    "status": "warn",
+    "severity": "medium",
+    "evidence": "password-gate.tsx:88 tem role='alert' no erro (pass) e onboarding.tsx:145-151 tem progressbar com aria-valuenow + sr-only '— feito' (198); mas em import-page.tsx o fileError (238-243), o state.error (374-381) e a conclusão 'Pronto!' (351-357) são <p> sem role='alert'/aria-live — usuário de leitor de tela não fica sabendo que a importação falhou ou terminou. Falta também aria-invalid/aria-describedby ligando o erro ao Input em password-gate.tsx:70-77.",
+    "fix": "Menor mudança correta, 4 edits pontuais: (1) import-page.tsx linha 239: adicionar role='alert' ao <p> do fileError; (2) import-page.tsx linha 375: adicionar role='alert' ao <p> do state.error; (3) import-page.tsx linha 353: adicionar role='status' ao <p> de 'Pronto!' (equivale a aria-live='polite'; NÃO envolver todas as PhaseLine em aria-live — o progresso muda a cada linha ingerida e ficaria verboso demais no leitor de tela); (4) password-gate.tsx: no Input (linha 70) adicionar aria-invalid={!!error} e aria-describedby={error ? 'share-password-error' : undefined}, e no <p> de erro (linha 88) adicionar id='share-password-error'. Como role='alert'/'status' funcionam melhor quando o elemento é inserido no DOM já com a role (todos esses são montados condicionalmente, o que é o caso correto aqui), nenhuma mudança estrutural adicional é necessária.",
+    "reason": "Confirmado no código real. Em src/features/audits/import/import-page.tsx: (1) fileError é renderizado em linhas 238-243 como <p className='flex items-start gap-2 text-sm text-destructive'> sem role='alert' ou aria-live; (2) state.error em linhas 374-381 é <p ... text-destructive> igualmente sem anúncio; (3) a conclusão 'Pronto!' em linhas 351-358 é <p className='flex items-center gap-2 text-success'> sem aria-live — como esses elementos são montados condicionalmente ({fileError && ...}, {state.phase === 'error' && ...}), leitores de tela não anunciam nada quando a importação falha ou termina. Em src/features/share/components/password-gate.tsx: o erro tem role='alert' (linha 88, será anunciado), mas o Input (linhas 70-77) de fato não tem aria-invalid nem aria-describedby ligando ao erro — parte secundária do achado, também confirmada. Nada no código já trata esses casos."
+   },
+   {
+    "label": "Touch targets mínimos 44px",
+    "status": "warn",
+    "severity": "low",
+    "evidence": "import-page.tsx:303 SelectTrigger className='h-8' (32px) e botões size='sm' (h-8, ex. onboarding.tsx:243,322, import-page.tsx:160,281) — atendem o mínimo de click target desktop (24px) mas ficam abaixo de 44px touch; o fluxo do cliente leigo (password-gate.tsx:92, botão default h-9 = 36px) é o mais provável de ser usado em celular.",
+    "fix": "Menor mudança correta: em src/components/ui/button.tsx, adicionar à string base do buttonVariants a classe `pointer-coarse:min-h-11` (Tailwind v4; 44px só em dispositivos touch, sem afetar densidade desktop). Fazer o mesmo no SelectTrigger base (src/components/ui/select.tsx) ou, no mínimo, remover o override h-8 de import-page.tsx:303 nos fluxos internos e garantir min-h-11 touch nos componentes usados pelo fluxo público (/r/:token e password-gate). Não usar size='lg' como fix — h-10 = 40px, ainda abaixo de 44px.",
+    "reason": "Evidência confere linha a linha: import-page.tsx:303 tem SelectTrigger className='h-8' (32px); import-page.tsx:160 e :281 têm Button size='sm' (h-8=32px, definido em src/components/ui/button.tsx:25). O fluxo do cliente leigo em src/features/share/components/password-gate.tsx usa botões size default (linhas 78 e 92) = h-9 (36px, button.tsx:24). Grep em todo src/ não encontrou nenhum tratamento para pointer:coarse, min-h-11 ou min-h-[44px] — não há compensação global de touch target. Nuance: 44px é AAA (WCAG 2.5.5); o AA (2.5.8, 24px) é atendido — o achado é de usabilidade touch, não falha AA. Detalhe que o auditor errou: size='lg' é h-10 (40px, button.tsx:26), então recomendar 'lg' NÃO resolve os 44px."
+   }
+  ]
+ },
+ {
+  "section": "Navigation",
+  "totals": {
+   "checks": 10,
+   "pass": 5,
+   "na": 0,
+   "confirmedIssues": 5,
+   "refuted": 0
+  },
+  "confirmed": [
+   {
+    "label": "Localização atual no sidebar em rotas profundas (active state)",
+    "status": "fail",
+    "severity": "medium",
+    "evidence": "src/components/layout/nav-group.tsx:176-185 — checkIsActive só dá match exato (href === item.url || href.split('?')[0] === item.url); o ramo de prefixo só roda com mainNav=true, que nunca é passado para itens simples (linha 47). Em /audits/$auditId, /audits/$auditId/import, /clients/$clientId e /settings/account, NENHUM item do sidebar fica ativo — o usuário perde o 'onde estou?' exatamente nas telas mais profundas do produto.",
+    "fix": "Menor mudança correta, em src/components/layout/nav-group.tsx, função checkIsActive (linha 176): extrair o pathname e adicionar um match por prefixo de segmento que preserva '/' exato:\n\nfunction checkIsActive(href: string, item: NavItem, mainNav = false) {\n  const pathname = href.split('?')[0]\n  return (\n    href === item.url ||\n    pathname === item.url ||\n    (item.url !== '/' && pathname.startsWith(item.url + '/')) ||\n    !!item?.items?.filter((i) => i.url === href).length ||\n    (mainNav &&\n      href.split('/')[1] !== '' &&\n      href.split('/')[1] === item?.url?.split('/')[1])\n  )\n}\n\nO sufixo '/' no startsWith evita falsos positivos entre prefixos parciais (ex.: /audit vs /audits) e mantém 'Início' (/) acendendo só na home; /settings continua ativo em /settings/account porque o parent é prefixo de segmento.",
+    "reason": "Confirmado no código. src/components/layout/nav-group.tsx:47 renderiza SidebarMenuLink para itens sem subitens, e a linha 71 chama checkIsActive(href, item) sem mainNav. checkIsActive (linhas 176-185) só faz match exato (href === item.url || href.split('?')[0] === item.url); o match por prefixo (linhas 181-183) exige mainNav=true, que nunca é passado para links simples. Todos os itens do sidebar (sidebar-data.ts:17-27: /, /clients, /audits, /team, /billing, /settings) são links simples, e existem rotas profundas reais (src/routes/_authenticated/audits/$auditId/index.tsx, audits/$auditId/import.tsx, clients/$clientId.tsx, settings/account.tsx). Em /audits/123 ou /settings/account nenhum item fica ativo — o defeito é real."
+   },
+   {
+    "label": "Abas: painéis renderizados fora do <Tabs> (aria-controls órfão, sem TabsContent)",
+    "status": "warn",
+    "severity": "medium",
+    "evidence": "src/features/audits/workspace/audit-workspace.tsx:42-50 — os painéis são divs condicionais FORA do componente Tabs (o </Tabs> fecha na linha 42). Cada TabsTrigger (Radix, src/components/ui/tabs.tsx:34-48) emite aria-controls apontando para um id de painel que não existe no DOM, e a troca de aba desmonta o painel anterior (estado local de scroll/filtros dos painéis se perde — a referência pede 'Preserve content on tab switch').",
+    "fix": "Menor mudança correta em src/features/audits/workspace/audit-workspace.tsx: (1) adicionar TabsContent ao import da linha 2; (2) mover as linhas 44-50 para dentro do <Tabs> (antes do fechamento na linha 42), trocando cada condicional por <TabsContent value='dashboard'><DashboardPanel auditId={auditId} /></TabsContent> etc. — as condicionais `tab === ...` podem ser removidas, pois o Radix já monta apenas o conteúdo da aba ativa (lazy-mount preservado por padrão). O wrapper div externo pode manter space-y-4 ou ser removido, já que Tabs (tabs.tsx:12) já aplica flex flex-col gap-2. Se quiser de fato preservar estado/scroll entre trocas de aba (a parte 'Preserve content on tab switch' do achado), adicionar forceMount + hidden via data-state nos TabsContent — mas isso é um passo opcional separado, não necessário para corrigir o vínculo ARIA.",
+    "reason": "Confirmado no código. Em src/features/audits/workspace/audit-workspace.tsx o </Tabs> fecha na linha 42 e os sete painéis são renderizados como condicionais soltas nas linhas 44-50, fora do componente Tabs. O TabsTrigger (Radix, src/components/ui/tabs.tsx:34-48) emite aria-controls apontando para o id do Radix Tabs.Content correspondente, que nunca existe no DOM porque nenhum TabsContent é usado (o import na linha 2 nem inclui TabsContent) — aria-controls órfão e ausência de role=tabpanel, defeito real de acessibilidade. Ressalva: a parte do achado sobre \"preservar estado ao trocar de aba\" não é corrigida pelo fix proposto — o Radix TabsContent também desmonta o conteúdo inativo por padrão (precisaria de forceMount), mas o vínculo ARIA quebrado por si só torna o achado real."
+   },
+   {
+    "label": "Contexto 'onde estou' na tela de importação (qual auditoria/cliente)",
+    "status": "warn",
+    "severity": "low",
+    "evidence": "src/features/audits/import/import-page.tsx:174-181 — o h1 é genérico ('Gerar dashboard') e a página não exibe título da auditoria nem nome do cliente, embora audit.data já esteja carregado (linha 89, usado só para defaultPeriod na linha 143-144). Com várias auditorias abertas em abas do navegador, o contador não sabe em qual está subindo a planilha — risco real de importar no lugar errado.",
+    "fix": "Menor mudança correta: adicionar uma linha de contexto sob o h1 em import-page.tsx, dentro do div text-center (após a linha 177), com guarda de loading: {audit.data && (<p className='text-sm text-muted-foreground'>{audit.data.title} · {audit.data.cliente_name}</p>)} — mantendo o parágrafo existente da linha 178-180 logo abaixo. Não é necessário alterar o rótulo do botão voltar; a linha de contexto já resolve o problema de 'onde estou'.",
+    "reason": "Confirmado no código. src/features/audits/import/import-page.tsx:174-181 renderiza apenas o h1 genérico 'Gerar dashboard' e um subtítulo fixo; audit.data (carregado na linha 89 via auditDetailQuery) é usado somente para defaultPeriod (linhas 143-144). O objeto retornado tem title (src/features/audits/data/schema.ts:21) e cliente_name (src/features/audits/data/queries.ts:36), mas nenhum dos dois aparece na tela. O botão voltar (linha 166) diz apenas 'Voltar à auditoria' sem nome, e o PageHeader (src/components/page-header.tsx) não adiciona breadcrumb nem título. Não há nenhum elemento que identifique auditoria/cliente na página de importação."
+   },
+   {
+    "label": "Busca/command palette: atalho global ⌘K, mas affordance visível só em 3 páginas",
+    "status": "warn",
+    "severity": "low",
+    "evidence": "src/context/search-provider.tsx:18-27 — Cmd/Ctrl+K funciona globalmente (provider no authenticated-layout.tsx:17); porém o botão visível <Search /> só aparece com withSearch (default false em src/components/page-header.tsx:12) e o grep mostra apenas 3 usos: audits/index.tsx:17, clients/index.tsx:12, overview/index.tsx:12. No workspace da auditoria, import, team, billing e settings não há nenhuma pista visual de que a busca existe — a referência manda 'Make search prominent' / 'Don't hide search'.",
+    "fix": "Menor mudança correta: em src/components/page-header.tsx:12, trocar `withSearch = false` por `withSearch = true` (a busca já funciona globalmente via SearchProvider, então exibir o gatilho é seguro em qualquer página). Opcionalmente, limpar as 3 props `withSearch` agora redundantes em overview/index.tsx:12, clients/index.tsx:12 e audits/index.tsx:17. Se alguma página específica não devesse mostrar busca, ela passaria `withSearch={false}` explicitamente — mas nenhum caso atual exige isso. Verificar visualmente as páginas com `leading` (client-detail.tsx:28, import-page.tsx:158) para garantir que o <Search /> ao lado do botão de voltar não aperta o layout em telas estreitas.",
+    "reason": "Confirmado no código: o SearchProvider envolve todo o layout autenticado (src/components/layout/authenticated-layout.tsx:17) e registra o atalho Cmd/Ctrl+K globalmente (src/context/search-provider.tsx:18-27), com o CommandMenu montado para todas as rotas (search-provider.tsx:32). Porém o affordance visível <Search /> só renderiza quando withSearch é passado (src/components/page-header.tsx:12 default false; linha 20 renderização condicional). Grep confirma apenas 3 call sites com withSearch (src/features/overview/index.tsx:12, src/features/clients/index.tsx:12, src/features/audits/index.tsx:17), enquanto team/index.tsx:142, billing/index.tsx:83, audits/import/import-page.tsx:158, clients/client-detail.tsx:28 e routes/_authenticated/audits/$auditId/index.tsx:19 usam PageHeader sem busca visível — a funcionalidade existe em todas as páginas mas sem nenhuma pista visual na maioria delas."
+   },
+   {
+    "label": "Command palette inconsistente com o sidebar: não filtra itens por role",
+    "status": "warn",
+    "severity": "medium",
+    "evidence": "src/components/command-menu.tsx:37 — CommandMenu itera navGroups cru, enquanto o sidebar filtra por role (src/components/layout/app-sidebar.tsx:16-23 + roles:['owner'] em sidebar-data.ts:25-26). Um membro não-owner vê e navega via ⌘K para 'Equipe' e 'Faturamento', destinos que o sidebar esconde — quebra 'Consistent across pages' do audit de navegação e gera dead-end (rota vai negar acesso ou mostrar erro).",
+    "fix": "Menor mudança correta: (1) mover visibleFor(role) de app-sidebar.tsx para src/components/layout/data/sidebar-data.ts (exportando-a; app-sidebar passa a importá-la, eliminando duplicação); (2) em command-menu.tsx, obter `const { role } = useRouteContext({ from: '/_authenticated' })` (seguro, pois CommandMenu só monta dentro de authenticated-layout) e trocar `navGroups.map(...)` por `visibleFor(role).map(...)` na linha 37. Atualizar search-provider.test.tsx para envolver o render num contexto de rota /_authenticated com role, ou mockar useRouteContext.",
+    "reason": "Confirmado no código: src/components/command-menu.tsx:15 importa navGroups cru e a linha 37 itera todos os itens sem filtro de role, enquanto src/components/layout/app-sidebar.tsx:16-23 define visibleFor(role) que filtra por item.roles, e src/components/layout/data/sidebar-data.ts:25-26 restringe 'Equipe' (/team) e 'Faturamento' (/billing) a roles:['owner']. CommandMenu é renderizado via SearchProvider em authenticated-layout.tsx:17 (dentro de /_authenticated), então um membro não-owner vê e pode navegar via ⌘K para rotas que o sidebar esconde — inconsistência real de navegação."
+   }
+  ]
+ },
+ {
+  "section": "Usability & Cognitive Load",
+  "totals": {
+   "checks": 10,
+   "pass": 7,
+   "na": 0,
+   "confirmedIssues": 3,
+   "refuted": 0
+  },
+  "confirmed": [
+   {
+    "label": "Cancelamento disponível para o processo longo",
+    "status": "warn",
+    "severity": "low",
+    "evidence": "src/features/audits/data/use-ingest-pipeline.ts:262 — existe reset() no hook, mas import-page.tsx nunca o expõe; durante busy (import-page.tsx:145,196,251) o dropzone e o botão travam e não há nenhum botão 'Cancelar' para abortar upload TUS/ingestão de um arquivo de até 20 MB. Ref: 'Allow cancellation for long processes'.",
+    "fix": "Menor mudança correta, em duas partes. (1) use-ingest-pipeline.ts: guardar referência do upload ativo (ex.: uploadRef = useRef<tus.Upload|null>) — fazer tusUpload aceitar/registrar a instância — e um cancelledRef; adicionar `cancel = useCallback(() => { uploadRef.current?.abort(); workerRef.current?.terminate(); workerRef.current = null; cancelledRef.current = true; setState(INITIAL) }, [])` e retornar `{ state, start, preview, reset, cancel }`. No catch de start(), ignorar o erro se cancelledRef estiver setado (para não cair em phase 'error' após cancelar). (2) import-page.tsx: desestruturar `cancel` na linha 88 e, dentro do card de Progresso (após as PhaseLine, ~linha 349), renderizar quando `busy`: <Button variant='outline' size='sm' className='w-full' onClick={cancel}>Cancelar</Button>. Opcional (robustez servidor): se já houver fileId registrado, chamar finalize_file com p_error='cancelled' antes do reset — mas não é necessário para resolver o achado de usabilidade.",
+    "reason": "Confirmado no código. import-page.tsx:88 desestrutura apenas `{ state, start, preview }` do useIngestPipeline — o `reset()` (use-ingest-pipeline.ts:262) nunca é usado. Durante `busy` (import-page.tsx:145) o dropzone bloqueia clique (linha 196), os selects de mapeamento ficam disabled (linha 301) e 'O BOTÃO' fica disabled (linha 251). Não existe nenhum controle 'Cancelar' em todo o arquivo (verificado nas 418 linhas). No hook, o tus.Upload é criado dentro de tusUpload() (use-ingest-pipeline.ts:58) sem expor referência para abort, e o worker (workerRef, linha 90) nunca é terminado — logo não há caminho de cancelamento nem no hook nem na página para um pipeline de upload+ingestão de arquivo de até 20 MB. O padrão 'allow cancellation for long processes' aplica-se: é um processo multi-fase potencialmente longo com UI travada."
+   },
+   {
+    "label": "Mensagem de erro do pipeline em linguagem clara (sem jargão técnico)",
+    "status": "fail",
+    "severity": "medium",
+    "evidence": "src/features/audits/import/import-page.tsx:374-381 renderiza state.error cru; use-ingest-pipeline.ts:256 grava e.message sem tradução — ex.: linha 145 lança new Error('not_authenticated'), e erros de RPC do Supabase chegam em inglês técnico ('new row violates row-level security policy...'). Contador leigo vê jargão sem instrução de correção. Ref: 'Use plain language / Explain how to fix it / Don't use technical jargon'.",
+    "fix": "Menor mudança correta, reutilizando o mapa existente: (1) em src/lib/handle-server-error.ts, exportar a função friendly (ex.: export function friendlyErrorMessage(raw: string): string) e trocar o fallback `MESSAGES[key] ?? raw` por `MESSAGES[key] ?? 'Algo deu errado ao processar o arquivo. Tente novamente.'` apenas na variante usada pelo pipeline (ou aceitar um fallback como parâmetro), para que erros desconhecidos (ex. RLS em inglês) nunca vazem à UI; (2) em src/features/audits/data/use-ingest-pipeline.ts:255-257, no catch, fazer console.error(e) (erro técnico só no log) e patch({ phase: 'error', error: friendlyErrorMessage(e instanceof Error ? e.message : String(e)) }); (3) em src/features/audits/import/import-page.tsx:374-381, adicionar abaixo da mensagem um <Button variant='outline' onClick={reset ou reenvio}>Tentar novamente</Button> reaproveitando a ação de reenviar o arquivo já existente na página. Não criar novo mapa de mensagens — o de handle-server-error.ts já cobre os códigos dos RPCs.",
+    "reason": "Confirmado no código. src/features/audits/data/use-ingest-pipeline.ts:145 lança new Error('not_authenticated'); linhas 217/247 propagam PostgrestError cru do Supabase (inglês técnico, ex. RLS); a linha 256 grava e.message sem tradução: patch({ phase: 'error', error: e instanceof Error ? e.message : String(e) }). import-page.tsx:374-381 renderiza {state.error} cru na UI. Agravante: já existe um mapa PT-BR completo em src/lib/handle-server-error.ts (MESSAGES inclui not_authenticated → 'Sua sessão expirou. Entre novamente.'), mas nem o hook nem a página o usam (grep por friendly/handleServerError em src/features/audits retorna zero). O único detalhe impreciso do achado é o caminho do arquivo (data/ em vez de import/), o que não invalida o defeito."
+   },
+   {
+    "label": "Estado de erro das queries nos painéis do workspace (empty state enganoso)",
+    "status": "fail",
+    "severity": "high",
+    "evidence": "src/features/audits/workspace/panels/inconsistencias-panel.tsx:51 destrutura só { data, isLoading } (sem isError); em falha de rede data=undefined e as linhas 76-88 renderizam 'Nenhuma inconsistência encontrada.' — feedback falso que pode levar o contador a aprovar sem revisar. Mesmo padrão em resumo-panel.tsx:44, relatorio-panel.tsx:50, dados-panel.tsx:34 e revisao-panel.tsx:83; apenas dashboard-panel.tsx:40-50 trata isError com retry. Ref empty states: tipo 'Error → Explain and offer retry', 'DON'T: make user feel [state is fine] when it failed'.",
+    "fix": "Menor mudança correta: (1) extrair o bloco de erro do dashboard-panel para um componente compartilhado, ex. src/features/audits/workspace/panels/panel-error-state.tsx — `function PanelErrorState({ onRetry }: { onRetry: () => void })` retornando o mesmo div border-dashed com mensagem 'Não foi possível carregar os dados.' e Button `strings.common.retry` (já existe em src/lib/strings.ts:6); (2) em cada painel afetado, destruturar isError/refetch e inserir `if (isError) return <PanelErrorState onRetry={refetch} />` logo após o guard de isLoading e antes de qualquer decisão de empty state. Detalhe por arquivo: inconsistencias-panel.tsx:51 (uma query — direto); relatorio-panel.tsx:50 (idem); dados-panel.tsx:34-35, resumo-panel.tsx:41-42 e revisao-panel.tsx:79-80 usam duas queries — usar `if (a.isError || b.isError) return <PanelErrorState onRetry={() => { a.refetch(); b.refetch() }} />`. Opcional: trocar o bloco inline do dashboard-panel.tsx:40-50 pelo componente compartilhado para não duplicar.",
+    "reason": "Confirmado no código. inconsistencias-panel.tsx:51 destrutura apenas { data, isLoading } e, com data=undefined após falha, as linhas 76-88 renderizam 'Nenhuma inconsistência encontrada.' — empty state falso. O mesmo padrão existe em resumo-panel.tsx:41-42, relatorio-panel.tsx:50, dados-panel.tsx:34-35 e revisao-panel.tsx:79-80 (nenhum usa isError; grep confirma que só dashboard-panel.tsx:22,40 e audits-table.tsx:28 tratam erro). Não há mitigação global: main.tsx:30-57 não define throwOnError nem error boundary, e o QueryCache.onError só trata AuthError (toast + signOut); erros de rede/Postgrest não-auth ficam silenciosos. Em DEV retry=false, então uma única falha já produz o estado enganoso. O risco citado é plausível: revisao-panel e inconsistencias-panel sinalizam 'tudo ok, pode aprovar' quando a query falhou."
+   }
+  ]
+ },
+ {
+  "section": "Forms & Error Handling",
+  "totals": {
+   "checks": 11,
+   "pass": 7,
+   "na": 0,
+   "confirmedIssues": 4,
+   "refuted": 0
+  },
+  "confirmed": [
+   {
+    "label": "Mensagens de erro sem detalhes técnicos expostos ao usuário",
+    "status": "warn",
+    "severity": "low",
+    "evidence": "src/features/audits/import/import-page.tsx:127-130 concatena o erro bruto do worker na mensagem ao usuário: 'Não foi possível ler este arquivo... ' + String(e.message) — pode exibir jargão técnico (ex.: mensagem interna do SheetJS) para o contador. O restante é exemplar: handle-server-error.ts:48-53 mapeia via friendly() com fallback 'Algo deu errado. Tente novamente.'",
+    "fix": "Menor mudança correta, em import-page.tsx:126-132 (catch do onPick): remover a concatenação e logar o erro bruto no console. Trocar o bloco por: `} catch (e) { console.error('[import] preview falhou:', e); setFileError('Não foi possível ler este arquivo. Ele pode estar protegido por senha ou corrompido. Verifique se ele abre no Excel e envie novamente.'); setFile(null) }`. Opcional (segunda iteração, não necessária para corrigir o defeito): mapear padrões conhecidos da mensagem (/password/i → 'protegido por senha', /corrupt|zip|CFB/i → 'corrompido') antes do fallback genérico.",
+    "reason": "Confirmado. src/features/audits/import/import-page.tsx:126-130 faz setFileError('Não foi possível ler este arquivo... ' + String(e instanceof Error ? e.message : e)), e essa mensagem é renderizada ao usuário via fileError. A cadeia comprova que o texto é o erro bruto do parser: src/workers/parse.worker.ts:88 e :171 postam FATAL com message: String(e) — a stringificação direta da exceção do SheetJS (jargão técnico em inglês, ex.: 'Error: File is password-protected') — e src/features/audits/data/use-ingest-pipeline.ts:122-124 repassa esse texto intacto em reject(new Error(msg.message)). Não há mapeamento friendly nesse caminho; o handle-server-error.ts cobre apenas erros de servidor/query, não este catch local."
+   },
+   {
+    "label": "Erro de credenciais no login exibido apenas como toast transitório, não adjacente/persistente no formulário",
+    "status": "warn",
+    "severity": "low",
+    "evidence": "src/features/auth/sign-in/components/user-auth-form.tsx:52-54 — falha de login dispara toast.error(strings.auth.invalidCredentials) e retorna; nenhum erro fica visível junto ao form. A referência recomenda 'show error adjacent to the field' e evitar feedback só fora do contexto; o toast some e o usuário perde a explicação.",
+    "fix": "Menor mudança correta, só em user-auth-form.tsx: (1) na linha 53, substituir `toast.error(strings.auth.invalidCredentials)` por `form.setError('root', { message: strings.auth.invalidCredentials })` (o toast pode ser removido; import de sonner fica sem uso e deve sair); (2) logo acima do `<Button>` (linha 106), adicionar: `{form.formState.errors.root && (<p role='alert' className='text-sm text-destructive'>{form.formState.errors.root.message}</p>)}`. Não precisa limpar o erro manualmente: react-hook-form limpa erros 'root' automaticamente no próximo submit. Isso replica exatamente o padrão já aprovado em password-gate.tsx:87-91, sem novos componentes nem strings novas.",
+    "reason": "Confirmado no código. Em src/features/auth/sign-in/components/user-auth-form.tsx:52-55, a falha de login executa apenas `toast.error(strings.auth.invalidCredentials)` e `return` — nenhum estado de erro é gravado no form e o JSX (linhas 59-112) não renderiza nenhum alerta persistente; o único feedback é o toast transitório. O padrão citado como referência existe de fato no próprio projeto: src/features/share/components/password-gate.tsx:87-91 renderiza `<p role='alert' className='text-sm text-destructive'>` inline dentro do formulário. O achado é real e a inconsistência interna (tela do cliente final acerta, tela de login do escritório não) procede."
+   },
+   {
+    "label": "Campo CPF/CNPJ sem máscara nem indicador de formato",
+    "status": "warn",
+    "severity": "low",
+    "evidence": "src/features/clients/components/client-action-dialog.tsx:105 — Input livre com placeholder 'CPF ou CNPJ do titular' (não mostra formato); validação de dígito verificador existe (src/features/clients/data/schema.ts:4-30, refine em 49) mas só reporta no submit. A referência lista input masks e format indicators como prevenção primária.",
+    "fix": "Menor mudança correta, sem dependências novas: (1) em client-action-dialog.tsx:39, mudar useForm para incluir mode: 'onTouched' (feedback no blur); (2) na linha 105, adicionar inputMode='numeric' ao Input e uma máscara progressiva leve via onChange local (formatar com 000.000.000-00 até 11 dígitos e 00.000.000/0000-00 com 12-14, limitando a 14 dígitos) antes de chamar field.onChange — o schema já ignora pontuação (replace(/\\D/g,'') em schema.ts:5); (3) importar FormDescription de @/components/ui/form e adicionar abaixo do FormControl: 'Formatos: 000.000.000-00 ou 00.000.000/0000-00'. Se quiser o mínimo absoluto, itens (1) e (3) já resolvem o achado sem máscara.",
+    "reason": "Confirmado no código: src/features/clients/components/client-action-dialog.tsx:105 usa <Input placeholder='CPF ou CNPJ do titular' {...field} /> sem máscara, sem inputMode e sem hint de formato (FormDescription nem é importado). O useForm (linhas 39-42) não define mode, então o react-hook-form usa o default onSubmit — o erro do refine 'CPF ou CNPJ inválido.' (src/features/clients/data/schema.ts:49, validador em 4-30) só aparece após o submit. A validação já strippa não-dígitos (schema.ts:5), portanto uma máscara visual é compatível sem alterar o schema."
+   },
+   {
+    "label": "Texto longo da 'Conclusão geral' sem autosave nem aviso de alterações não salvas",
+    "status": "warn",
+    "severity": "medium",
+    "evidence": "src/features/audits/workspace/panels/revisao-panel.tsx:32,57-71 — Textarea da conclusão (conteúdo que vai para o cliente e o PDF) vive em useState local com botão manual 'Salvar conclusão'; trocar de aba do workspace ou navegar descarta o texto silenciosamente, sem indicador 'não salvo' nem guard. A referência pede autosave (continuous/debounced) para long-form e 'warn before navigating away with unsaved changes'.",
+    "fix": "Menor mudança correta, contida em revisao-panel.tsx (ConclusionCard): adicionar autosave com debounce. (1) useEffect que, quando text !== initial, agenda save.mutate() após ~1.5s (clearTimeout no cleanup); (2) no onSuccess do autosave, trocar toast.success por um indicador inline discreto ('Salvando…' quando save.isPending, 'Salvo' após sucesso) ao lado do botão, mantendo o toast só para o clique manual; (3) para evitar que a remontagem via key={conclusion} (linha 135) descarte texto digitado durante o save, substituir invalidateQueries por qc.setQueryData atualizando apenas o campo conclusion, ou remover o key e sincronizar initial via useEffect só quando o campo não estiver dirty. Alternativa mínima aceitável se autosave for indesejado: flush do save no cleanup do useEffect de desmontagem (salvar pendências ao sair do painel) + texto 'Alterações não salvas' quando dirty.",
+    "reason": "Confirmado no código. Em revisao-panel.tsx:32 o texto da conclusão vive em useState local e só é persistido pelo botão manual (linhas 63-71). Em audit-workspace.tsx:48 o painel é montado condicionalmente ({tab === 'revisao' && <RevisaoPanel/>}), então trocar de aba desmonta o componente e descarta o texto digitado silenciosamente. Grep por useBlocker/beforeunload em todo o src não retornou nada — não há guard de navegação em lugar algum. Não há indicador de 'não salvo' (o botão apenas fica habilitado quando text !== initial, linha 67, sem sinalização textual). Agravante: o key={audit.data?.conclusion ?? ''} na linha 135 remonta o card sempre que a query é invalidada, podendo também descartar texto em edição."
+   }
+  ]
+ },
+ {
+  "section": "Onboarding",
+  "totals": {
+   "checks": 10,
+   "pass": 6,
+   "na": 1,
+   "confirmedIssues": 3,
+   "refuted": 0
+  },
+  "confirmed": [
+   {
+    "label": "Empty states guiam a ação com CTA claro",
+    "status": "warn",
+    "severity": "low",
+    "evidence": "src/features/audits/components/audits-table.tsx:87-96 ('Clique em Nova auditoria (acima)…') e src/lib/strings.ts:48-50 ('Clique em Novo cliente (acima)…') explicam o que vai ali e o que fazer, mas apontam para um botão fora do empty state em vez de renderizar o CTA inline; já src/features/audits/workspace/panels/dashboard-panel.tsx:53-69 acerta em cheio ('O dashboard nasce da planilha' + botão 'Gerar dashboard' inline).",
+    "fix": "Menor mudança correta, respeitando as permissões já existentes nos botões do header:\n\n1) src/features/audits/components/audits-table.tsx — no bloco `!q` do empty state (linhas 91-97): importar `useAudits` de './audits-provider', `can` de '@/lib/permissions' e `useAuthStore`; trocar o texto \"Clique em Nova auditoria (acima), escolha o cliente e o período —\" por \"Escolha o cliente e o período —\" e, abaixo do parágrafo, renderizar `{can(role ?? undefined, 'create_audit') && <Button size='sm' className='mt-3' onClick={() => setCreateOpen(true)}><Plus /> Nova auditoria</Button>}` (o componente já é neto de AuditsProvider, index.tsx:33).\n\n2) src/features/clients/components/clients-table.tsx — no bloco `!q` (linhas 98-102): o componente já usa `useClients()` (linha 32, pegar também `setOpen`); adicionar `{can(role ?? undefined, 'manage_clients') && <Button size='sm' className='mt-3' onClick={() => setOpen('create')}><UserPlus /> {strings.clients.new}</Button>}` abaixo do hint.\n\n3) src/lib/strings.ts:49-50 — ajustar emptyHint para não referenciar posição: 'Toda auditoria pertence a um cliente do escritório — cadastre o primeiro.'\n\nSem permissão, o texto atual \"(acima)\" ficaria mentiroso (o botão do header some para roles sem can()); manter o hint neutro resolve os dois casos.",
+    "reason": "Confirmado no código. (1) src/features/audits/components/audits-table.tsx:91-97 — o empty state diz \"Clique em Nova auditoria (acima)\" mas não renderiza botão; o único botão real está no header (src/features/audits/index.tsx:25-28, via setCreateOpen do AuditsProvider). (2) src/lib/strings.ts:48-50 — clients.emptyHint diz \"Clique em Novo cliente (acima)\", consumido em src/features/clients/components/clients-table.tsx:98-102, também sem botão inline; o botão real está em clients-primary-buttons.tsx:13. (3) src/features/audits/workspace/panels/dashboard-panel.tsx:53-69 de fato renderiza o CTA inline (Button \"Gerar dashboard\"), confirmando a inconsistência de padrão. Ambas as tabelas já estão dentro dos providers que expõem o setter do dialog (useAudits().setCreateOpen e useClients().setOpen), então o fix é barato e o achado é real — apontar para um botão fora do viewport de foco em vez de oferecer a ação no ponto de decisão."
+   },
+   {
+    "label": "Onboarding dispensável, mas sem caminho de re-acesso após dispensa",
+    "status": "warn",
+    "severity": "low",
+    "evidence": "src/features/overview/onboarding.tsx:214-226 — botão 'Já conheço, dispensar' existe (dispensável, não bloqueante), porém LS_DISMISSED (linha 34) é permanente: nenhum código remove a chave nem oferece 'rever o guia', violando 'Allow users to re-access tips' / DON'T 'Hide the checklist' da referência.",
+    "fix": "Menor mudança correta, contida em src/features/overview/onboarding.tsx: (1) adicionar helper lsRemove(key) ao lado de lsSet (try/catch com localStorage.removeItem); (2) em HomeOnboarding, quando `dismissed` for true (apenas nesse caso — não quando o ciclo foi completado/celebrado), passar para ContinuePanel um callback onRestore={() => { lsRemove(LS_DISMISSED); setDismissed(false) }}; (3) em ContinuePanel, aceitar prop opcional onRestore e, quando presente, renderizar abaixo do conteúdo um Button variant='ghost' size='sm' discreto com texto 'Rever o guia de primeiros passos'. Isso restaura a checklist sem tocar em outras telas nem criar rota nova.",
+    "reason": "Confirmado no código. src/features/overview/onboarding.tsx:219-221 — o botão 'Já conheço, dispensar' chama lsSet(LS_DISMISSED) e setDismissed(true); a partir daí a linha 75-77 renderiza permanentemente o ContinuePanel. Grep em todo o src confirma que 'auditview.onboarding.dismissed' aparece apenas nas linhas 34, 57 e 220 desse arquivo — nenhum localStorage.removeItem para essa chave existe no projeto (os únicos removeItem estão em share/data/api.ts para outra chave de sessão), e nenhum componente (ContinuePanel, Configurações, Ajuda) oferece 'rever o guia'. A dispensa é irreversível sem limpar o localStorage manualmente."
+   },
+   {
+    "label": "Medição de ativação / funil de onboarding",
+    "status": "fail",
+    "severity": "medium",
+    "evidence": "Grep em src/ por track/analytics/posthog/amplitude/logEvent/onboarding_ não encontra nenhuma instrumentação (os únicos hits são classes CSS 'tracking-tight'); nenhum evento é emitido em onboarding.tsx (dispensa, boas-vindas, celebração) nem em import-page.tsx (upload, done, error) — a referência exige 'Measuring activation' e monitorar drop-off points.",
+    "fix": "Menor mudança correta, sem provider externo: (1) migração Supabase criando tabela app_events (id uuid default, user_id uuid default auth.uid(), name text, props jsonb default '{}', created_at timestamptz default now()) com RLS permitindo apenas INSERT para authenticated. (2) Novo helper src/lib/track.ts com `export function track(name: string, props?: Record<string, unknown>) { void supabase.from('app_events').insert({ name, props }).then(() => {}, () => {}) }` — fire-and-forget, nunca quebra a UI. (3) Chamadas pontuais: em src/features/overview/onboarding.tsx adicionar track('onboarding_welcome_started') no onClick da linha ~126, track('onboarding_dismissed', { doneCount: state.doneCount }) no onClick da linha ~219, track('onboarding_completed') no onClick da linha ~94; para step_completed, em vez de instrumentar deriveOnboarding (função pura), usar um useEffect no HomeOnboarding que compara state.doneCount com valor anterior em localStorage (ex.: auditview.onboarding.doneCount) e emite track('onboarding_step_completed', { key }) apenas para passos recém-concluídos — evita duplicatas entre sessões. (4) Em src/features/audits/data/use-ingest-pipeline.ts (não em import-page.tsx, que só renderiza) emitir track('import_started'), track('import_done', { rows }) e track('import_error', { stage }) nas transições do pipeline. 'published' como evento de ativação: track('audit_published') no ponto de mutação de publicação (feature share/audits). Total: 1 migração + 1 arquivo novo (~10 linhas) + ~8 linhas de chamadas.",
+    "reason": "Confirmado no código. Grep case-insensitive em src/ por posthog|amplitude|logEvent|track(|onboarding_ não retorna nenhuma instrumentação de telemetria — todos os hits de \"analytics\" são o tipo de dados financeiros AuditAnalytics (src/features/audits/analytics/*), não event tracking, e os hits de \"track\" são classes CSS tracking-tight/tracking-[0.14em] (src/features/overview/onboarding.tsx:110,113). Nos pontos de transição citados nenhum evento é emitido: onboarding.tsx:94-97 (celebração/completed só grava localStorage LS_CELEBRATED), :126-129 (boas-vindas só grava LS_WELCOME), :219-222 (dispensa só grava LS_DISMISSED); e em import-page.tsx grep por supabase|onDone|onError|mutate não encontra nada — o fluxo de upload/done/error vive em useIngestPipeline sem qualquer emissão de evento. A ressalva \"padrão não se aplica\" não procede: o produto tem onboarding explícito de ativação (checklist de 5 passos, primeiro ciclo) e backend Supabase, então medir drop-off é aplicável; porém é um gap de observabilidade de produto (severidade menor), não um bug funcional."
+   }
+  ]
+ },
+ {
+  "section": "Trust Signals no fluxo público (relatório enviado ao cliente leigo)",
+  "totals": {
+   "checks": 10,
+   "pass": 7,
+   "na": 0,
+   "confirmedIssues": 2,
+   "refuted": 1
+  },
+  "confirmed": [
+   {
+    "label": "Identidade clara de quem publica (autoridade específica > anônima)",
+    "status": "warn",
+    "severity": "medium",
+    "evidence": "src/features/share/components/public-report.tsx:81-84 mostra apenas a marca 'AUDITVIEW' + nome do cliente; footer (linhas 215-218) e password-gate.tsx:61-63/100-103 referem-se genericamente a 'seu escritório de contabilidade'. Grep por escritorio/office/tenant em src/features/share não retorna nenhum uso — o nome do escritório que publicou nunca aparece no relatório, no gate nem no PDF (download-pdf-button.tsx:59-64 só traz AUDITVIEW).",
+    "fix": "Menor mudança correta, em 3 pontos: (1) Backend — em publish_audit (supabase/migrations, nova migration recriando a função), adicionar ao jsonb do audit: 'escritorio', (select name from escritorios where id = v_esc). Como snapshots são imutáveis, tratar o campo como opcional no frontend para snapshots antigos. (2) Tipo — em src/features/share/data/api.ts adicionar escritorio?: string | null ao PublicSnapshot.audit. (3) UI — em public-report.tsx trocar o rótulo 'AUDITVIEW' do header (linhas 81-83) por audit.escritorio ?? 'AUDITVIEW' (ou exibir o nome do escritório acima do cliente) e no footer (linha 218) usar 'Fale com {audit.escritorio}' quando presente; em download-pdf-button.tsx incluir audit.escritorio no cabeçalho do PDF com fallback. Ressalva importante sobre o PasswordGate: o gate renderiza ANTES do redeem_share, então o payload (e o nome do escritório) ainda não está disponível — exibir o nome ali exigiria expor o nome do escritório a anônimos via lookup pré-autenticação por token (novo RPC anon), o que é uma mudança maior e um leve vazamento de informação; recomendo manter o gate genérico nesta iteração e aplicar o nome apenas no relatório e no PDF. Logo do escritório fica fora do escopo mínimo (exigiria storage + settings).",
+    "reason": "Confirmado no código. (1) O snapshot publicado nunca inclui o nome do escritório: em supabase/migrations/20260711000900_rpcs.sql:431-435, publish_audit monta v_payload.audit apenas com title, period_start, period_end, cliente, version, conclusion e published_at — v_esc (escritorio_id) é usado só para RLS/insert, e a tabela escritorios tem coluna name (20260711000300_core_tables.sql:7) que nunca é lida. (2) O tipo PublicSnapshot em src/features/share/data/api.ts:6-32 não tem campo de escritório. (3) public-report.tsx:79-84 renderiza só Logo AUDITVIEW + audit.cliente; linhas 119, 207 e 215-218 dizem genericamente 'o escritório'/'seu escritório de contabilidade'. (4) password-gate.tsx:62 e 101 idem ('a senha que o escritório enviou'). (5) O PDF (download-pdf-button.tsx) só tem menções genéricas ('CONCLUSÃO DO ESCRITÓRIO', linha 99). Grep por nome do escritório em src/features/share não retorna nenhum uso. O padrão se aplica: o destinatário é o cliente leigo do escritório, e a entidade de confiança dele é o escritório, não o SaaS."
+   },
+   {
+    "label": "Linguagem sem jargão para o leigo (3 rótulos, voz do cliente)",
+    "status": "warn",
+    "severity": "low",
+    "evidence": "public-report.tsx:34-55 mapeia severidades para 3 rótulos claros ('Precisa de atenção', 'Informativo', 'Está tudo certo') e a cópia do hero (linhas 97-107) é plana. Porém as chaves técnicas de values_snapshot são renderizadas cruas como rótulos dos valores monetários em public-report.tsx:186-188 ('{k}' vem direto do jsonb da fórmula, ex. nomes de parâmetros internos), e o PDF expõe 'CONTA {account_code}' (download-pdf-button.tsx:113).",
+    "fix": "Menor mudança correta: (1) em src/features/share/components/public-report.tsx, adicionar uma função humanizeKey(k: string) ao lado de fmtMoney — consulta um pequeno Record<string,string> com as chaves conhecidas das fórmulas (ex. saldo_anterior: 'Saldo anterior', total_debitos: 'Total de débitos') e, como fallback, faz k.replace(/_/g, ' ') com primeira letra maiúscula — e usar {humanizeKey(k)} na linha 188 (mantendo key={k}). (2) Em src/features/share/components/download-pdf-button.tsx:113, trocar ` · CONTA ${item.account_code}` por ` · Conta ${item.account_code}` (title case, coerente com o restante da cópia). Se a mesma renderização de values existir na versão PDF, reutilizar a mesma humanizeKey exportada.",
+    "reason": "Confirmado no código: public-report.tsx:188 renderiza a chave crua do jsonb ({k}) como rótulo do valor monetário sem nenhum dicionário ou humanização (só o valor passa por fmtMoney, linhas 57-60); e download-pdf-button.tsx:113 concatena ` · CONTA ${item.account_code}` em caixa alta no PDF público. Chaves internas da fórmula (ex. saldo_anterior) vazam para o leigo."
+   }
+  ]
+ }
+]

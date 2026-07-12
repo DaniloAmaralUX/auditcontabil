@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentação do AuditView
+    url: https://github.com/DaniloAmaralUX/auditcontabil.v0.oficial/blob/main/docs/README.md
+    about: Índice de handoff — o que o produto faz, regras de negócio, fluxos, confiança e setup.
