@@ -10,8 +10,6 @@ import {
   LineChart,
   Pie,
   PieChart,
-  ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
 } from 'recharts'
@@ -24,6 +22,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from '@/components/ui/chart'
 import {
   Table,
   TableBody,
@@ -142,6 +146,7 @@ export function GroupDonut({
   description?: string
 }) {
   if (grupos.length === 0) return null
+  const donutConfig: ChartConfig = { valor: { label: 'Valor' } }
   return (
     <Card>
       <CardHeader>
@@ -150,29 +155,36 @@ export function GroupDonut({
       </CardHeader>
       <CardContent className='flex flex-wrap items-center gap-4'>
         {/* A lista ao lado é o equivalente textual completo do donut. */}
-        <div className='h-44 w-44 shrink-0' aria-hidden='true'>
-          <ResponsiveContainer width='100%' height='100%'>
-            <PieChart>
-              <Pie
-                data={grupos}
-                dataKey='valor'
-                nameKey='grupo'
-                innerRadius={48}
-                outerRadius={80}
-                paddingAngle={2}
-                stroke='var(--card)'
-              >
-                {grupos.map((_, i) => (
-                  <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
-                ))}
-              </Pie>
-              <Tooltip
-                formatter={(v) => brl(Number(v))}
-                contentStyle={tooltipStyle}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+        <ChartContainer
+          config={donutConfig}
+          aria-hidden='true'
+          className='aspect-square size-44 shrink-0'
+        >
+          <PieChart>
+            <Pie
+              data={grupos}
+              dataKey='valor'
+              nameKey='grupo'
+              innerRadius={48}
+              outerRadius={80}
+              paddingAngle={2}
+              stroke='var(--card)'
+            >
+              {grupos.map((_, i) => (
+                <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
+              ))}
+            </Pie>
+            <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  nameKey='grupo'
+                  hideLabel
+                  formatter={(v) => brl(Number(v))}
+                />
+              }
+            />
+          </PieChart>
+        </ChartContainer>
         <ul className='min-w-40 flex-1 space-y-2'>
           {grupos.map((g, i) => (
             <li key={g.grupo} className='flex items-center gap-2 text-sm'>
@@ -207,6 +219,9 @@ export function CompanyRanking({
 }) {
   if (empresas.length <= 1) return null
   const data = empresas.slice(0, 8)
+  const config: ChartConfig = {
+    despesas: { label: 'Despesas', color: 'var(--chart-1)' },
+  }
   return (
     <Card>
       <CardHeader>
@@ -214,12 +229,16 @@ export function CompanyRanking({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width='100%' height={Math.max(180, data.length * 36)}>
+        <ChartContainer
+          config={config}
+          className='aspect-auto w-full'
+          style={{ height: Math.max(180, data.length * 36) }}
+        >
           <BarChart
+            accessibilityLayer
             data={data}
             layout='vertical'
             margin={{ left: 8, right: 48 }}
-            aria-label={`${title}: ${data.map((d) => `${d.codigo} ${brl(d.despesas, true)}`).join(', ')}`}
           >
             <XAxis type='number' hide />
             <YAxis
@@ -230,16 +249,19 @@ export function CompanyRanking({
               axisLine={false}
               tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
             />
-            <Tooltip
-              formatter={(v) => brl(Number(v))}
-              labelFormatter={(codigo) =>
-                data.find((d) => d.codigo === codigo)?.nome ?? codigo
+            <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  formatter={(v) => brl(Number(v))}
+                  labelFormatter={(codigo) =>
+                    data.find((d) => d.codigo === codigo)?.nome ?? codigo
+                  }
+                />
               }
-              contentStyle={tooltipStyle}
             />
             <Bar
               dataKey='despesas'
-              fill='var(--chart-1)'
+              fill='var(--color-despesas)'
               radius={[0, 4, 4, 0]}
               label={{
                 position: 'right',
@@ -249,7 +271,7 @@ export function CompanyRanking({
               }}
             />
           </BarChart>
-        </ResponsiveContainer>
+        </ChartContainer>
       </CardContent>
     </Card>
   )
@@ -307,6 +329,7 @@ export function CompanyResults({
   const data = [...empresas]
     .sort((a, b) => a.resultado - b.resultado)
     .slice(0, 10)
+  const config: ChartConfig = { resultado: { label: 'Resultado' } }
   return (
     <Card>
       <CardHeader>
@@ -314,12 +337,16 @@ export function CompanyResults({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width='100%' height={Math.max(180, data.length * 34)}>
+        <ChartContainer
+          config={config}
+          className='aspect-auto w-full'
+          style={{ height: Math.max(180, data.length * 34) }}
+        >
           <BarChart
+            accessibilityLayer
             data={data}
             layout='vertical'
             margin={{ left: 8, right: 56 }}
-            aria-label={`${title}: ${data.map((d) => `${d.codigo} ${brl(d.resultado, true)}`).join(', ')}`}
           >
             <XAxis type='number' hide />
             <YAxis
@@ -330,12 +357,15 @@ export function CompanyResults({
               axisLine={false}
               tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
             />
-            <Tooltip
-              formatter={(v) => brl(Number(v))}
-              labelFormatter={(codigo) =>
-                data.find((d) => d.codigo === codigo)?.nome ?? codigo
+            <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  formatter={(v) => brl(Number(v))}
+                  labelFormatter={(codigo) =>
+                    data.find((d) => d.codigo === codigo)?.nome ?? codigo
+                  }
+                />
               }
-              contentStyle={tooltipStyle}
             />
             <Bar
               dataKey='resultado'
@@ -350,7 +380,7 @@ export function CompanyResults({
               ))}
             </Bar>
           </BarChart>
-        </ResponsiveContainer>
+        </ChartContainer>
       </CardContent>
     </Card>
   )
@@ -418,6 +448,10 @@ export function PeriodTrend({
 }) {
   if (periodos.length < 2) return null
   const data = periodos.map((p) => ({ ...p, mes: mesLabel(p.mes) }))
+  const config: ChartConfig = {
+    receita_liquida: { label: 'Receita líquida', color: 'var(--success)' },
+    despesas: { label: 'Despesas', color: 'var(--chart-1)' },
+  }
   return (
     <Card>
       <CardHeader>
@@ -425,12 +459,8 @@ export function PeriodTrend({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width='100%' height={220}>
-          <LineChart
-            data={data}
-            margin={{ left: 8, right: 16, top: 8 }}
-            aria-label={`${title}: ${description}`}
-          >
+        <ChartContainer config={config} className='aspect-auto h-[220px] w-full'>
+          <LineChart data={data} margin={{ left: 8, right: 16, top: 8 }}>
             <CartesianGrid strokeDasharray='3 3' stroke='var(--border)' />
             <XAxis
               dataKey='mes'
@@ -446,17 +476,13 @@ export function PeriodTrend({
               width={56}
               tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
             />
-            <Tooltip
-              formatter={(v, name) => [
-                brl(Number(v)),
-                name === 'receita_liquida' ? 'Receita líquida' : 'Despesas',
-              ]}
-              contentStyle={tooltipStyle}
+            <ChartTooltip
+              content={<ChartTooltipContent formatter={(v) => brl(Number(v))} />}
             />
             <Line
               type='monotone'
               dataKey='receita_liquida'
-              stroke='var(--success)'
+              stroke='var(--color-receita_liquida)'
               strokeWidth={2.5}
               dot={{ r: 3 }}
               name='receita_liquida'
@@ -464,14 +490,14 @@ export function PeriodTrend({
             <Line
               type='monotone'
               dataKey='despesas'
-              stroke='var(--chart-1)'
+              stroke='var(--color-despesas)'
               strokeWidth={2.5}
               strokeDasharray='6 3'
               dot={{ r: 3 }}
               name='despesas'
             />
           </LineChart>
-        </ResponsiveContainer>
+        </ChartContainer>
         {/* Legenda: cor + padrão de traço (não só cor) para daltônicos */}
         <div className='mt-1 flex gap-4 text-xs text-muted-foreground'>
           <span className='flex items-center gap-1.5'>
@@ -594,10 +620,3 @@ export function CompanyTable({
   )
 }
 
-const tooltipStyle: React.CSSProperties = {
-  background: 'var(--popover)',
-  border: '1px solid var(--border)',
-  borderRadius: 'var(--radius-sm)',
-  color: 'var(--popover-foreground)',
-  fontSize: 12,
-}

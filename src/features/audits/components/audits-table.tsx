@@ -1,11 +1,19 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { Plus } from 'lucide-react'
+import { FileText, Plus } from 'lucide-react'
 import { can } from '@/lib/permissions'
 import { strings } from '@/lib/strings'
 import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
@@ -87,30 +95,33 @@ export function AuditsTable() {
             )}
 
             {!isLoading && !isError && rows.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={5} className='py-10 text-center'>
-                  <p className='text-sm font-medium'>
-                    {q
-                      ? 'Nenhuma auditoria corresponde à busca.'
-                      : 'Suas auditorias vão aparecer aqui.'}
-                  </p>
-                  {!q && (
-                    <>
-                      <p className='mx-auto mt-1 max-w-md text-sm text-muted-foreground'>
-                        Escolha o cliente e o período — depois importe a
-                        planilha e o dashboard se monta sozinho.
-                      </p>
-                      {can(role ?? undefined, 'create_audit') && (
-                        <Button
-                          size='sm'
-                          className='mt-3'
-                          onClick={() => setCreateOpen(true)}
-                        >
+              <TableRow className='hover:bg-transparent'>
+                <TableCell colSpan={5} className='p-0'>
+                  <Empty className='border-0'>
+                    <EmptyHeader>
+                      <EmptyMedia variant='icon'>
+                        <FileText aria-hidden />
+                      </EmptyMedia>
+                      <EmptyTitle>
+                        {q
+                          ? 'Nenhuma auditoria corresponde à busca.'
+                          : 'Suas auditorias vão aparecer aqui.'}
+                      </EmptyTitle>
+                      {!q && (
+                        <EmptyDescription>
+                          Escolha o cliente e o período — depois importe a
+                          planilha e o dashboard se monta sozinho.
+                        </EmptyDescription>
+                      )}
+                    </EmptyHeader>
+                    {!q && can(role ?? undefined, 'create_audit') && (
+                      <EmptyContent>
+                        <Button size='sm' onClick={() => setCreateOpen(true)}>
                           <Plus className='size-4' /> Nova auditoria
                         </Button>
-                      )}
-                    </>
-                  )}
+                      </EmptyContent>
+                    )}
+                  </Empty>
                 </TableCell>
               </TableRow>
             )}

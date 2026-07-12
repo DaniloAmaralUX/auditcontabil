@@ -1,5 +1,6 @@
 // PDF gerado 100% no cliente (@react-pdf/renderer) — chunk separado via lazy.
 import { useState } from 'react'
+import { Spinner } from '@/components/ui/spinner'
 import {
   Document,
   Page,
@@ -8,7 +9,7 @@ import {
   View,
   pdf,
 } from '@react-pdf/renderer'
-import { Download, Loader2 } from 'lucide-react'
+import { Download } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { type PublicSnapshot } from '../data/api'
@@ -36,7 +37,7 @@ const styles = StyleSheet.create({
     left: 40,
     right: 40,
     fontSize: 8,
-    color: '#888',
+    color: '#666',
     textAlign: 'center',
   },
 })
@@ -155,7 +156,7 @@ export function DownloadPdfButton({ snapshot }: { snapshot: PublicSnapshot }) {
   return (
     <Button onClick={download} disabled={busy} variant='outline'>
       {busy ? (
-        <Loader2 className='size-4 animate-spin' />
+        <Spinner className='size-4' />
       ) : (
         <Download className='size-4' />
       )}

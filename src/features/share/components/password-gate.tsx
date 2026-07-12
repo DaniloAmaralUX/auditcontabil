@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Loader2, LockKeyhole } from 'lucide-react'
+import { Spinner } from '@/components/ui/spinner'
+import { LockKeyhole } from 'lucide-react'
 import { Logo } from '@/assets/logo'
 import { Button } from '@/components/ui/button'
 import {
@@ -96,7 +97,7 @@ export function PasswordGate({
               </p>
             )}
             <Button type='submit' disabled={loading || password.length === 0}>
-              {loading && <Loader2 className='size-4 animate-spin' />}
+              {loading && <Spinner className='size-4' />}
               Acessar
             </Button>
           </form>

@@ -1,8 +1,9 @@
 import { useState } from 'react'
+import { Spinner } from '@/components/ui/spinner'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowRight, Loader2 } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { strings } from '@/lib/strings'
@@ -77,7 +78,7 @@ export function ForgotPasswordForm({
         />
         <Button className='mt-2' disabled={isLoading}>
           {strings.auth.sendLink}
-          {isLoading ? <Loader2 className='animate-spin' /> : <ArrowRight />}
+          {isLoading ? <Spinner className='size-4' /> : <ArrowRight />}
         </Button>
       </form>
     </Form>

@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
+import { Spinner } from '@/components/ui/spinner'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2 } from 'lucide-react'
+
 import { strings } from '@/lib/strings'
 import { Button } from '@/components/ui/button'
 import {
@@ -179,7 +180,7 @@ export function ClientActionDialog({ open, onOpenChange, currentRow }: Props) {
             {strings.common.cancel}
           </Button>
           <Button type='submit' form='client-form' disabled={isPending}>
-            {isPending && <Loader2 className='animate-spin' />}
+            {isPending && <Spinner className='size-4' />}
             {strings.common.save}
           </Button>
         </DialogFooter>

@@ -1,8 +1,9 @@
 import { useForm } from 'react-hook-form'
+import { Spinner } from '@/components/ui/spinner'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { Loader2 } from 'lucide-react'
+
 import { clientsQuery } from '@/features/clients/data/queries'
 import { strings } from '@/lib/strings'
 import { Button } from '@/components/ui/button'
@@ -143,7 +144,7 @@ export function AuditCreateDialog({ open, onOpenChange }: Props) {
             {strings.common.cancel}
           </Button>
           <Button type='submit' form='audit-form' disabled={create.isPending}>
-            {create.isPending && <Loader2 className='animate-spin' />}
+            {create.isPending && <Spinner className='size-4' />}
             Criar e enviar arquivos
           </Button>
         </DialogFooter>

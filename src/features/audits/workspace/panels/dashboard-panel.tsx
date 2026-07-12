@@ -5,8 +5,17 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
 import { analyticsQuery } from '../../analytics/query'
+import { PanelErrorState } from './panel-error-state'
 import {
   CompanyRanking,
   CompanyResults,
@@ -37,35 +46,28 @@ export function DashboardPanel({ auditId }: { auditId: string }) {
     )
   }
 
-  if (isError) {
-    return (
-      <div className='rounded-lg border border-dashed py-12 text-center'>
-        <p className='text-sm font-medium'>
-          Não foi possível carregar o dashboard.
-        </p>
-        <Button variant='outline' size='sm' className='mt-2' onClick={() => refetch()}>
-          Tentar novamente
-        </Button>
-      </div>
-    )
-  }
+  if (isError) return <PanelErrorState onRetry={() => refetch()} />
 
   if (!hasAnalyticsData(data)) {
     return (
-      <div className='flex flex-col items-center gap-3 rounded-lg border border-dashed py-14 text-center'>
-        <Sparkles className='size-8 text-muted-foreground' aria-hidden />
-        <div>
-          <p className='font-medium'>O dashboard nasce da planilha.</p>
-          <p className='text-sm text-muted-foreground'>
+      <Empty className='border'>
+        <EmptyHeader>
+          <EmptyMedia variant='icon'>
+            <Sparkles aria-hidden />
+          </EmptyMedia>
+          <EmptyTitle>O dashboard nasce da planilha.</EmptyTitle>
+          <EmptyDescription>
             Importe o arquivo do período e ele se monta sozinho.
-          </p>
-        </div>
-        <Button asChild>
-          <Link to='/audits/$auditId/import' params={{ auditId }}>
-            <Sparkles className='size-4' /> Gerar dashboard
-          </Link>
-        </Button>
-      </div>
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button asChild>
+            <Link to='/audits/$auditId/import' params={{ auditId }}>
+              <Sparkles className='size-4' /> Gerar dashboard
+            </Link>
+          </Button>
+        </EmptyContent>
+      </Empty>
     )
   }
 

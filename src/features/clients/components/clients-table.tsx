@@ -1,12 +1,20 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
+import { MoreHorizontal, Pencil, Plus, Trash2, Users } from 'lucide-react'
 import { can } from '@/lib/permissions'
 import { strings } from '@/lib/strings'
 import { useAuthStore } from '@/stores/auth-store'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -90,27 +98,32 @@ export function ClientsTable() {
             )}
 
             {!isLoading && !isError && rows.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={5} className='py-10 text-center'>
-                  <p className='text-sm font-medium'>
-                    {q ? strings.clients.emptyFiltered : strings.clients.emptyTitle}
-                  </p>
-                  {!q && (
-                    <>
-                      <p className='text-sm text-muted-foreground'>
-                        {strings.clients.emptyHint}
-                      </p>
-                      {canEdit && (
-                        <Button
-                          size='sm'
-                          className='mt-3'
-                          onClick={() => setOpen('create')}
-                        >
+              <TableRow className='hover:bg-transparent'>
+                <TableCell colSpan={5} className='p-0'>
+                  <Empty className='border-0'>
+                    <EmptyHeader>
+                      <EmptyMedia variant='icon'>
+                        <Users aria-hidden />
+                      </EmptyMedia>
+                      <EmptyTitle>
+                        {q
+                          ? strings.clients.emptyFiltered
+                          : strings.clients.emptyTitle}
+                      </EmptyTitle>
+                      {!q && (
+                        <EmptyDescription>
+                          {strings.clients.emptyHint}
+                        </EmptyDescription>
+                      )}
+                    </EmptyHeader>
+                    {!q && canEdit && (
+                      <EmptyContent>
+                        <Button size='sm' onClick={() => setOpen('create')}>
                           <Plus className='size-4' /> {strings.clients.new}
                         </Button>
-                      )}
-                    </>
-                  )}
+                      </EmptyContent>
+                    )}
+                  </Empty>
                 </TableCell>
               </TableRow>
             )}

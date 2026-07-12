@@ -33,13 +33,7 @@ const MESSAGES: Record<string, string> = {
     'Faltam colunas obrigatórias no mapeamento (conta, período e valores).',
 }
 
-function friendly(raw: string): string {
-  if (!raw) return 'Algo deu errado. Tente novamente.'
-  const key = raw.split(':')[0].trim()
-  return MESSAGES[key] ?? raw
-}
-
-/** Versão para superfícies de UI: erro desconhecido NUNCA vaza texto técnico. */
+/** Erro para a UI: desconhecido NUNCA vaza texto técnico — cai no fallback. */
 export function friendlyErrorMessage(raw: string, fallback: string): string {
   if (!raw) return fallback
   const key = raw.split(':')[0].trim()
@@ -52,10 +46,14 @@ export function handleServerError(error: unknown) {
     console.error(error)
   }
 
-  let msg = 'Algo deu errado. Tente novamente.'
-  if (error instanceof PostgrestError) msg = friendly(error.message)
+  const fallback = 'Algo deu errado. Tente novamente.'
+  let msg = fallback
+  // Erro desconhecido NUNCA vaza texto técnico cru para a UI.
+  if (error instanceof PostgrestError)
+    msg = friendlyErrorMessage(error.message, fallback)
   else if (error instanceof AuthError) msg = error.message
-  else if (error instanceof Error) msg = friendly(error.message)
+  else if (error instanceof Error)
+    msg = friendlyErrorMessage(error.message, fallback)
 
   toast.error(msg)
 }
