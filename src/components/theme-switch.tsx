@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
  * do que está resolvido no momento.
  */
 export function ThemeSwitch() {
-  const { theme, setTheme } = useTheme()
+  const { theme, resolvedTheme, setTheme } = useTheme()
 
   useEffect(() => {
     const themeColor = theme === 'dark' ? '#020817' : '#fff'
@@ -18,11 +18,7 @@ export function ThemeSwitch() {
     if (metaThemeColor) metaThemeColor.setAttribute('content', themeColor)
   }, [theme])
 
-  const isDark =
-    theme === 'dark' ||
-    (theme === 'system' &&
-      window.matchMedia?.('(prefers-color-scheme: dark)').matches)
-
+  const isDark = resolvedTheme === 'dark'
   const next = isDark ? 'light' : 'dark'
   const label = isDark ? 'Mudar para o tema claro' : 'Mudar para o tema escuro'
 

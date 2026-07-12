@@ -119,6 +119,12 @@ export function HomeOnboarding() {
   const state = deriveOnboarding(clients.data?.length ?? 0, audits.data ?? [])
   const pending = auditsNeedingAction(audits.data ?? [])
 
+  const handleDismiss = () => {
+    lsSet(K.dismissed)
+    setDismissed(true)
+    track('onboarding_dismissed', { doneCount: state.doneCount })
+  }
+
   // Loop aprendido (ou dispensado): a home vira "continue de onde parou".
   if (dismissed || (state.complete && celebrated)) {
     return (
@@ -200,11 +206,7 @@ export function HomeOnboarding() {
             <Button
               variant='ghost'
               className='text-muted-foreground'
-              onClick={() => {
-                lsSet(K.dismissed)
-                setDismissed(true)
-                track('onboarding_dismissed', { doneCount: state.doneCount })
-              }}
+              onClick={handleDismiss}
             >
               Já conheço, pular
             </Button>
@@ -280,19 +282,16 @@ export function HomeOnboarding() {
             })}
           </ol>
 
-          {/* O CTA "Já conheço, pular" já vive no hero acima. Se o hero foi
-              dispensado (welcomed), oferecemos aqui a mesma saída. */}
+          {/* welcomed=true = usuário já iniciou o guia, então o hero está
+              oculto. Reoferecemos a saída "dispensar" aqui embaixo para não
+              prender ninguém no checklist. */}
           {welcomed && (
             <div className='flex justify-end'>
               <Button
                 variant='ghost'
                 size='sm'
                 className='text-muted-foreground'
-                onClick={() => {
-                  lsSet(K.dismissed)
-                  setDismissed(true)
-                  track('onboarding_dismissed', { doneCount: state.doneCount })
-                }}
+                onClick={handleDismiss}
               >
                 Já conheço, dispensar
               </Button>
