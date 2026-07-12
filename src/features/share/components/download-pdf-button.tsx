@@ -1,6 +1,8 @@
 // PDF gerado 100% no cliente (@react-pdf/renderer) — chunk separado via lazy.
+// Reflete a narrativa do deck em TEXTO (veredito + DRE + empresas + top
+// contas), sem embutir imagem de gráfico. Cores fixas em hex ESCURO: os
+// tokens de tela (OKLCH claros) falham >=4.5:1 sobre o papel branco do PDF.
 import { useState } from 'react'
-import { Spinner } from '@/components/ui/spinner'
 import {
   Document,
   Page,
@@ -12,7 +14,16 @@ import {
 import { Download } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { buildIncomeStatement } from '@/features/audits/analytics/statement'
+import { deriveVerdict } from '@/features/audits/analytics/insights'
+import { hasAnalyticsData, pct } from '@/features/audits/analytics/types'
 import { type PublicSnapshot } from '../data/api'
+import { fmtPeriod } from '../report-format'
+
+// Contraste sobre #fff: vermelho 5.9:1 · verde 4.7:1 · âmbar/azul já passam.
+const NEG = '#b91c1c'
+const POS = '#15803d'
 
 const styles = StyleSheet.create({
   page: { padding: 40, fontSize: 11, fontFamily: 'Helvetica', color: '#1a1a1a' },
@@ -20,6 +31,12 @@ const styles = StyleSheet.create({
   brand: { fontSize: 9, letterSpacing: 2, color: '#666666' },
   title: { fontSize: 18, fontFamily: 'Helvetica-Bold', marginTop: 2 },
   meta: { fontSize: 10, color: '#666', marginTop: 2 },
+  verdict: {
+    fontSize: 13,
+    fontFamily: 'Helvetica-Bold',
+    marginTop: 12,
+    lineHeight: 1.4,
+  },
   summary: { marginVertical: 12, lineHeight: 1.5 },
   item: {
     marginBottom: 10,
@@ -31,6 +48,20 @@ const styles = StyleSheet.create({
   attention: { color: '#b45309' },
   info: { color: '#1d4ed8' },
   note: { marginTop: 4, color: '#555' },
+  dreRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 3,
+  },
+  dreValue: { fontFamily: 'Helvetica' },
+  dreResult: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+    borderTop: '1 solid #1a1a1a',
+    marginTop: 2,
+  },
+  bold: { fontFamily: 'Helvetica-Bold' },
   footer: {
     position: 'absolute',
     bottom: 24,
@@ -42,14 +73,13 @@ const styles = StyleSheet.create({
   },
 })
 
-function fmtPeriod(start: string | null, end: string | null) {
-  if (!start || !end) return ''
-  const f = (s: string) => s.split('-').reverse().join('/')
-  return `${f(start)} a ${f(end)}`
-}
+const money = (v: number) =>
+  v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
 function ReportPdf({ snapshot }: { snapshot: PublicSnapshot }) {
   const { audit, summary, items } = snapshot
+  const a = hasAnalyticsData(snapshot.analytics) ? snapshot.analytics! : null
+  const verdict = deriveVerdict(a, items.length)
   return (
     <Document
       title={`Relatório de auditoria — ${audit.cliente}`}
@@ -65,33 +95,88 @@ function ReportPdf({ snapshot }: { snapshot: PublicSnapshot }) {
             {audit.cliente} · {fmtPeriod(audit.period_start, audit.period_end)} ·
             versão {audit.version}
           </Text>
+          <Text
+            style={[
+              styles.verdict,
+              { color: verdict.tone === 'critical' ? NEG : '#1a1a1a' },
+            ]}
+          >
+            {verdict.headline}
+          </Text>
         </View>
 
         <Text style={styles.summary}>
           Analisamos {summary.processed.toLocaleString('pt-BR')} movimentos do
-          período.{' '}
-          {items.length === 0
-            ? 'Está tudo certo: não encontramos pontos que precisem da sua atenção.'
-            : `${items.length} ponto${items.length > 1 ? 's' : ''} ${items.length > 1 ? 'precisam' : 'precisa'} da sua atenção.`}
+          período.
           {summary.invalid > 0 &&
             ' Algumas linhas das planilhas enviadas não puderam ser lidas e não fazem parte desta análise.'}
         </Text>
 
-        {snapshot.analytics && (
+        {a && (
           <View style={styles.item} wrap={false}>
-            <Text style={styles.itemBadge}>NÚMEROS DO PERÍODO</Text>
-            <Text>
-              Receita líquida{' '}
-              {snapshot.analytics.consolidado.receita_liquida.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-              {'  ·  '}Despesas{' '}
-              {snapshot.analytics.consolidado.despesas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-              {'  ·  '}Resultado{' '}
-              {snapshot.analytics.consolidado.resultado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            <Text style={styles.itemBadge}>DEMONSTRAÇÃO DO RESULTADO</Text>
+            {buildIncomeStatement(a.consolidado).map((l) =>
+              l.kind === 'result' ? (
+                <View key={l.key} style={styles.dreResult}>
+                  <Text style={styles.bold}>= {l.label}</Text>
+                  <Text style={[styles.bold, { color: l.value < 0 ? NEG : POS }]}>
+                    {l.value < 0
+                      ? `(${money(Math.abs(l.value))})`
+                      : money(l.value)}
+                  </Text>
+                </View>
+              ) : (
+                <View key={l.key} style={styles.dreRow}>
+                  <Text>
+                    {l.sign === '−' ? '(–) ' : l.sign === '=' ? '= ' : ''}
+                    {l.label}
+                  </Text>
+                  <Text style={styles.dreValue}>
+                    {l.value < 0
+                      ? `(${money(Math.abs(l.value))})`
+                      : money(l.value)}
+                  </Text>
+                </View>
+              )
+            )}
+            <Text style={styles.note}>
+              Despesa/Receita {pct(a.consolidado.despesa_receita_pct)} · margem{' '}
+              {pct(a.consolidado.margem_pct)}
             </Text>
-            {snapshot.analytics.por_grupo.map((g) => (
+          </View>
+        )}
+
+        {a && a.empresas.length > 1 && (
+          <View style={styles.item} wrap={false}>
+            <Text style={styles.itemBadge}>POR EMPRESA</Text>
+            {a.empresas.map((e) => (
+              <Text key={e.codigo} style={styles.note}>
+                {e.codigo} {e.nome !== e.codigo ? `${e.nome} ` : ''}— resultado{' '}
+                {money(e.resultado)} · {e.status}
+              </Text>
+            ))}
+          </View>
+        )}
+
+        {a && a.top_contas.length > 0 && (
+          <View style={styles.item} wrap={false}>
+            <Text style={styles.itemBadge}>MAIORES DESPESAS</Text>
+            {a.top_contas.slice(0, 3).map((c) => (
+              <Text key={`${c.conta}-${c.codigo}`} style={styles.note}>
+                {c.conta} — {money(c.valor)}
+                {c.pct !== null ? ` (${pct(c.pct)})` : ''}
+              </Text>
+            ))}
+          </View>
+        )}
+
+        {a && a.por_grupo.length > 0 && (
+          <View style={styles.item} wrap={false}>
+            <Text style={styles.itemBadge}>DESPESAS POR GRUPO</Text>
+            {a.por_grupo.map((g) => (
               <Text key={g.grupo} style={styles.note}>
-                {g.grupo}: {g.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                {g.pct !== null ? ` (${g.pct}%)` : ''}
+                {g.grupo}: {money(g.valor)}
+                {g.pct !== null ? ` (${pct(g.pct)})` : ''}
               </Text>
             ))}
           </View>
@@ -155,11 +240,7 @@ export function DownloadPdfButton({ snapshot }: { snapshot: PublicSnapshot }) {
 
   return (
     <Button onClick={download} disabled={busy} variant='outline'>
-      {busy ? (
-        <Spinner className='size-4' />
-      ) : (
-        <Download className='size-4' />
-      )}
+      {busy ? <Spinner className='size-4' /> : <Download className='size-4' />}
       Baixar PDF
     </Button>
   )

@@ -86,7 +86,14 @@ export function DashboardPanel({ auditId }: { auditId: string }) {
         <CompanyResults empresas={a.empresas} />
       </div>
 
-      <PeriodTrend periodos={a.por_periodo} />
+      {/* Degradação honesta: com 1 competência a evolução não existe ainda. */}
+      {a.por_periodo.length < 2 ? (
+        <p className='text-xs text-muted-foreground'>
+          A evolução mês a mês aparece a partir de 2 competências importadas.
+        </p>
+      ) : (
+        <PeriodTrend periodos={a.por_periodo} />
+      )}
 
       <CompanyTable empresas={a.empresas} />
     </div>

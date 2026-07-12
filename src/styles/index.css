@@ -212,6 +212,135 @@
   }
 }
 
+/* ============================================================
+   Deck "O Fechamento" — /r/:token como slide deck editorial.
+   Fraunces só nas figuras; leader dots; régua-brasa; reveal-once.
+   ============================================================ */
+
+/* Eyebrow serifado do deck (Fraunces opsz 20) */
+.deck-eyebrow {
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 20;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.75rem;
+  color: var(--brasa);
+}
+@media (min-width: 640px) {
+  .deck-eyebrow {
+    font-size: 0.8125rem;
+  }
+}
+
+/* A figura RESULTADO (Fraunces opsz 144) — large text, --receita passa 3:1 */
+.result-figure {
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 144;
+  font-weight: 600;
+  font-size: clamp(2.5rem, 6vw + 1rem, 4.5rem);
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  font-variant-numeric: tabular-nums;
+}
+.result-figure.is-pos {
+  color: var(--receita);
+}
+.result-figure.is-neg {
+  color: var(--despesa);
+}
+
+/* Régua "bottom line": conduz o olho ao resultado. Estática. */
+.bottom-rule {
+  height: 3px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--brasa) 0%,
+    var(--brasa) 46%,
+    color-mix(in oklch, var(--brasa) 30%, transparent) 80%,
+    transparent 100%
+  );
+}
+
+/* DRE como tabela real; leader dots via célula-mola decorativa */
+.income-statement {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.income-statement .is-row > * {
+  padding-block: 0.75rem;
+  vertical-align: baseline;
+  font-weight: 400;
+}
+.income-statement .is-label {
+  text-align: start;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.income-statement .is-value {
+  text-align: end;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: var(--ink);
+}
+.income-statement .is-dots {
+  width: 100%;
+}
+.income-statement .is-dots::after {
+  content: '';
+  display: block;
+  border-bottom: 2px dotted var(--mist);
+  transform: translateY(-0.28em);
+}
+.income-statement .is-subtotal > * {
+  border-top: 1px solid var(--border);
+  font-weight: 600;
+}
+.income-statement .is-pos {
+  color: var(--receita-text);
+}
+.income-statement .is-neg {
+  color: var(--despesa-text);
+}
+
+/* Rodapé de percentuais do resultado */
+.result-footnotes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+.result-footnotes dt {
+  font-size: 0.75rem;
+  color: var(--mist-text);
+  letter-spacing: 0.01em;
+}
+.result-footnotes dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+/* Reveal por seção no scroll: o hook arma [data-armed] antes do paint e
+   marca [data-revealed] UMA vez (observer desconecta — nunca re-anima).
+   Sem JS nada é armado → conteúdo visível. Momento de apresentação:
+   450ms autorizado (CRAFT §Motion.3). Só compositor. */
+@media (prefers-reduced-motion: no-preference) {
+  .deck-reveal [data-reveal][data-armed] {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(4px);
+  }
+  .deck-reveal [data-reveal][data-armed][data-revealed] {
+    animation: av-rise 0.45s var(--ease-out) both;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
