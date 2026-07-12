@@ -1,11 +1,7 @@
 import { Link, useRouteContext } from '@tanstack/react-router'
 import { FileSpreadsheet, Users } from 'lucide-react'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
+import { PageHeader } from '@/components/page-header'
 import {
   Card,
   CardContent,
@@ -20,14 +16,7 @@ export function Overview() {
 
   return (
     <>
-      <Header fixed>
-        <Search />
-        <div className='ms-auto flex items-center gap-2'>
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <PageHeader withSearch />
 
       <Main>
         <div className='mb-6'>

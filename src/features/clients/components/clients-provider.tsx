@@ -2,7 +2,7 @@ import { createContext, use, useState, type ReactNode } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
 import { type Cliente } from '../data/schema'
 
-export type ClientsDialogType = 'create' | 'update' | 'delete'
+type ClientsDialogType = 'create' | 'update' | 'delete'
 
 type ClientsContextValue = {
   open: ClientsDialogType | null

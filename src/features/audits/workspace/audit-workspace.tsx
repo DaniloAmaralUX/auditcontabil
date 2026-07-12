@@ -16,7 +16,7 @@ const TABS = [
   { value: 'compartilhar', label: 'Compartilhar' },
 ] as const
 
-export type WorkspaceTab = (typeof TABS)[number]['value']
+type WorkspaceTab = (typeof TABS)[number]['value']
 
 export function AuditWorkspace({ auditId }: { auditId: string }) {
   const { tab } = useSearch({ from: '/_authenticated/audits/$auditId/' })

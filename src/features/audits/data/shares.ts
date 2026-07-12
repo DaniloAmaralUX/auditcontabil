@@ -24,7 +24,7 @@ export function usePublishAudit(auditId: string) {
   })
 }
 
-export type ShareRow = {
+type ShareRow = {
   id: string
   status: string
   expires_at: string | null

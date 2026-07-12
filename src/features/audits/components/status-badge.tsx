@@ -51,9 +51,6 @@ const AUDIT_META: Record<AuditStatus, Meta> = {
   archived: { label: 'Arquivada', icon: Archive, cls: 'text-muted-foreground' },
 }
 
-export function auditStatusLabel(status: AuditStatus) {
-  return AUDIT_META[status].label
-}
 
 export function AuditStatusBadge({ status }: { status: AuditStatus }) {
   const meta = AUDIT_META[status]
@@ -82,9 +79,6 @@ const SEVERITY_META: Record<Severity, Meta> = {
   },
 }
 
-export function severityLabel(s: Severity) {
-  return SEVERITY_META[s].label
-}
 
 export function SeverityBadge({ severity }: { severity: Severity }) {
   const meta = SEVERITY_META[severity]

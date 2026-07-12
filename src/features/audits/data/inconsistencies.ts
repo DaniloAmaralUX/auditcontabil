@@ -46,7 +46,7 @@ export function inconsistenciesQuery(auditId: string) {
   })
 }
 
-export type ReviewInput = {
+type ReviewInput = {
   id: number
   review_status: ReviewStatus
   review_note: string | null

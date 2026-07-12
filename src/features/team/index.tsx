@@ -13,11 +13,8 @@ import { z } from 'zod'
 import { qk } from '@/lib/query-keys'
 import { roleLabels } from '@/lib/permissions'
 import { supabase, type Role } from '@/lib/supabase'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { ThemeSwitch } from '@/components/theme-switch'
+import { PageHeader, PageTitle } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -123,26 +120,18 @@ export function Team() {
 
   return (
     <>
-      <Header fixed>
-        <div className='ms-auto flex items-center gap-2'>
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <PageHeader />
 
       <Main>
-        <div className='mb-4 flex items-center justify-between'>
-          <div>
-            <h1 className='text-2xl font-bold tracking-tight'>Equipe</h1>
-            <p className='text-muted-foreground'>
-              Convide contadores e analistas para dividir a fila.
-            </p>
-          </div>
-          <Button onClick={() => setOpen(true)}>
-            <UserPlus /> Convidar pessoa
-          </Button>
-        </div>
+        <PageTitle
+          title='Equipe'
+          description='Convide contadores e analistas para dividir a fila.'
+          action={
+            <Button onClick={() => setOpen(true)}>
+              <UserPlus /> Convidar pessoa
+            </Button>
+          }
+        />
 
         <div className='rounded-lg border'>
           <Table>

@@ -38,7 +38,7 @@ export function auditDetailQuery(id: string) {
   })
 }
 
-export type AuditFile = {
+type AuditFile = {
   id: string
   audit_id: string
   original_name: string

@@ -3,11 +3,8 @@ import { CreditCard, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
 import { qk } from '@/lib/query-keys'
 import { supabase } from '@/lib/supabase'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { ThemeSwitch } from '@/components/theme-switch'
+import { PageHeader, PageTitle } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -83,21 +80,13 @@ export function Billing() {
 
   return (
     <>
-      <Header fixed>
-        <div className='ms-auto flex items-center gap-2'>
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <PageHeader />
 
       <Main>
-        <div className='mb-4'>
-          <h1 className='text-2xl font-bold tracking-tight'>Faturamento</h1>
-          <p className='text-muted-foreground'>
-            Assinatura do escritório e forma de pagamento.
-          </p>
-        </div>
+        <PageTitle
+          title='Faturamento'
+          description='Assinatura do escritório e forma de pagamento.'
+        />
 
         {isLoading ? (
           <Skeleton className='h-40 w-full max-w-xl' />

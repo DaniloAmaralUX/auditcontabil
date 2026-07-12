@@ -8,11 +8,8 @@ import {
   Loader2,
   Upload,
 } from 'lucide-react'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { ThemeSwitch } from '@/components/theme-switch'
+import { PageHeader } from '@/components/page-header'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -124,22 +121,19 @@ export function ImportPage() {
 
   return (
     <>
-      <Header fixed>
-        <Button variant='ghost' size='sm' asChild>
-          <Link
-            to='/audits/$auditId'
-            params={{ auditId }}
-            search={{ tab: 'dados' }}
-          >
-            <ArrowLeft className='size-4' /> Voltar à auditoria
-          </Link>
-        </Button>
-        <div className='ms-auto flex items-center gap-2'>
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <PageHeader
+        leading={
+          <Button variant='ghost' size='sm' asChild>
+            <Link
+              to='/audits/$auditId'
+              params={{ auditId }}
+              search={{ tab: 'dados' }}
+            >
+              <ArrowLeft className='size-4' /> Voltar à auditoria
+            </Link>
+          </Button>
+        }
+      />
 
       <Main>
         <div className='mx-auto max-w-3xl space-y-4'>

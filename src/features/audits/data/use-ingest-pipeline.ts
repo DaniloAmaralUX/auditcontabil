@@ -11,7 +11,7 @@ import {
   type ParseWorkerResponse,
 } from '@/workers/parse-protocol'
 
-export type PipelinePhase =
+type PipelinePhase =
   | 'idle'
   | 'hashing'
   | 'uploading'
@@ -21,7 +21,7 @@ export type PipelinePhase =
   | 'done'
   | 'error'
 
-export type PipelineState = {
+type PipelineState = {
   phase: PipelinePhase
   uploadPct: number
   ingestedRows: number

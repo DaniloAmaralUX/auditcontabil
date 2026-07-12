@@ -21,7 +21,7 @@ export const supabase: SupabaseClient = createClient(url ?? '', anonKey ?? '', {
 
 export type Role = 'owner' | 'accountant' | 'analyst'
 
-export type SessionClaims = {
+type SessionClaims = {
   session: Session
   userId: string
   email: string

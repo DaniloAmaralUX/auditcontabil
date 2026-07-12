@@ -58,16 +58,3 @@ export function useTransitionAudit(auditId: string) {
   })
 }
 
-export function useRunRules(auditId: string) {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.rpc('run_rules', { p_audit_id: auditId })
-      if (error) throw error
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: qk.audits.detail(auditId) })
-      qc.invalidateQueries({ queryKey: qk.audits.inconsistencies(auditId, 'all') })
-    },
-  })
-}

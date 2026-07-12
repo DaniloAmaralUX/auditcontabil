@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-07-12T00:34:27.429Z",
-  "now": "Passada de qualidade (visual Ramp + limpeza) e configuração do deploy",
+  "updatedAt": "2026-07-12T00:42:03.029Z",
+  "now": "Validando o fluxo completo no navegador e finalizando o deploy",
   "groups": [
     {
       "title": "🗄️ Backend (banco + funções)",
@@ -124,7 +124,7 @@
       "items": [
         {
           "label": "Visual estilo Ramp (passada ui-skills)",
-          "state": "todo"
+          "state": "done"
         },
         {
           "label": "Testes automatizados extras",
@@ -132,7 +132,7 @@
         },
         {
           "label": "Limpeza de código (knip + react-doctor)",
-          "state": "todo"
+          "state": "done"
         }
       ]
     },
@@ -141,15 +141,15 @@
       "items": [
         {
           "label": "Config Cloudflare Pages + CI",
-          "state": "todo"
+          "state": "done"
         },
         {
           "label": "Runbook de deploy (passo a passo)",
-          "state": "todo"
+          "state": "done"
         },
         {
           "label": "Planilha de teste de exemplo",
-          "state": "todo"
+          "state": "done"
         }
       ]
     },

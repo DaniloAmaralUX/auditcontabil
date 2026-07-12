@@ -1,7 +1,7 @@
 import { type Role } from '@/lib/supabase'
 
 // Capacidades da UI. A RLS garante no servidor; aqui só desabilitamos ações.
-export type Capability =
+type Capability =
   | 'manage_team'
   | 'manage_billing'
   | 'manage_clients'

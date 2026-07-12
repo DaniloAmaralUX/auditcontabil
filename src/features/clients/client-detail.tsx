@@ -1,11 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { ThemeSwitch } from '@/components/theme-switch'
+import { PageHeader } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -24,18 +21,15 @@ export function ClientDetail() {
 
   return (
     <>
-      <Header fixed>
-        <Button variant='ghost' size='sm' asChild>
-          <Link to='/clients'>
-            <ArrowLeft className='size-4' /> {strings.clients.title}
-          </Link>
-        </Button>
-        <div className='ms-auto flex items-center gap-2'>
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <PageHeader
+        leading={
+          <Button variant='ghost' size='sm' asChild>
+            <Link to='/clients'>
+              <ArrowLeft className='size-4' /> {strings.clients.title}
+            </Link>
+          </Button>
+        }
+      />
 
       <Main>
         {isLoading && <Skeleton className='h-40 w-full' />}

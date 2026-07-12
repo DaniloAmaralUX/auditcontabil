@@ -3,11 +3,8 @@ import { createFileRoute, useParams } from '@tanstack/react-router'
 import { zodValidator } from '@tanstack/zod-adapter'
 import { AuditHeader } from '@/features/audits/workspace/audit-header'
 import { AuditWorkspace } from '@/features/audits/workspace/audit-workspace'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { ThemeSwitch } from '@/components/theme-switch'
+import { PageHeader } from '@/components/page-header'
 
 const workspaceSearchSchema = z.object({
   tab: z
@@ -19,13 +16,7 @@ function WorkspacePage() {
   const { auditId } = useParams({ from: '/_authenticated/audits/$auditId/' })
   return (
     <>
-      <Header fixed>
-        <div className='ms-auto flex items-center gap-2'>
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <PageHeader />
       <Main>
         <AuditHeader auditId={auditId} />
         <div className='pt-4'>
