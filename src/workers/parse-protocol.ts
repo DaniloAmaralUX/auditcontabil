@@ -50,6 +50,23 @@ export type RowError = {
 
 export type SheetInfo = { name: string; rows: number }
 
+/** Documento contábil reconhecido automaticamente (preset — sem mapping). */
+export type DetectedDocument = {
+  kind: 'balancete-csv' | 'dre-pdf'
+  company: string | null
+  cnpj: string | null
+  periodStart: string | null
+  periodEnd: string | null
+  /** Resultado/lucro declarado no documento (string decimal). */
+  declaredResult: string | null
+  totalRows: number
+  analyticRows: number
+  /** true = resultado calculado bate com o declarado E totalizadores conferem */
+  conciliado: boolean
+  resultadoCalculado: string
+  warnings: string[]
+}
+
 export type ParseWorkerRequest =
   | { type: 'PREVIEW'; fileId: string; file: File; limit: number }
   | {
@@ -70,6 +87,8 @@ export type ParseWorkerResponse =
       headers: string[]
       rows: unknown[][]
       sheets: SheetInfo[]
+      /** presente quando o documento foi reconhecido (balancete/DRE) */
+      detected?: DetectedDocument
     }
   | {
       type: 'BATCH'

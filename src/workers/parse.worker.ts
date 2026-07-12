@@ -2,8 +2,16 @@
 // uma empresa (entity) — todas são percorridas. Nunca trava a UI.
 import Papa from 'papaparse'
 import * as XLSX from 'xlsx'
+import { extractBalanceteCsv } from './extractors/balancete-csv'
+import { detectKind } from './extractors/detect'
+import { extractDreFromItems } from './extractors/dre-pdf'
+import { summarizeDre } from './extractors/dre-summary'
+import { decodeSmart } from './extractors/encoding'
+import { extractedToNormalized } from './extractors/to-normalized'
+import { type ExtractResult } from './extractors/types'
 import { normalizeRow } from './normalize'
 import {
+  type DetectedDocument,
   type NormalizedRow,
   type ParseWorkerRequest,
   type ParseWorkerResponse,
@@ -66,8 +74,75 @@ async function readSheets(file: File): Promise<Sheet[]> {
   return isCsv(file) ? readCsvSheets(file) : readXlsxSheets(file)
 }
 
+/* ------------- Documentos contábeis reconhecidos (preset) ------------- */
+
+function isPdf(file: File) {
+  return (
+    file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf'
+  )
+}
+
+/**
+ * Tenta reconhecer o documento (balancete CSV / DRE PDF) e extraí-lo.
+ * Retorna null quando não é um formato reconhecido (cai no fluxo genérico).
+ */
+async function tryExtractDocument(file: File): Promise<ExtractResult | null> {
+  if (isPdf(file)) {
+    // pdfjs carregado sob demanda (não pesa o worker p/ CSV/XLSX)
+    const { loadPdfItems } = await import('./extractors/pdf-loader')
+    const pages = await loadPdfItems(await file.arrayBuffer())
+    const result = extractDreFromItems(pages)
+    if (result.rows.length === 0) {
+      throw new Error(
+        'Este PDF parece ser uma imagem escaneada — exporte o relatório em CSV ou um PDF com texto.'
+      )
+    }
+    return result
+  }
+  if (isCsv(file)) {
+    const { text } = decodeSmart(await file.arrayBuffer())
+    const kind = detectKind({ fileName: file.name, head: text.slice(0, 4096) })
+    if (kind === 'balancete-csv') return extractBalanceteCsv(text)
+  }
+  return null
+}
+
+function toDetected(result: ExtractResult): DetectedDocument {
+  const dre = summarizeDre(result.rows, result.meta)
+  const broken = result.checks.filter((c) => !c.ok)
+  return {
+    kind: result.meta.kind,
+    company: result.meta.company,
+    cnpj: result.meta.cnpj,
+    periodStart: result.meta.periodStart,
+    periodEnd: result.meta.periodEnd,
+    declaredResult: result.meta.declaredResult,
+    totalRows: result.rows.length,
+    analyticRows: result.rows.filter((r) => !r.synthetic).length,
+    conciliado: dre.conciliado && broken.length === 0,
+    resultadoCalculado: dre.resultado.toFixed(2),
+    warnings: result.warnings,
+  }
+}
+
 async function handlePreview(fileId: string, file: File, limit: number) {
   try {
+    // documentos contábeis reconhecidos: preview falante, sem mapping
+    const doc = await tryExtractDocument(file)
+    if (doc) {
+      const analiticas = doc.rows.filter((r) => !r.synthetic)
+      post({
+        type: 'PREVIEW_ROWS',
+        fileId,
+        headers: ['Conta', 'Descrição', 'Saldo'],
+        rows: analiticas
+          .slice(0, limit)
+          .map((r) => [r.account_code, r.account_name, r.saldo]),
+        sheets: [{ name: doc.meta.company ?? file.name, rows: doc.rows.length }],
+        detected: toDetected(doc),
+      })
+      return
+    }
     const sheets = await readSheets(file)
     const withData = sheets.filter((s) => s.rows.length > 0)
     const first = withData[0] ?? sheets[0]
@@ -103,6 +178,33 @@ async function handleParse(
     return
   }
   try {
+    // documentos reconhecidos: extração determinística com reconciliação
+    const doc = await tryExtractDocument(file)
+    if (doc) {
+      const rows = extractedToNormalized(doc)
+      let seq = 0
+      for (let i = 0; i < rows.length; i += batchSize) {
+        if (cancelled.has(fileId)) {
+          cancelled.delete(fileId)
+          return
+        }
+        post({
+          type: 'BATCH',
+          fileId,
+          batchSeq: seq++,
+          rows: rows.slice(i, i + batchSize),
+          rowErrors: [],
+        })
+        post({
+          type: 'PROGRESS',
+          fileId,
+          parsedRows: Math.min(i + batchSize, rows.length),
+        })
+      }
+      post({ type: 'DONE', fileId, totalRows: rows.length, totalErrors: 0 })
+      return
+    }
+
     const sheets = await readSheets(file)
 
     let batch: NormalizedRow[] = []

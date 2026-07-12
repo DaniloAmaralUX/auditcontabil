@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth-store'
 import {
   type ColumnMapping,
+  type DetectedDocument,
   type ParseWorkerResponse,
 } from '@/workers/parse-protocol'
 
@@ -118,6 +119,7 @@ export function useIngestPipeline(auditId: string) {
       headers: string[]
       rows: unknown[][]
       sheets: { name: string; rows: number }[]
+      detected?: DetectedDocument
     }> => {
       const worker = getWorker()
       return new Promise((resolve, reject) => {
@@ -125,7 +127,12 @@ export function useIngestPipeline(auditId: string) {
           const msg = ev.data
           if (msg.type === 'PREVIEW_ROWS') {
             worker.removeEventListener('message', onMsg)
-            resolve({ headers: msg.headers, rows: msg.rows, sheets: msg.sheets })
+            resolve({
+              headers: msg.headers,
+              rows: msg.rows,
+              sheets: msg.sheets,
+              detected: msg.detected,
+            })
           } else if (msg.type === 'FATAL') {
             worker.removeEventListener('message', onMsg)
             reject(new Error(msg.message))
