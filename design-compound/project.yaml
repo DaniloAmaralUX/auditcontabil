@@ -1,6 +1,6 @@
 schema: design-compound/project/v1
-revision: 1
-last_event_seq: 4
+revision: 2
+last_event_seq: 5
 
 project:
   id: auditview
@@ -43,7 +43,19 @@ workflow:
     quality-handoff-compound: { status: pending, owner: quality-handoff-compound, gate: G6 }
 
 gates: []
-decisions: []
+decisions:
+  - id: dec-001
+    stage: foundation-strategy
+    risk: R1
+    question: "Quem decide os próximos passos (etapas, gates, design do dashboard, handoff)?"
+    options_considered:
+      - { label: "Gates interativos", summary: "Usuário aprova cada gate manualmente" }
+      - { label: "Delegação total", summary: "Agente decide tudo e registra; gates via override fundamentado" }
+    chosen: "Delegação total até a entrega (dashboard polido + deploy + handoff didático curto no repo/GitHub)"
+    rationale: "Pedido explícito do usuário: 'Reflita e tome todas as próximas decisões sozinho… ao terminar crie um hand off didático o mais curto possível.'"
+    decided_by: user
+    adr: none
+    created_at: 2026-07-12T01:55:00-03:00
 overrides: []
 evidence:
   - id: ev-001

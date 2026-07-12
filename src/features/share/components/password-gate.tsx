@@ -49,12 +49,7 @@ export function PasswordGate({
     <div className='flex min-h-svh flex-col items-center justify-center gap-6 p-4'>
       <div className='flex items-center gap-2'>
         <Logo className='size-10' />
-        <div className='leading-tight'>
-          <div className='text-xs font-bold tracking-[0.14em] text-muted-foreground'>
-            ESPAÇO
-          </div>
-          <div className='text-lg font-extrabold'>AÇÃO</div>
-        </div>
+        <div className='text-xl font-extrabold tracking-tight'>AuditView</div>
       </div>
 
       <Card className='w-full max-w-sm'>

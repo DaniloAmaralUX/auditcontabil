@@ -1,6 +1,6 @@
 // Strings comuns PT-BR (§9.6 — sem lib de i18n; literais centralizados).
 export const strings = {
-  appName: 'Espaço Ação',
+  appName: 'AuditView',
   appTagline: 'Auditoria contábil visual',
   common: {
     retry: 'Tentar novamente',
@@ -28,7 +28,7 @@ export const strings = {
     forgotSubtitle: 'Enviaremos um link para redefinir sua senha.',
     sendLink: 'Enviar link',
     acceptTitle: 'Definir sua senha',
-    acceptSubtitle: 'Crie uma senha para acessar o Espaço Ação.',
+    acceptSubtitle: 'Crie uma senha para acessar o AuditView.',
     setPassword: 'Definir senha e entrar',
     invalidCredentials: 'E-mail ou senha incorretos.',
     signedOut: 'Sessão encerrada.',
@@ -49,7 +49,7 @@ export const strings = {
     emptyHint: 'Cadastre o primeiro para criar auditorias.',
     emptyFiltered: 'Nenhum cliente corresponde aos filtros.',
     name: 'Nome',
-    cnpj: 'CNPJ',
+    cnpj: 'CPF / CNPJ',
     email: 'E-mail de contato',
     situation: 'Situação',
     active: 'Ativo',

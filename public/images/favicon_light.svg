@@ -1,1 +1,6 @@
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="948,463.5,24,24"><defs><clipPath id="clip-1"><rect x="948" y="463.5" width="24" height="24" id="clip-1" stroke="none"/></clipPath></defs><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g><g id="Group 1"><g clip-path="url(#clip-1)" id="Group 1"><path d="M963,469.5v12c0,1.65685 1.34315,3 3,3c1.65685,0 3,-1.34315 3,-3c0,-1.65685 -1.34315,-3 -3,-3h-12c-1.65685,0 -3,1.34315 -3,3c0,1.65685 1.34315,3 3,3c1.65685,0 3,-1.34315 3,-3v-12c0,-1.65685 -1.34315,-3 -3,-3c-1.65685,0 -3,1.34315 -3,3c0,1.65685 1.34315,3 3,3h12c1.65685,0 3,-1.34315 3,-3c0,-1.65685 -1.34315,-3 -3,-3c-1.65685,0 -3,1.34315 -3,3" id="Path 1" stroke="#f2f2f2"/></g></g></g></g></svg>
+<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AuditView">
+  <rect x="8" y="26" width="8" height="14" rx="2" fill="#334155" opacity="0.5"/>
+  <rect x="20" y="16" width="8" height="24" rx="2" fill="#334155" opacity="0.8"/>
+  <rect x="32" y="8" width="8" height="32" rx="2" fill="#334155"/>
+  <path d="M7 27 L19 17 L28 22 L41 9" fill="none" stroke="#EE7D2B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

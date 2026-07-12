@@ -9,6 +9,16 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  CompanyRanking,
+  CompanyResults,
+  CompanyTable,
+  GroupDonut,
+  KpiHero,
+  PeriodTrend,
+  TopAccounts,
+} from '@/features/audits/analytics/charts'
+import { hasAnalyticsData } from '@/features/audits/analytics/types'
 import { type PublicSnapshot } from '../data/api'
 
 const DownloadPdfButton = lazy(() =>
@@ -60,51 +70,107 @@ export function PublicReport({
   const attention = items.length
 
   return (
-    <div className='mx-auto flex min-h-svh max-w-2xl flex-col gap-6 p-4 py-8'>
-      <header className='flex items-center justify-between'>
-        <div className='flex items-center gap-2'>
-          <Logo className='size-9' />
-          <div className='leading-tight'>
-            <div className='text-[0.65rem] font-bold tracking-[0.14em] text-muted-foreground'>
-              ESPAÇO AÇÃO
+    <div className='min-h-svh'>
+      {/* Keynote hero — malha de marca, número em destaque, entrada suave */}
+      <div className='brand-mesh border-b'>
+        <div className='animate-rise mx-auto flex max-w-2xl flex-col gap-5 px-4 py-10'>
+          <header className='flex items-center justify-between'>
+            <div className='flex items-center gap-2'>
+              <Logo className='size-9' />
+              <div className='leading-tight'>
+                <div className='text-[0.62rem] font-bold tracking-[0.16em] text-muted-foreground'>
+                  AUDITVIEW
+                </div>
+                <div className='font-bold'>{audit.cliente}</div>
+              </div>
             </div>
-            <div className='font-bold'>{audit.cliente}</div>
+            <div className='text-end text-sm text-muted-foreground'>
+              {fmtPeriod(audit.period_start, audit.period_end)}
+            </div>
+          </header>
+
+          <div className='space-y-1.5'>
+            <p className='text-sm font-medium tracking-wide text-muted-foreground'>
+              {audit.title}
+            </p>
+            <h1 className='text-3xl leading-tight font-bold tracking-tight text-balance sm:text-4xl'>
+              Analisamos{' '}
+              <span className='text-gradient-brand tabular-nums'>
+                {summary.processed.toLocaleString('pt-BR')}
+              </span>{' '}
+              movimentos.
+            </h1>
+            <p className='text-lg text-muted-foreground'>
+              {attention === 0
+                ? 'Está tudo certo — nenhum ponto precisa da sua atenção neste período.'
+                : `${attention} ponto${attention > 1 ? 's' : ''} ${attention > 1 ? 'precisam' : 'precisa'} da sua atenção.`}
+            </p>
+          </div>
+
+          <div className='flex flex-wrap items-center gap-3'>
+            {allowDownload && (
+              <Suspense fallback={<Skeleton className='h-9 w-36' />}>
+                <DownloadPdfButton snapshot={snapshot} />
+              </Suspense>
+            )}
+            {summary.invalid > 0 && (
+              <span className='text-xs text-muted-foreground'>
+                Algumas linhas não puderam ser lidas e não entram nesta análise —
+                o escritório está tratando esses casos.
+              </span>
+            )}
           </div>
         </div>
-        <div className='text-end text-sm text-muted-foreground'>
-          {fmtPeriod(audit.period_start, audit.period_end)}
-        </div>
-      </header>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className='text-xl'>{audit.title}</CardTitle>
-        </CardHeader>
-        <CardContent className='space-y-2'>
-          <p>
-            Analisamos{' '}
-            <strong className='tabular-nums'>
-              {summary.processed.toLocaleString('pt-BR')}
-            </strong>{' '}
-            movimentos do período.{' '}
-            {attention === 0
-              ? 'Está tudo certo. Não encontramos pontos que precisem da sua atenção neste período.'
-              : `${attention} ponto(s) precisam da sua atenção.`}
-          </p>
-          {summary.invalid > 0 && (
-            <p className='text-sm text-muted-foreground'>
-              Algumas linhas das planilhas enviadas não puderam ser lidas e não
-              fazem parte desta análise. O escritório está cuidando desses
-              casos.
-            </p>
-          )}
-          {allowDownload && (
-            <Suspense fallback={<Skeleton className='h-9 w-36' />}>
-              <DownloadPdfButton snapshot={snapshot} />
-            </Suspense>
-          )}
-        </CardContent>
-      </Card>
+      <div className='mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8'>
+
+      {hasAnalyticsData(snapshot.analytics) && (
+        <section className='space-y-4'>
+          <h2 className='text-lg font-semibold tracking-tight'>
+            Os números do período
+          </h2>
+          <KpiHero a={snapshot.analytics!} />
+          <GroupDonut
+            grupos={snapshot.analytics!.por_grupo}
+            title='Para onde o dinheiro foi'
+            description='As despesas do período, agrupadas.'
+          />
+          <div className='grid gap-4 lg:grid-cols-2'>
+            <CompanyRanking
+              empresas={snapshot.analytics!.empresas}
+              title='Despesas por empresa'
+              description='Onde o custo se concentra no grupo.'
+            />
+            <CompanyResults
+              empresas={snapshot.analytics!.empresas}
+              title='Resultado por empresa'
+              description='Quem fechou no azul e quem precisa de atenção.'
+            />
+          </div>
+          <TopAccounts
+            contas={snapshot.analytics!.top_contas}
+            title='Maiores despesas'
+            description='As contas que mais pesaram no período.'
+          />
+          <PeriodTrend
+            periodos={snapshot.analytics!.por_periodo}
+            title='Evolução mês a mês'
+            description='Receita e despesas ao longo do período.'
+          />
+          <CompanyTable
+            empresas={snapshot.analytics!.empresas}
+            title='Resumo por empresa'
+            description='Os números de cada empresa do grupo.'
+          />
+        </section>
+      )}
+
+      {items.length > 0 && (
+        <h2 className='text-lg font-semibold tracking-tight'>
+          Pontos que precisam da sua atenção
+        </h2>
+      )}
 
       {items.map((item, i) => {
         const money = Object.entries(item.values ?? {})
@@ -146,11 +212,12 @@ export function PublicReport({
         </Card>
       )}
 
-      <footer className='mt-auto pt-6 text-center text-xs text-muted-foreground'>
-        Relatório publicado em{' '}
-        {new Date(audit.published_at).toLocaleDateString('pt-BR')} · versão{' '}
-        {audit.version}. Dúvidas? Fale com seu escritório de contabilidade.
-      </footer>
+        <footer className='pt-6 text-center text-xs text-muted-foreground'>
+          Relatório publicado em{' '}
+          {new Date(audit.published_at).toLocaleDateString('pt-BR')} · versão{' '}
+          {audit.version}. Dúvidas? Fale com seu escritório de contabilidade.
+        </footer>
+      </div>
     </div>
   )
 }

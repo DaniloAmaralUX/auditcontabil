@@ -2,12 +2,14 @@ import { useNavigate, useSearch } from '@tanstack/react-router'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CompartilharPanel } from './panels/compartilhar-panel'
 import { DadosPanel } from './panels/dados-panel'
+import { DashboardPanel } from './panels/dashboard-panel'
 import { InconsistenciasPanel } from './panels/inconsistencias-panel'
 import { RelatorioPanel } from './panels/relatorio-panel'
 import { ResumoPanel } from './panels/resumo-panel'
 import { RevisaoPanel } from './panels/revisao-panel'
 
 const TABS = [
+  { value: 'dashboard', label: 'Dashboard' },
   { value: 'resumo', label: 'Resumo' },
   { value: 'dados', label: 'Dados' },
   { value: 'inconsistencias', label: 'Inconsistências' },
@@ -39,6 +41,7 @@ export function AuditWorkspace({ auditId }: { auditId: string }) {
         </TabsList>
       </Tabs>
 
+      {tab === 'dashboard' && <DashboardPanel auditId={auditId} />}
       {tab === 'resumo' && <ResumoPanel auditId={auditId} />}
       {tab === 'dados' && <DadosPanel auditId={auditId} />}
       {tab === 'inconsistencias' && <InconsistenciasPanel auditId={auditId} />}

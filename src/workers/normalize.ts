@@ -28,10 +28,8 @@ export function parseDecimal(raw: unknown): {
   const lastComma = digits.lastIndexOf(',')
   const lastDot = digits.lastIndexOf('.')
   if (lastComma > lastDot) {
-    // vírgula decimal (pt-BR): remove pontos de milhar, troca vírgula
     normalized = digits.replace(/\./g, '').replace(',', '.')
   } else if (lastDot > lastComma) {
-    // ponto decimal (en): remove vírgulas de milhar
     normalized = digits.replace(/,/g, '')
   } else {
     normalized = digits
@@ -55,7 +53,6 @@ export function parseDateBR(raw: unknown): {
     return { value: raw.toISOString().slice(0, 10), coerced: false }
   }
   if (typeof raw === 'number' && raw > 20000 && raw < 80000) {
-    // serial Excel (dias desde 1899-12-30)
     const ms = Math.round((raw - 25569) * 86400 * 1000)
     const d = new Date(ms)
     if (!isNaN(d.getTime()))
@@ -80,54 +77,69 @@ export function parseDateBR(raw: unknown): {
   return { value: null, coerced: false }
 }
 
+type Kind = 'revenue' | 'deduction' | 'expense' | 'other'
+
+/** Heurística determinística (espelha app.classify_kind do banco). */
+function classifyKind(name: string | null): Kind {
+  if (!name) return 'expense'
+  const l = name.toLowerCase()
+  if (/(dedu|imposto sobre|iss|icms|pis|cofins|simples nacional|cancelamento)/.test(l))
+    return 'deduction'
+  if (/(receita|faturamento|venda|mensalidade|patroc)/.test(l)) return 'revenue'
+  if (/(total|subtotal|resultado|soma)/.test(l)) return 'other'
+  return 'expense'
+}
+
+/** Mapeia rótulos PT do mapeamento para o enum interno. */
+function normalizeKindLabel(raw: unknown): Kind | null {
+  if (raw === null || raw === undefined || raw === '') return null
+  const l = String(raw).toLowerCase().trim()
+  if (/(receita|revenue)/.test(l)) return 'revenue'
+  if (/(dedu|deduction)/.test(l)) return 'deduction'
+  if (/(despesa|custo|expense)/.test(l)) return 'expense'
+  if (/(total|outro|other)/.test(l)) return 'other'
+  return null
+}
+
 export function normalizeRow(
   rowNumber: number,
   original: Record<string, unknown>,
-  mapping: ColumnMapping
+  mapping: ColumnMapping,
+  sheetName?: string,
+  defaultPeriod?: string
 ): { row: NormalizedRow; errors: RowError[] } {
   const errors: RowError[] = []
   const messages: string[] = []
   let coercedAny = false
   let invalid = false
 
-  const get = (header?: string) =>
-    header ? original[header] : undefined
+  const get = (header?: string) => (header ? original[header] : undefined)
 
   const accountRaw = get(mapping.account_code)
   const account_code =
     accountRaw === null || accountRaw === undefined || accountRaw === ''
       ? null
       : String(accountRaw).trim()
-  if (!account_code) {
-    invalid = true
-    messages.push('Código da conta ausente.')
-    errors.push({
-      rowIndex: rowNumber,
-      column: mapping.account_code,
-      code: 'MISSING_ACCOUNT',
-      raw: accountRaw,
-      message: 'Código da conta ausente.',
-    })
-  }
 
-  const periodRes = parseDateBR(get(mapping.period))
-  if (!periodRes.value) {
-    invalid = true
-    messages.push('Data em formato não reconhecido.')
-    errors.push({
-      rowIndex: rowNumber,
-      column: mapping.period,
-      code: 'BAD_DATE',
-      raw: get(mapping.period),
-      message: 'Data em formato não reconhecido.',
-    })
-  } else if (periodRes.coerced) {
+  const account_name = mapping.account_name
+    ? String(get(mapping.account_name) ?? '').trim() || null
+    : null
+
+  const periodRes = mapping.period
+    ? parseDateBR(get(mapping.period))
+    : { value: null, coerced: false }
+  if (periodRes.coerced) {
     coercedAny = true
     messages.push('Data interpretada automaticamente.')
   }
+  if (!mapping.period && defaultPeriod) {
+    periodRes.value = defaultPeriod
+    coercedAny = true
+    messages.push('Competência assumida do período da auditoria.')
+  }
 
   const numField = (
-    field: 'opening_balance' | 'debit' | 'credit' | 'closing_balance'
+    field: 'opening_balance' | 'debit' | 'credit' | 'closing_balance' | 'amount'
   ) => {
     const header = mapping[field]
     if (!header) return null
@@ -151,12 +163,72 @@ export function normalizeRow(
   }
 
   const opening_balance = numField('opening_balance')
-  const debit = numField('debit')
-  const credit = numField('credit')
+  let debit = numField('debit')
+  let credit = numField('credit')
   const closing_balance = numField('closing_balance')
+  const amount = numField('amount')
 
-  const account_name = mapping.account_name
-    ? String(get(mapping.account_name) ?? '').trim() || null
+  // natureza da linha: mapeada > heurística por nome (determinística)
+  const mappedKind = normalizeKindLabel(get(mapping.kind))
+  const kind: Kind = mappedKind ?? classifyKind(account_name ?? account_code)
+
+  // valor único mapeado: vira crédito p/ receita/dedução, débito p/ despesa
+  if (amount !== null && debit === null && credit === null) {
+    if (kind === 'revenue' || kind === 'deduction') credit = amount
+    else debit = amount
+    messages.push('Valor único atribuído conforme a natureza da linha.')
+    coercedAny = true
+  }
+
+  const hasValue =
+    debit !== null ||
+    credit !== null ||
+    opening_balance !== null ||
+    closing_balance !== null
+
+  // linha de totalização/section header (sem conta, sem valor e sem erro)
+  // é preservada como 'other'; linha com erro nunca vira estrutural
+  const isStructural =
+    kind === 'other' || (!account_code && !account_name && !hasValue && !invalid)
+
+  if (!isStructural) {
+    if (!account_code && !account_name) {
+      invalid = true
+      messages.push('Código/descrição da conta ausente.')
+      errors.push({
+        rowIndex: rowNumber,
+        column: mapping.account_code,
+        code: 'MISSING_ACCOUNT',
+        raw: accountRaw,
+        message: 'Código/descrição da conta ausente.',
+      })
+    }
+    if (!periodRes.value && mapping.period) {
+      invalid = true
+      messages.push('Data em formato não reconhecido.')
+      errors.push({
+        rowIndex: rowNumber,
+        column: mapping.period,
+        code: 'BAD_DATE',
+        raw: get(mapping.period),
+        message: 'Data em formato não reconhecido.',
+      })
+    }
+  } else if (!messages.length) {
+    messages.push('Linha estrutural (totalização/seção) fora dos cálculos.')
+  }
+
+  // empresa: coluna mapeada > nome da aba
+  const entityRaw = mapping.entity ? get(mapping.entity) : undefined
+  const entityFromCol =
+    entityRaw === null || entityRaw === undefined || entityRaw === ''
+      ? null
+      : String(entityRaw).trim()
+  const entity_code = entityFromCol ?? sheetName ?? null
+  const entity_name = entityFromCol ?? sheetName ?? null
+
+  const category = mapping.category
+    ? String(get(mapping.category) ?? '').trim() || null
     : null
 
   const status: NormalizedRow['status'] = invalid
@@ -177,6 +249,9 @@ export function normalizeRow(
         debit,
         credit,
         closing_balance,
+        entity_code,
+        category,
+        kind,
       },
       account_code,
       account_name,
@@ -185,6 +260,10 @@ export function normalizeRow(
       debit,
       credit,
       closing_balance,
+      entity_code,
+      entity_name,
+      category,
+      kind: isStructural ? 'other' : kind,
       status,
       message: messages.join(' '),
     },

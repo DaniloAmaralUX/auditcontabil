@@ -99,7 +99,7 @@ export function Billing() {
               </CardTitle>
               <CardDescription>
                 {data
-                  ? 'Plano do escritório no Espaço Ação.'
+                  ? 'Plano do escritório no AuditView.'
                   : 'Nenhuma assinatura encontrada para este escritório.'}
               </CardDescription>
             </CardHeader>

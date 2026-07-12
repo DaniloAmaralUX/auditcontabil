@@ -16,7 +16,7 @@ import { type PublicSnapshot } from '../data/api'
 const styles = StyleSheet.create({
   page: { padding: 40, fontSize: 11, fontFamily: 'Helvetica', color: '#1a1a1a' },
   header: { marginBottom: 16 },
-  brand: { fontSize: 9, letterSpacing: 2, color: '#8a3a40' },
+  brand: { fontSize: 9, letterSpacing: 2, color: '#EE7D2B' },
   title: { fontSize: 18, fontFamily: 'Helvetica-Bold', marginTop: 2 },
   meta: { fontSize: 10, color: '#666', marginTop: 2 },
   summary: { marginVertical: 12, lineHeight: 1.5 },
@@ -52,11 +52,11 @@ function ReportPdf({ snapshot }: { snapshot: PublicSnapshot }) {
   return (
     <Document
       title={`Relatório de auditoria — ${audit.cliente}`}
-      author='Espaço Ação'
+      author='AuditView'
     >
       <Page size='A4' style={styles.page}>
         <View style={styles.header}>
-          <Text style={styles.brand}>ESPAÇO AÇÃO</Text>
+          <Text style={styles.brand}>AUDITVIEW</Text>
           <Text style={styles.title}>{audit.title}</Text>
           <Text style={styles.meta}>
             {audit.cliente} · {fmtPeriod(audit.period_start, audit.period_end)} ·
@@ -73,6 +73,26 @@ function ReportPdf({ snapshot }: { snapshot: PublicSnapshot }) {
           {summary.invalid > 0 &&
             ' Algumas linhas das planilhas enviadas não puderam ser lidas e não fazem parte desta análise.'}
         </Text>
+
+        {snapshot.analytics && (
+          <View style={styles.item} wrap={false}>
+            <Text style={styles.itemBadge}>NÚMEROS DO PERÍODO</Text>
+            <Text>
+              Receita líquida{' '}
+              {snapshot.analytics.consolidado.receita_liquida.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              {'  ·  '}Despesas{' '}
+              {snapshot.analytics.consolidado.despesas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              {'  ·  '}Resultado{' '}
+              {snapshot.analytics.consolidado.resultado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            </Text>
+            {snapshot.analytics.por_grupo.map((g) => (
+              <Text key={g.grupo} style={styles.note}>
+                {g.grupo}: {g.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                {g.pct !== null ? ` (${g.pct}%)` : ''}
+              </Text>
+            ))}
+          </View>
+        )}
 
         {audit.conclusion ? (
           <View style={styles.item} wrap={false}>
@@ -103,8 +123,7 @@ function ReportPdf({ snapshot }: { snapshot: PublicSnapshot }) {
 
         <Text style={styles.footer} fixed>
           Publicado em {new Date(audit.published_at).toLocaleDateString('pt-BR')}{' '}
-          · Espaço Ação — Coworking · Contabilidade · Regularização de obras e
-          imóveis
+          · Gerado com AuditView — auditoria contábil visual
         </Text>
       </Page>
     </Document>

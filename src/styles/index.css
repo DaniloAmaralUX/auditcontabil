@@ -12,9 +12,24 @@
   }
   html {
     @apply overflow-x-hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
   body {
     @apply min-h-svh w-full bg-background text-foreground has-[div[data-variant='inset']]:bg-sidebar;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  /* Números sempre tabulares em métricas e tabelas (Apple/Ramp) */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+  /* Foco visível e macio (ring da marca) em tudo que é interativo */
+  :where(a, button, [role='button'], input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
   }
 
   /* Override Radix scroll locking for sticky headers */
@@ -83,5 +98,107 @@
   }
   to {
     height: 0;
+  }
+}
+
+/* ============================================================
+   Camada de polish AuditView — Apple-grade: profundidade suave,
+   micro-interações fluidas, gradientes de marca. Tudo respeita
+   prefers-reduced-motion.
+   ============================================================ */
+
+/* Transições calmas por padrão em superfícies interativas */
+@layer base {
+  button,
+  [role='button'],
+  a,
+  .transition-base {
+    transition:
+      background-color 0.18s ease,
+      border-color 0.18s ease,
+      color 0.18s ease,
+      box-shadow 0.22s ease,
+      transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.18s ease;
+  }
+  /* Toque tátil: botões afundam de leve ao pressionar */
+  button:not(:disabled):active,
+  [role='button']:not(:disabled):active {
+    transform: translateY(0.5px) scale(0.985);
+  }
+}
+
+/* Card com elevação Apple: sobe suavemente no hover */
+@utility card-lift {
+  box-shadow: var(--shadow-soft);
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.2s ease;
+  &:hover {
+    box-shadow: var(--shadow-lift);
+    transform: translateY(-2px);
+    border-color: color-mix(in oklch, var(--brand) 35%, var(--border));
+  }
+}
+
+/* Barra fina de acento no topo de um card/hero */
+@utility accent-top {
+  position: relative;
+  overflow: hidden;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--brand), var(--brand-2));
+    opacity: 0.9;
+  }
+}
+
+/* Malha de marca suave (hero de login/relatório do cliente) */
+@utility brand-mesh {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(60% 60% at 15% 10%, color-mix(in oklch, var(--brand) 16%, transparent), transparent 70%),
+    radial-gradient(50% 50% at 90% 20%, color-mix(in oklch, var(--brand-2) 14%, transparent), transparent 70%),
+    radial-gradient(55% 55% at 60% 100%, color-mix(in oklch, var(--chart-2) 12%, transparent), transparent 70%);
+}
+
+/* Texto com gradiente de marca (títulos de destaque) */
+@utility text-gradient-brand {
+  background: linear-gradient(100deg, var(--brand), var(--brand-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Entrada suave de conteúdo (dashboard/relatório) */
+@utility animate-rise {
+  animation: av-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes av-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  button:active,
+  [role='button']:active {
+    transform: none;
   }
 }

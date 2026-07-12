@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-07-12T11:59:57.901Z",
-  "now": "🎉 PRONTO! Entre em auditcontabil.vercel.app com danilo.productdesigner@gmail.com e sua senha",
+  "updatedAt": "2026-07-12T12:49:01.742Z",
+  "now": "🏆 Dashboard gerencial no ar! Falta 1 Run seu no SQL Editor (migração 4-analytics, já no clipboard) para ativar em produção",
   "groups": [
     {
       "title": "🗄️ Backend (banco + funções)",
@@ -195,6 +195,35 @@
         {
           "label": "KPIs extras do dashboard técnico",
           "state": "done"
+        }
+      ]
+    },
+    {
+      "title": "🏆 Dashboard gerencial (AuditView)",
+      "items": [
+        {
+          "label": "Rebrand AuditView + ícone minimalista",
+          "state": "done"
+        },
+        {
+          "label": "Import 1 botão: solte a planilha → Gerar dashboard",
+          "state": "done"
+        },
+        {
+          "label": "Multi-empresa: 1 aba = 1 empresa (CPF/CNPJ do dono)",
+          "state": "done"
+        },
+        {
+          "label": "Aba Dashboard: KPIs, composição, rankings, evolução",
+          "state": "done"
+        },
+        {
+          "label": "Gráficos na visão do cliente + PDF com números",
+          "state": "done"
+        },
+        {
+          "label": "Migração 4-analytics no banco (SEU Run no SQL Editor)",
+          "state": "doing"
         }
       ]
     },

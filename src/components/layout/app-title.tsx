@@ -28,11 +28,11 @@ export function AppTitle() {
             >
               <Logo className='size-8 shrink-0' />
               <div className='grid leading-tight'>
-                <span className='truncate text-[0.7rem] font-bold tracking-[0.12em] text-muted-foreground'>
-                  ESPAÇO
+                <span className='truncate text-base font-extrabold tracking-tight'>
+                  AuditView
                 </span>
-                <span className='-mt-0.5 truncate text-base font-extrabold'>
-                  AÇÃO
+                <span className='truncate text-[0.68rem] text-muted-foreground'>
+                  Auditoria contábil visual
                 </span>
               </div>
             </Link>

@@ -24,6 +24,7 @@ function fmtPeriod(a: AuditListItem) {
 }
 
 type WorkspaceTab =
+  | 'dashboard'
   | 'resumo'
   | 'dados'
   | 'inconsistencias'
@@ -43,7 +44,7 @@ function nextAction(status: AuditStatus): NextAction {
     case 'partially_processed':
       return { label: 'Ver processamento', tab: 'dados' }
     case 'processed':
-      return { label: 'Revisar', tab: 'inconsistencias' }
+      return { label: 'Ver dashboard', tab: 'dashboard' }
     case 'in_review':
       return { label: 'Revisar', tab: 'revisao' }
     case 'approved':

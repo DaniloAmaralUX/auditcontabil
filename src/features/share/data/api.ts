@@ -1,6 +1,7 @@
 // Acesso do cliente externo — sem sessão Supabase; apenas RPCs anon.
 import { supabase } from '@/lib/supabase'
 import { type Severity } from '@/features/audits/components/status-badge'
+import { type AuditAnalytics } from '@/features/audits/analytics/types'
 
 export type PublicSnapshot = {
   audit: {
@@ -27,6 +28,7 @@ export type PublicSnapshot = {
     values: Record<string, unknown>
     note: string | null
   }>
+  analytics?: AuditAnalytics
 }
 
 const SESSION_KEY = 'share_session'

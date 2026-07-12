@@ -28,7 +28,7 @@ export function Overview() {
 
         <div className='grid gap-4 sm:grid-cols-2'>
           <Link to='/audits' className='block'>
-            <Card className='transition-colors hover:border-primary'>
+            <Card className='card-lift accent-top h-full'>
               <CardHeader>
                 <FileSpreadsheet className='size-6 text-primary' />
                 <CardTitle>Auditorias</CardTitle>
@@ -43,7 +43,7 @@ export function Overview() {
           </Link>
 
           <Link to='/clients' className='block'>
-            <Card className='transition-colors hover:border-primary'>
+            <Card className='card-lift accent-top h-full'>
               <CardHeader>
                 <Users className='size-6 text-primary' />
                 <CardTitle>Clientes</CardTitle>

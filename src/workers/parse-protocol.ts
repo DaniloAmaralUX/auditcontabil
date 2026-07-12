@@ -1,7 +1,9 @@
 // Contrato browser <-> worker de parse (§9.5).
+// Multi-empresa: cada ABA da planilha é tratada como uma empresa (entity),
+// a menos que a coluna `entity` seja mapeada explicitamente.
 
 export type ColumnMapping = {
-  // campo destino -> header de origem
+  // campo destino -> header de origem (todos opcionais exceto os validados no save_mapping)
   account_code: string
   account_name?: string
   period: string
@@ -9,6 +11,14 @@ export type ColumnMapping = {
   debit?: string
   credit?: string
   closing_balance?: string
+  /** valor único (sem débito/crédito): vira débito p/ despesa e crédito p/ receita */
+  amount?: string
+  /** empresa por coluna (senão, o nome da aba é usado) */
+  entity?: string
+  /** grupo de despesa (Pessoal/Admin, Departamentais, Financeiras…) */
+  category?: string
+  /** natureza da linha: receita | dedução | despesa (senão, heurística determinística) */
+  kind?: string
 }
 
 export type NormalizedRow = {
@@ -22,6 +32,10 @@ export type NormalizedRow = {
   debit: string | null
   credit: string | null
   closing_balance: string | null
+  entity_code: string | null
+  entity_name: string | null
+  category: string | null
+  kind: 'revenue' | 'deduction' | 'expense' | 'other' | null
   status: 'ok' | 'coerced' | 'invalid' | 'duplicate'
   message: string
 }
@@ -34,6 +48,8 @@ export type RowError = {
   message: string
 }
 
+export type SheetInfo = { name: string; rows: number }
+
 export type ParseWorkerRequest =
   | { type: 'PREVIEW'; fileId: string; file: File; limit: number }
   | {
@@ -42,11 +58,19 @@ export type ParseWorkerRequest =
       file: File
       mapping: ColumnMapping
       batchSize: number
+      /** competência assumida quando não há coluna de data mapeada (ISO) */
+      defaultPeriod?: string
     }
   | { type: 'CANCEL'; fileId: string }
 
 export type ParseWorkerResponse =
-  | { type: 'PREVIEW_ROWS'; fileId: string; headers: string[]; rows: unknown[][] }
+  | {
+      type: 'PREVIEW_ROWS'
+      fileId: string
+      headers: string[]
+      rows: unknown[][]
+      sheets: SheetInfo[]
+    }
   | {
       type: 'BATCH'
       fileId: string

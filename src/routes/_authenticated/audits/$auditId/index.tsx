@@ -8,8 +8,8 @@ import { PageHeader } from '@/components/page-header'
 
 const workspaceSearchSchema = z.object({
   tab: z
-    .enum(['resumo', 'dados', 'inconsistencias', 'revisao', 'relatorio', 'compartilhar'])
-    .catch('resumo'),
+    .enum(['dashboard', 'resumo', 'dados', 'inconsistencias', 'revisao', 'relatorio', 'compartilhar'])
+    .catch('dashboard'),
 })
 
 function WorkspacePage() {

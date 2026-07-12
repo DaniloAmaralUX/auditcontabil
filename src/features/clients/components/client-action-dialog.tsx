@@ -102,7 +102,7 @@ export function ClientActionDialog({ open, onOpenChange, currentRow }: Props) {
                 <FormItem>
                   <FormLabel>{strings.clients.cnpj}</FormLabel>
                   <FormControl>
-                    <Input placeholder='00.000.000/0000-00' {...field} />
+                    <Input placeholder='CPF ou CNPJ do titular' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

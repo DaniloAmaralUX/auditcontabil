@@ -105,14 +105,20 @@ export function useIngestPipeline(auditId: string) {
   }, [])
 
   const preview = useCallback(
-    (file: File): Promise<{ headers: string[]; rows: unknown[][] }> => {
+    (
+      file: File
+    ): Promise<{
+      headers: string[]
+      rows: unknown[][]
+      sheets: { name: string; rows: number }[]
+    }> => {
       const worker = getWorker()
       return new Promise((resolve, reject) => {
         const onMsg = (ev: MessageEvent<ParseWorkerResponse>) => {
           const msg = ev.data
           if (msg.type === 'PREVIEW_ROWS') {
             worker.removeEventListener('message', onMsg)
-            resolve({ headers: msg.headers, rows: msg.rows })
+            resolve({ headers: msg.headers, rows: msg.rows, sheets: msg.sheets })
           } else if (msg.type === 'FATAL') {
             worker.removeEventListener('message', onMsg)
             reject(new Error(msg.message))
@@ -126,7 +132,7 @@ export function useIngestPipeline(auditId: string) {
   )
 
   const start = useCallback(
-    async (file: File, mapping: ColumnMapping) => {
+    async (file: File, mapping: ColumnMapping, defaultPeriod?: string) => {
       try {
         patch({ ...INITIAL, phase: 'hashing' })
 
@@ -229,6 +235,7 @@ export function useIngestPipeline(auditId: string) {
             file,
             mapping,
             batchSize: 500,
+            defaultPeriod,
           })
         })
 
