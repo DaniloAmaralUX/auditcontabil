@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-07-12T12:49:01.742Z",
-  "now": "🏆 Dashboard gerencial no ar! Falta 1 Run seu no SQL Editor (migração 4-analytics, já no clipboard) para ativar em produção",
+  "updatedAt": "2026-07-12T18:20:00.000Z",
+  "now": "🎬 Produto pronto! Deck \"O Fechamento\" + arquivos reais da contadora fechando ao centavo. Faltam 2 cliques seus: Run da migração 7 no SQL Editor + confirmar o push para publicar",
   "groups": [
     {
       "title": "🗄️ Backend (banco + funções)",
@@ -222,8 +222,8 @@
           "state": "done"
         },
         {
-          "label": "Migração 4-analytics no banco (SEU Run no SQL Editor)",
-          "state": "doing"
+          "label": "Migração 4-analytics no banco",
+          "state": "done"
         }
       ]
     },
@@ -249,6 +249,72 @@
         {
           "label": "Edge Functions (convite/Stripe) — opcional, via janela PowerShell",
           "state": "todo"
+        }
+      ]
+    },
+    {
+      "title": "📄 Arquivos REAIS da contadora",
+      "items": [
+        {
+          "label": "Balancete Societário CSV (CP1252, paginado, flag S) lido sozinho",
+          "state": "done"
+        },
+        {
+          "label": "DRE em PDF (hierarquia por indentação) lida sozinha",
+          "state": "done"
+        },
+        {
+          "label": "Regra de ouro: reconciliação ao centavo com o documento",
+          "state": "done"
+        },
+        {
+          "label": "Import detecta o arquivo e mostra empresa/CNPJ/período",
+          "state": "done"
+        },
+        {
+          "label": "E2E produção: CSV real → deck com R$ 232.696,03 conferido",
+          "state": "done"
+        },
+        {
+          "label": "Migração 7 no SQL Editor (SEU Run — docs/deploy/7)",
+          "state": "doing"
+        }
+      ]
+    },
+    {
+      "title": "🎬 Deck \"O Fechamento\" (link do cliente)",
+      "items": [
+        {
+          "label": "Capa com veredito em 1 frase (ladder de severidade)",
+          "state": "done"
+        },
+        {
+          "label": "DRE tipografada: leader dots + régua-brasa + Fraunces",
+          "state": "done"
+        },
+        {
+          "label": "Insight dinâmico por seção (uma fonte: deck, capa e PDF)",
+          "state": "done"
+        },
+        {
+          "label": "Gráficos elegantes: donut c/ total, área c/ gradiente, bars",
+          "state": "done"
+        },
+        {
+          "label": "Reveal por seção no scroll (uma vez, acessível)",
+          "state": "done"
+        },
+        {
+          "label": "Selo \"Conferido com o documento\" quando tudo bate",
+          "state": "done"
+        },
+        {
+          "label": "PDF com a mesma narrativa (veredito + mini-DRE)",
+          "state": "done"
+        },
+        {
+          "label": "Publicar (push → Vercel) — aguardando SEU ok",
+          "state": "doing"
         }
       ]
     }
