@@ -1,5 +1,4 @@
 import { useRouteContext } from '@tanstack/react-router'
-import { type Role } from '@/lib/supabase'
 import { useLayout } from '@/context/layout-provider'
 import {
   Sidebar,
@@ -9,18 +8,9 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 import { AppTitle } from './app-title'
-import { navGroups } from './data/sidebar-data'
+import { visibleFor } from './data/sidebar-data'
 import { NavGroup } from './nav-group'
 import { NavUser } from './nav-user'
-
-function visibleFor(role: Role | undefined) {
-  return navGroups
-    .map((group) => ({
-      ...group,
-      items: group.items.filter((item) => !item.roles || (role && item.roles.includes(role))),
-    }))
-    .filter((group) => group.items.length > 0)
-}
 
 export function AppSidebar() {
   const { collapsible, variant } = useLayout()

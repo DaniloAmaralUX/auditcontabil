@@ -10,6 +10,7 @@ import {
   CircleCheck,
   FileSpreadsheet,
   Loader2,
+  RefreshCw,
   Sparkles,
   Upload,
 } from 'lucide-react'
@@ -85,7 +86,7 @@ export function ImportPage() {
     from: '/_authenticated/audits/$auditId/import',
   })
   const navigate = useNavigate()
-  const { state, start, preview } = useIngestPipeline(auditId)
+  const { state, start, preview, cancel } = useIngestPipeline(auditId)
   const audit = useQuery(auditDetailQuery(auditId))
 
   const inputRef = useRef<HTMLInputElement>(null)
@@ -124,9 +125,11 @@ export function ImportPage() {
       setSheets(p.sheets)
       setMap(guessMapping(p.headers))
     } catch (e) {
+      // Detalhe técnico só no console; o usuário recebe orientação humana.
+      // eslint-disable-next-line no-console
+      console.error('[import] preview falhou:', e)
       setFileError(
-        'Não foi possível ler este arquivo. Ele pode estar protegido por senha ou corrompido. ' +
-          String(e instanceof Error ? e.message : e)
+        'Não foi possível ler este arquivo. Ele pode estar protegido por senha ou corrompido — verifique se ele abre no Excel e envie novamente.'
       )
       setFile(null)
     }
@@ -175,6 +178,11 @@ export function ImportPage() {
             <h1 className='text-2xl font-bold tracking-tight'>
               Gerar dashboard
             </h1>
+            {audit.data && (
+              <p className='text-sm text-muted-foreground'>
+                {audit.data.title} · {audit.data.cliente_name}
+              </p>
+            )}
             <p className='text-muted-foreground'>
               Solte a planilha e aperte o botão. O resto é com a gente.
             </p>
@@ -236,26 +244,32 @@ export function ImportPage() {
           </button>
 
           {fileError && (
-            <p className='flex items-start gap-2 text-sm text-destructive'>
+            <p
+              role='alert'
+              className='flex items-start gap-2 text-sm text-destructive'
+            >
               <CircleAlert className='mt-0.5 size-4 shrink-0' aria-hidden />
               {fileError}
             </p>
           )}
 
-          {/* O BOTÃO */}
+          {/* O BOTÃO — após concluir, quem manda é "Ver o dashboard" */}
           {file && (
             <Button
               size='lg'
+              variant={state.phase === 'done' ? 'outline' : 'default'}
               className='w-full text-base'
               onClick={onGenerate}
               disabled={!ready || busy}
             >
               {busy ? (
                 <Loader2 className='size-5 animate-spin' />
+              ) : state.phase === 'done' ? (
+                <RefreshCw className='size-5' />
               ) : (
                 <Sparkles className='size-5' />
               )}
-              Gerar dashboard
+              {state.phase === 'done' ? 'Gerar novamente' : 'Gerar dashboard'}
             </Button>
           )}
 
@@ -287,7 +301,9 @@ export function ImportPage() {
                     <div className='grid gap-3 pt-3 sm:grid-cols-2'>
                       {TARGETS.map((t) => (
                         <div key={t.key} className='space-y-1'>
-                          <Label className='text-xs'>{t.label}</Label>
+                          <Label htmlFor={`map-${t.key}`} className='text-xs'>
+                            {t.label}
+                          </Label>
                           <Select
                             value={map[t.key] ?? NONE}
                             onValueChange={(v) =>
@@ -300,7 +316,7 @@ export function ImportPage() {
                             }
                             disabled={busy}
                           >
-                            <SelectTrigger className='h-8'>
+                            <SelectTrigger id={`map-${t.key}`} className='h-8'>
                               <SelectValue placeholder='Não mapear' />
                             </SelectTrigger>
                             <SelectContent>
@@ -350,7 +366,10 @@ export function ImportPage() {
                 />
                 {state.phase === 'done' && (
                   <div className='space-y-3 pt-2'>
-                    <p className='flex items-center gap-2 text-success'>
+                    <p
+                      role='status'
+                      className='flex items-center gap-2 text-success-text'
+                    >
                       <CircleCheck className='size-4' aria-hidden />
                       Pronto!{' '}
                       {state.invalidRows > 0 &&
@@ -372,13 +391,38 @@ export function ImportPage() {
                   </div>
                 )}
                 {state.phase === 'error' && (
-                  <p className='flex items-start gap-2 pt-1 text-destructive'>
-                    <CircleAlert
-                      className='mt-0.5 size-4 shrink-0'
-                      aria-hidden
-                    />
-                    {state.error}
-                  </p>
+                  <div className='space-y-3 pt-1'>
+                    <p
+                      role='alert'
+                      className='flex items-start gap-2 text-destructive'
+                    >
+                      <CircleAlert
+                        className='mt-0.5 size-4 shrink-0'
+                        aria-hidden
+                      />
+                      {state.error}
+                    </p>
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      className='w-full'
+                      onClick={onGenerate}
+                    >
+                      <RefreshCw className='size-4' /> Tentar novamente
+                    </Button>
+                  </div>
+                )}
+                {busy && (
+                  <div className='pt-2'>
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      className='w-full text-muted-foreground'
+                      onClick={cancel}
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
                 )}
               </CardContent>
             </Card>

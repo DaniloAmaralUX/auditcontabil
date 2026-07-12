@@ -8,6 +8,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { auditFilesQuery } from '../../data/queries'
 import { inconsistenciesQuery } from '../../data/inconsistencies'
+import { PanelErrorState } from './panel-error-state'
 
 function Kpi({
   label,
@@ -43,6 +44,15 @@ export function ResumoPanel({ auditId }: { auditId: string }) {
 
   if (results.isLoading || files.isLoading)
     return <Skeleton className='h-40 w-full' />
+  if (results.isError || files.isError)
+    return (
+      <PanelErrorState
+        onRetry={() => {
+          void results.refetch()
+          void files.refetch()
+        }}
+      />
+    )
 
   const all = results.data ?? []
   const divergences = all.filter((r) => r.severity === 'divergence').length

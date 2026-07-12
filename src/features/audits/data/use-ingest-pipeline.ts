@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import * as tus from 'tus-js-client'
+import { friendlyErrorMessage } from '@/lib/handle-server-error'
 import { qk } from '@/lib/query-keys'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth-store'
@@ -51,7 +52,8 @@ function tusUpload(
   file: File,
   objectPath: string,
   accessToken: string,
-  onProgress: (pct: number) => void
+  onProgress: (pct: number) => void,
+  onCreated?: (upload: tus.Upload) => void
 ): Promise<void> {
   const projectUrl = import.meta.env.VITE_SUPABASE_URL
   return new Promise((resolve, reject) => {
@@ -72,6 +74,7 @@ function tusUpload(
       onProgress: (sent, total) => onProgress(Math.round((sent / total) * 100)),
       onSuccess: () => resolve(),
     })
+    onCreated?.(upload)
     upload.findPreviousUploads().then((previous) => {
       if (previous.length > 0) upload.resumeFromPreviousUpload(previous[0])
       upload.start()
@@ -88,11 +91,15 @@ const MIME_BY_EXT: Record<string, string> = {
 export function useIngestPipeline(auditId: string) {
   const [state, setState] = useState<PipelineState>(INITIAL)
   const workerRef = useRef<Worker | null>(null)
+  const uploadRef = useRef<tus.Upload | null>(null)
+  const cancelledRef = useRef(false)
   const qc = useQueryClient()
   const escritorioId = useAuthStore((s) => s.auth.escritorioId)
 
-  const patch = (p: Partial<PipelineState>) =>
+  const patch = (p: Partial<PipelineState>) => {
+    if (cancelledRef.current) return // lotes tardios não ressuscitam a UI
     setState((s) => ({ ...s, ...p }))
+  }
 
   const getWorker = useCallback(() => {
     if (!workerRef.current) {
@@ -134,6 +141,7 @@ export function useIngestPipeline(auditId: string) {
   const start = useCallback(
     async (file: File, mapping: ColumnMapping, defaultPeriod?: string) => {
       try {
+        cancelledRef.current = false
         patch({ ...INITIAL, phase: 'hashing' })
 
         const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
@@ -147,9 +155,14 @@ export function useIngestPipeline(auditId: string) {
         // upload TUS para {escritorio}/{audit}/{sha}.{ext}
         patch({ phase: 'uploading' })
         const objectPath = `${escritorioId}/${auditId}/${sha}.${ext}`
-        await tusUpload(file, objectPath, token, (pct) =>
-          patch({ uploadPct: pct })
+        await tusUpload(
+          file,
+          objectPath,
+          token,
+          (pct) => patch({ uploadPct: pct }),
+          (u) => (uploadRef.current = u)
         )
+        uploadRef.current = null
 
         patch({ phase: 'registering' })
         const { data: fileId, error: regErr } = await supabase.rpc(
@@ -253,7 +266,17 @@ export function useIngestPipeline(auditId: string) {
           queryKey: qk.audits.inconsistencies(auditId, 'all'),
         })
       } catch (e) {
-        patch({ phase: 'error', error: e instanceof Error ? e.message : String(e) })
+        if (cancelledRef.current) return // cancelado pelo usuário — sem erro
+        // Erro técnico vai para o console; a UI recebe linguagem humana.
+        // eslint-disable-next-line no-console
+        console.error('[import] pipeline falhou:', e)
+        patch({
+          phase: 'error',
+          error: friendlyErrorMessage(
+            e instanceof Error ? e.message : String(e),
+            'Algo deu errado ao processar o arquivo. Verifique sua conexão e tente novamente.'
+          ),
+        })
       }
     },
     [auditId, escritorioId, getWorker, qc]
@@ -261,5 +284,15 @@ export function useIngestPipeline(auditId: string) {
 
   const reset = useCallback(() => setState(INITIAL), [])
 
-  return { state, start, preview, reset }
+  /** Aborta upload e parse em andamento e volta ao estado inicial. */
+  const cancel = useCallback(() => {
+    cancelledRef.current = true
+    void uploadRef.current?.abort()
+    uploadRef.current = null
+    workerRef.current?.terminate()
+    workerRef.current = null
+    setState(INITIAL)
+  }, [])
+
+  return { state, start, preview, reset, cancel }
 }

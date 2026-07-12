@@ -16,6 +16,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { track } from '@/lib/track'
 import { cn } from '@/lib/utils'
 import { clientsQuery } from '@/features/clients/data/queries'
 import { auditsListQuery } from '../audits/data/queries'
@@ -48,6 +49,13 @@ function lsSet(key: string) {
     /* sem storage, sem persistência — segue o fluxo */
   }
 }
+function lsRemove(key: string) {
+  try {
+    localStorage.removeItem(key)
+  } catch {
+    /* idem */
+  }
+}
 
 /* -------------------------------- Componente ------------------------------ */
 
@@ -73,7 +81,20 @@ export function HomeOnboarding() {
 
   // Loop aprendido (ou dispensado): a home vira "continue de onde parou".
   if (dismissed || (state.complete && celebrated)) {
-    return <ContinuePanel pending={pending} />
+    return (
+      <ContinuePanel
+        pending={pending}
+        // Só quem dispensou sem completar pode reabrir o guia.
+        onRestore={
+          dismissed && !state.complete
+            ? () => {
+                lsRemove(LS_DISMISSED)
+                setDismissed(false)
+              }
+            : undefined
+        }
+      />
+    )
   }
 
   if (state.complete) {
@@ -94,6 +115,7 @@ export function HomeOnboarding() {
             onClick={() => {
               lsSet(LS_CELEBRATED)
               setCelebrated(true)
+              track('onboarding_completed')
             }}
           >
             Começar a próxima <ArrowRight className='size-4' />
@@ -126,6 +148,7 @@ export function HomeOnboarding() {
             onClick={() => {
               lsSet(LS_WELCOME)
               setWelcomed(true)
+              track('onboarding_welcome_started')
             }}
           >
             <Sparkles className='size-4' /> Começar
@@ -136,7 +159,7 @@ export function HomeOnboarding() {
       <Card className='animate-rise'>
         <CardContent className='space-y-4 pt-6'>
           <div className='flex flex-wrap items-center justify-between gap-2'>
-            <h2 className='font-semibold'>Comece por aqui</h2>
+            <h2 className='text-lg font-semibold'>Comece por aqui</h2>
             <span className='text-sm text-muted-foreground tabular-nums'>
               {state.doneCount} de {state.steps.length}
             </span>
@@ -219,6 +242,7 @@ export function HomeOnboarding() {
               onClick={() => {
                 lsSet(LS_DISMISSED)
                 setDismissed(true)
+                track('onboarding_dismissed', { doneCount: state.doneCount })
               }}
             >
               Já conheço, dispensar
@@ -297,7 +321,25 @@ function StepCta({
 
 /* --------------------------- Continue de onde parou ----------------------- */
 
-function ContinuePanel({ pending }: { pending: AuditListItem[] }) {
+function ContinuePanel({
+  pending,
+  onRestore,
+}: {
+  pending: AuditListItem[]
+  onRestore?: () => void
+}) {
+  const restoreButton = onRestore && (
+    <div className='flex justify-center pt-1'>
+      <Button
+        variant='ghost'
+        size='sm'
+        className='text-muted-foreground'
+        onClick={onRestore}
+      >
+        Rever o guia de primeiros passos
+      </Button>
+    </div>
+  )
   if (pending.length === 0) {
     return (
       <Card className='animate-rise'>
@@ -310,6 +352,7 @@ function ContinuePanel({ pending }: { pending: AuditListItem[] }) {
           <Button size='sm' className='mt-2' asChild>
             <Link to='/audits'>Nova auditoria</Link>
           </Button>
+          {restoreButton}
         </CardContent>
       </Card>
     )
@@ -318,7 +361,7 @@ function ContinuePanel({ pending }: { pending: AuditListItem[] }) {
     <Card className='animate-rise'>
       <CardContent className='space-y-1 pt-6'>
         <div className='mb-3 flex items-center justify-between gap-2'>
-          <h2 className='font-semibold'>Continue de onde parou</h2>
+          <h2 className='text-lg font-semibold'>Continue de onde parou</h2>
           <Button variant='ghost' size='sm' asChild>
             <Link to='/audits'>
               Ver todas <ArrowRight className='size-4' />
@@ -366,6 +409,7 @@ function ContinuePanel({ pending }: { pending: AuditListItem[] }) {
             )
           })}
         </ul>
+        {restoreButton}
       </CardContent>
     </Card>
   )

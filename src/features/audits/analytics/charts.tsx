@@ -99,16 +99,16 @@ function Kpi({
   return (
     <Card className='animate-rise gap-2 py-5'>
       <CardHeader className='pb-0'>
-        <CardTitle className='text-[0.7rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase'>
+        <CardTitle className='text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase'>
           {label}
         </CardTitle>
       </CardHeader>
       <CardContent className='flex items-center gap-1.5'>
         <span
           className={cn(
-            'text-[1.7rem] leading-none font-bold tracking-tight tabular-nums',
+            'text-2xl leading-none font-bold tracking-tight tabular-nums',
             tone === 'bad' && 'text-destructive',
-            tone === 'good' && 'text-success'
+            tone === 'good' && 'text-success-text'
           )}
         >
           {value}
@@ -149,7 +149,8 @@ export function GroupDonut({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent className='flex flex-wrap items-center gap-4'>
-        <div className='h-44 w-44 shrink-0'>
+        {/* A lista ao lado é o equivalente textual completo do donut. */}
+        <div className='h-44 w-44 shrink-0' aria-hidden='true'>
           <ResponsiveContainer width='100%' height='100%'>
             <PieChart>
               <Pie
@@ -214,7 +215,12 @@ export function CompanyRanking({
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width='100%' height={Math.max(180, data.length * 36)}>
-          <BarChart data={data} layout='vertical' margin={{ left: 8, right: 48 }}>
+          <BarChart
+            data={data}
+            layout='vertical'
+            margin={{ left: 8, right: 48 }}
+            aria-label={`${title}: ${data.map((d) => `${d.codigo} ${brl(d.despesas, true)}`).join(', ')}`}
+          >
             <XAxis type='number' hide />
             <YAxis
               type='category'
@@ -277,7 +283,9 @@ function ResultBarLabel(props: {
       fontSize={11}
       fontWeight={inside ? 600 : 400}
       className='tabular-nums'
-      fill={inside ? 'oklch(1 0 0)' : 'var(--muted-foreground)'}
+      // Escuro fixo: as barras são médias/claras nos DOIS temas (L 0.585–0.72),
+      // então texto escuro rende >=4.7:1 no pior caso; branco não passava.
+      fill={inside ? 'oklch(0.145 0 0)' : 'var(--muted-foreground)'}
     >
       {brl(value, true)}
     </text>
@@ -305,7 +313,12 @@ export function CompanyResults({
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width='100%' height={Math.max(180, data.length * 34)}>
-          <BarChart data={data} layout='vertical' margin={{ left: 8, right: 56 }}>
+          <BarChart
+            data={data}
+            layout='vertical'
+            margin={{ left: 8, right: 56 }}
+            aria-label={`${title}: ${data.map((d) => `${d.codigo} ${brl(d.resultado, true)}`).join(', ')}`}
+          >
             <XAxis type='number' hide />
             <YAxis
               type='category'
@@ -411,7 +424,11 @@ export function PeriodTrend({
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width='100%' height={220}>
-          <LineChart data={data} margin={{ left: 8, right: 16, top: 8 }}>
+          <LineChart
+            data={data}
+            margin={{ left: 8, right: 16, top: 8 }}
+            aria-label={`${title}: ${description}`}
+          >
             <CartesianGrid strokeDasharray='3 3' stroke='var(--border)' />
             <XAxis
               dataKey='mes'
@@ -462,6 +479,26 @@ export function PeriodTrend({
             Despesas
           </span>
         </div>
+        {/* Equivalente textual do gráfico para leitores de tela. */}
+        <table className='sr-only'>
+          <caption>{title} — valores mensais</caption>
+          <thead>
+            <tr>
+              <th scope='col'>Mês</th>
+              <th scope='col'>Receita líquida</th>
+              <th scope='col'>Despesas</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((p) => (
+              <tr key={p.mes}>
+                <th scope='row'>{p.mes}</th>
+                <td>{brl(p.receita_liquida)}</td>
+                <td>{brl(p.despesas)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </CardContent>
     </Card>
   )
@@ -471,8 +508,8 @@ export function PeriodTrend({
 
 function statusBadge(status: AnalyticsEmpresa['status']) {
   const map = {
-    Superavitária: 'text-success',
-    Deficitária: 'text-warning',
+    Superavitária: 'text-success-text',
+    Deficitária: 'text-warning-text',
     Crítica: 'text-destructive',
   } as const
   return (
@@ -531,7 +568,7 @@ export function CompanyTable({
                   <TableCell
                     className={cn(
                       'text-end font-medium tabular-nums',
-                      e.resultado < 0 ? 'text-destructive' : 'text-success'
+                      e.resultado < 0 ? 'text-destructive' : 'text-success-text'
                     )}
                   >
                     {brl(e.resultado, true)}
@@ -553,7 +590,7 @@ export function CompanyTable({
 const tooltipStyle: React.CSSProperties = {
   background: 'var(--popover)',
   border: '1px solid var(--border)',
-  borderRadius: 8,
+  borderRadius: 'var(--radius-sm)',
   color: 'var(--popover-foreground)',
   fontSize: 12,
 }

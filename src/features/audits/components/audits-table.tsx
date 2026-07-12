@@ -1,7 +1,10 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
+import { Plus } from 'lucide-react'
+import { can } from '@/lib/permissions'
 import { strings } from '@/lib/strings'
+import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -15,6 +18,7 @@ import {
 } from '@/components/ui/table'
 import { auditsListQuery } from '../data/queries'
 import { type AuditListItem } from '../data/schema'
+import { useAudits } from './audits-provider'
 import { nextAction } from './next-action'
 import { AuditStatusBadge } from './status-badge'
 
@@ -26,6 +30,8 @@ function fmtPeriod(a: AuditListItem) {
 
 export function AuditsTable() {
   const { data, isLoading, isError, refetch } = useQuery(auditsListQuery())
+  const { setCreateOpen } = useAudits()
+  const role = useAuthStore((s) => s.auth.role)
   const [q, setQ] = useState('')
 
   const rows = useMemo(() => {
@@ -89,11 +95,21 @@ export function AuditsTable() {
                       : 'Suas auditorias vão aparecer aqui.'}
                   </p>
                   {!q && (
-                    <p className='mx-auto mt-1 max-w-md text-sm text-muted-foreground'>
-                      Clique em <strong>Nova auditoria</strong> (acima), escolha
-                      o cliente e o período — depois importe a planilha e o
-                      dashboard se monta sozinho.
-                    </p>
+                    <>
+                      <p className='mx-auto mt-1 max-w-md text-sm text-muted-foreground'>
+                        Escolha o cliente e o período — depois importe a
+                        planilha e o dashboard se monta sozinho.
+                      </p>
+                      {can(role ?? undefined, 'create_audit') && (
+                        <Button
+                          size='sm'
+                          className='mt-3'
+                          onClick={() => setCreateOpen(true)}
+                        >
+                          <Plus className='size-4' /> Nova auditoria
+                        </Button>
+                      )}
+                    </>
                   )}
                 </TableCell>
               </TableRow>

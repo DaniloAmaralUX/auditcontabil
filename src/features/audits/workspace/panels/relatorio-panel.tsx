@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SeverityBadge, type Severity } from '../../components/status-badge'
+import { PanelErrorState } from './panel-error-state'
 
 type SnapshotPayload = {
   audit: {
@@ -47,9 +48,10 @@ function snapshotQuery(auditId: string) {
 }
 
 export function RelatorioPanel({ auditId }: { auditId: string }) {
-  const { data, isLoading } = useQuery(snapshotQuery(auditId))
+  const { data, isLoading, isError, refetch } = useQuery(snapshotQuery(auditId))
 
   if (isLoading) return <Skeleton className='h-40 w-full' />
+  if (isError) return <PanelErrorState onRetry={() => refetch()} />
 
   if (!data) {
     return (

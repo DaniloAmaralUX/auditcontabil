@@ -15,6 +15,8 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
   return {
     ...actual,
     useNavigate: () => mocks.navigate,
+    // CommandMenu filtra itens por papel via route context (owner vê tudo).
+    useRouteContext: () => ({ role: 'owner' }),
   }
 })
 

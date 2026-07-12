@@ -19,6 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { auditDetailQuery, auditFilesQuery } from '../../data/queries'
+import { PanelErrorState } from './panel-error-state'
 
 const FILE_STATUS_LABEL: Record<string, string> = {
   uploading: 'Enviando',
@@ -31,7 +32,9 @@ const FILE_STATUS_LABEL: Record<string, string> = {
 }
 
 export function DadosPanel({ auditId }: { auditId: string }) {
-  const { data, isLoading } = useQuery(auditFilesQuery(auditId))
+  const { data, isLoading, isError, refetch } = useQuery(
+    auditFilesQuery(auditId)
+  )
   const audit = useQuery(auditDetailQuery(auditId))
   const role = useAuthStore((s) => s.auth.role)
   const qc = useQueryClient()
@@ -72,6 +75,8 @@ export function DadosPanel({ auditId }: { auditId: string }) {
 
       {isLoading ? (
         <Skeleton className='h-32 w-full' />
+      ) : isError ? (
+        <PanelErrorState onRetry={() => refetch()} />
       ) : (data?.length ?? 0) === 0 ? (
         <div className='flex flex-col items-center gap-2 rounded-lg border border-dashed py-12 text-center'>
           <FileSpreadsheet className='size-8 text-muted-foreground' />

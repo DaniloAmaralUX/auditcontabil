@@ -9,6 +9,9 @@ type MainProps = React.HTMLAttributes<HTMLElement> & {
 export function Main({ fixed, className, fluid, ...props }: MainProps) {
   return (
     <main
+      // Alvo do skip link; tabIndex garante que o foco realmente se mova.
+      id='content'
+      tabIndex={-1}
       data-layout={fixed ? 'fixed' : 'auto'}
       className={cn(
         'px-4 py-6',

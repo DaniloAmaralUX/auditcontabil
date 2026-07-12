@@ -1,5 +1,10 @@
 import { useNavigate, useSearch } from '@tanstack/react-router'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs'
 import { CompartilharPanel } from './panels/compartilhar-panel'
 import { DadosPanel } from './panels/dados-panel'
 import { DashboardPanel } from './panels/dashboard-panel'
@@ -25,29 +30,44 @@ export function AuditWorkspace({ auditId }: { auditId: string }) {
   const navigate = useNavigate({ from: '/audits/$auditId' })
 
   return (
-    <div className='space-y-4'>
-      <Tabs
-        value={tab}
-        onValueChange={(value) =>
-          navigate({ search: (prev) => ({ ...prev, tab: value as WorkspaceTab }) })
-        }
-      >
-        <TabsList className='w-full justify-start overflow-x-auto'>
-          {TABS.map((t) => (
-            <TabsTrigger key={t.value} value={t.value}>
-              {t.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+    // Painéis DENTRO do <Tabs>: aria-controls dos triggers aponta para
+    // TabsContent reais (o Radix monta só a aba ativa — lazy preservado).
+    <Tabs
+      className='gap-4'
+      value={tab}
+      onValueChange={(value) =>
+        navigate({ search: (prev) => ({ ...prev, tab: value as WorkspaceTab }) })
+      }
+    >
+      <TabsList className='w-full justify-start overflow-x-auto'>
+        {TABS.map((t) => (
+          <TabsTrigger key={t.value} value={t.value}>
+            {t.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
 
-      {tab === 'dashboard' && <DashboardPanel auditId={auditId} />}
-      {tab === 'resumo' && <ResumoPanel auditId={auditId} />}
-      {tab === 'dados' && <DadosPanel auditId={auditId} />}
-      {tab === 'inconsistencias' && <InconsistenciasPanel auditId={auditId} />}
-      {tab === 'revisao' && <RevisaoPanel auditId={auditId} />}
-      {tab === 'relatorio' && <RelatorioPanel auditId={auditId} />}
-      {tab === 'compartilhar' && <CompartilharPanel auditId={auditId} />}
-    </div>
+      <TabsContent value='dashboard'>
+        <DashboardPanel auditId={auditId} />
+      </TabsContent>
+      <TabsContent value='resumo'>
+        <ResumoPanel auditId={auditId} />
+      </TabsContent>
+      <TabsContent value='dados'>
+        <DadosPanel auditId={auditId} />
+      </TabsContent>
+      <TabsContent value='inconsistencias'>
+        <InconsistenciasPanel auditId={auditId} />
+      </TabsContent>
+      <TabsContent value='revisao'>
+        <RevisaoPanel auditId={auditId} />
+      </TabsContent>
+      <TabsContent value='relatorio'>
+        <RelatorioPanel auditId={auditId} />
+      </TabsContent>
+      <TabsContent value='compartilhar'>
+        <CompartilharPanel auditId={auditId} />
+      </TabsContent>
+    </Tabs>
   )
 }

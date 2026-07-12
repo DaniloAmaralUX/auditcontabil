@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader2, ShieldCheck } from 'lucide-react'
-import { toast } from 'sonner'
 import { qk } from '@/lib/query-keys'
 import { can } from '@/lib/permissions'
 import { supabase } from '@/lib/supabase'
@@ -19,8 +18,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { auditDetailQuery } from '../../data/queries'
 import { inconsistenciesQuery } from '../../data/inconsistencies'
 import { useTransitionAudit } from '../../data/mutations'
+import { PanelErrorState } from './panel-error-state'
 
 // RF-052: conclusão geral — vai para o snapshot, o cliente e o PDF.
+// Autosave com debounce: trocar de aba não descarta o que foi digitado.
 function ConclusionCard({
   auditId,
   initial,
@@ -30,20 +31,35 @@ function ConclusionCard({
 }) {
   const qc = useQueryClient()
   const [text, setText] = useState(initial)
+  const [lastSaved, setLastSaved] = useState(initial)
   const save = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (value: string) => {
       const { error } = await supabase
         .from('audits')
-        .update({ conclusion: text.trim() || null })
+        .update({ conclusion: value.trim() || null })
         .eq('id', auditId)
       if (error) throw error
+      return value
     },
-    onSuccess: () => {
-      toast.success('Conclusão salva.')
-      qc.invalidateQueries({ queryKey: qk.audits.detail(auditId) })
+    onSuccess: (value) => {
+      setLastSaved(value)
+      // Atualiza o cache sem remontar o painel — o texto continua no lugar.
+      qc.setQueryData(
+        qk.audits.detail(auditId),
+        (prev: { conclusion?: string | null } | undefined) =>
+          prev ? { ...prev, conclusion: value.trim() || null } : prev
+      )
     },
   })
+  const { mutate: saveNow } = save
 
+  useEffect(() => {
+    if (text === lastSaved) return
+    const t = setTimeout(() => saveNow(text), 1500)
+    return () => clearTimeout(t)
+  }, [text, lastSaved, saveNow])
+
+  const saved = text === lastSaved
   return (
     <Card>
       <CardHeader>
@@ -60,15 +76,26 @@ function ConclusionCard({
           placeholder='Ex.: A análise do período indicou 3 pontos que precisam de ajuste. Recomendamos…'
           rows={4}
         />
-        <Button
-          variant='outline'
-          size='sm'
-          onClick={() => save.mutate()}
-          disabled={save.isPending || text === initial}
-        >
-          {save.isPending && <Loader2 className='size-4 animate-spin' />}
-          Salvar conclusão
-        </Button>
+        <div className='flex flex-wrap items-center gap-3'>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => saveNow(text)}
+            disabled={save.isPending || saved}
+          >
+            {save.isPending && <Loader2 className='size-4 animate-spin' />}
+            Salvar conclusão
+          </Button>
+          <span aria-live='polite' className='text-xs text-muted-foreground'>
+            {save.isPending
+              ? 'Salvando…'
+              : !saved
+                ? 'Alterações não salvas — salvamos sozinhos em instantes.'
+                : text !== initial
+                  ? 'Salvo.'
+                  : ''}
+          </span>
+        </div>
       </CardContent>
     </Card>
   )
@@ -82,6 +109,15 @@ export function RevisaoPanel({ auditId }: { auditId: string }) {
 
   if (audit.isLoading || results.isLoading)
     return <Skeleton className='h-40 w-full' />
+  if (audit.isError || results.isError)
+    return (
+      <PanelErrorState
+        onRetry={() => {
+          void audit.refetch()
+          void results.refetch()
+        }}
+      />
+    )
 
   const actionable = (results.data ?? []).filter(
     (r) => r.severity === 'attention' || r.severity === 'divergence'
@@ -131,11 +167,7 @@ export function RevisaoPanel({ auditId }: { auditId: string }) {
         </CardContent>
       </Card>
 
-      <ConclusionCard
-        key={audit.data?.conclusion ?? ''}
-        auditId={auditId}
-        initial={audit.data?.conclusion ?? ''}
-      />
+      <ConclusionCard auditId={auditId} initial={audit.data?.conclusion ?? ''} />
 
       <Card>
         <CardHeader>

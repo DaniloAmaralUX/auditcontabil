@@ -6,10 +6,11 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 
 // Header padrão das páginas internas (dedup: antes repetido por feature).
-// `leading` permite botão de voltar/breadcrumb à esquerda; `withSearch` liga o ⌘K.
+// `leading` permite botão de voltar/breadcrumb à esquerda. A busca (⌘K) já é
+// global — o gatilho visível aparece por padrão em todas as páginas.
 export function PageHeader({
   leading,
-  withSearch = false,
+  withSearch = true,
 }: {
   leading?: ReactNode
   withSearch?: boolean

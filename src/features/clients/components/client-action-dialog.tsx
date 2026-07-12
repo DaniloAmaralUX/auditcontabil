@@ -15,6 +15,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -24,6 +25,22 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { useCreateClient, useUpdateClient } from '../data/mutations'
 import { clienteFormSchema, type Cliente, type ClienteForm } from '../data/schema'
+
+/** Máscara progressiva: 000.000.000-00 (CPF) → 00.000.000/0000-00 (CNPJ). */
+function maskCpfCnpj(value: string): string {
+  const d = value.replace(/\D/g, '').slice(0, 14)
+  if (d.length <= 11) {
+    return d
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+  }
+  return d
+    .replace(/(\d{2})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1/$2')
+    .replace(/(\d{4})(\d{1,2})$/, '$1-$2')
+}
 
 type Props = {
   open: boolean
@@ -38,6 +55,7 @@ export function ClientActionDialog({ open, onOpenChange, currentRow }: Props) {
 
   const form = useForm<ClienteForm>({
     resolver: zodResolver(clienteFormSchema),
+    mode: 'onTouched', // valida no blur, não só no submit
     defaultValues: { name: '', cnpj: '', contact_email: '', is_active: true },
   })
 
@@ -102,8 +120,18 @@ export function ClientActionDialog({ open, onOpenChange, currentRow }: Props) {
                 <FormItem>
                   <FormLabel>{strings.clients.cnpj}</FormLabel>
                   <FormControl>
-                    <Input placeholder='CPF ou CNPJ do titular' {...field} />
+                    <Input
+                      placeholder='000.000.000-00 ou 00.000.000/0000-00'
+                      inputMode='numeric'
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(maskCpfCnpj(e.target.value))
+                      }
+                    />
                   </FormControl>
+                  <FormDescription>
+                    Só números — a pontuação entra sozinha.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

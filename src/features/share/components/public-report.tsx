@@ -54,6 +54,26 @@ function clientBadge(severity: string) {
   )
 }
 
+// Chaves internas das fórmulas nunca chegam cruas ao leigo.
+const KEY_LABELS: Record<string, string> = {
+  saldo_anterior: 'Saldo anterior',
+  saldo_inicial: 'Saldo inicial',
+  saldo_final: 'Saldo final',
+  saldo_esperado: 'Saldo esperado',
+  saldo_informado: 'Saldo informado',
+  total_debitos: 'Total de débitos',
+  total_creditos: 'Total de créditos',
+  debito: 'Débito',
+  credito: 'Crédito',
+  diferenca: 'Diferença',
+  valor: 'Valor',
+}
+function humanizeKey(k: string): string {
+  if (KEY_LABELS[k]) return KEY_LABELS[k]
+  const plain = k.replace(/_/g, ' ')
+  return plain.charAt(0).toUpperCase() + plain.slice(1)
+}
+
 function fmtMoney(v: unknown): string | null {
   if (typeof v !== 'number') return null
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -78,8 +98,8 @@ export function PublicReport({
             <div className='flex items-center gap-2'>
               <Logo className='size-9' />
               <div className='leading-tight'>
-                <div className='text-[0.62rem] font-bold tracking-[0.16em] text-muted-foreground'>
-                  AUDITVIEW
+                <div className='text-[0.62rem] font-bold tracking-[0.16em] text-muted-foreground uppercase'>
+                  {audit.escritorio ?? 'AuditView'}
                 </div>
                 <div className='font-bold'>{audit.cliente}</div>
               </div>
@@ -185,7 +205,9 @@ export function PublicReport({
                 <div className='grid grid-cols-2 gap-2 rounded-md bg-muted/40 p-3 sm:grid-cols-3'>
                   {money.slice(0, 6).map(({ k, money: m }) => (
                     <div key={k}>
-                      <div className='text-xs text-muted-foreground'>{k}</div>
+                      <div className='text-xs text-muted-foreground'>
+                        {humanizeKey(k)}
+                      </div>
                       <div className='font-medium tabular-nums'>{m}</div>
                     </div>
                   ))}
@@ -215,7 +237,8 @@ export function PublicReport({
         <footer className='pt-6 text-center text-xs text-muted-foreground'>
           Relatório publicado em{' '}
           {new Date(audit.published_at).toLocaleDateString('pt-BR')} · versão{' '}
-          {audit.version}. Dúvidas? Fale com seu escritório de contabilidade.
+          {audit.version}. Dúvidas? Fale com{' '}
+          {audit.escritorio ?? 'seu escritório de contabilidade'}.
         </footer>
       </div>
     </div>

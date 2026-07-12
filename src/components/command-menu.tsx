@@ -1,5 +1,5 @@
 import React from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, useRouteContext } from '@tanstack/react-router'
 import { ArrowRight, ChevronRight, Laptop, Moon, Sun } from 'lucide-react'
 import { useSearch } from '@/context/search-provider'
 import { useTheme } from '@/context/theme-provider'
@@ -12,11 +12,13 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command'
-import { navGroups } from './layout/data/sidebar-data'
+import { visibleFor } from './layout/data/sidebar-data'
 import { ScrollArea } from './ui/scroll-area'
 
 export function CommandMenu() {
   const navigate = useNavigate()
+  // Mesmo filtro de papel do sidebar — viewer não vê Equipe/Faturamento aqui.
+  const { role } = useRouteContext({ from: '/_authenticated' })
   const { setTheme } = useTheme()
   const { open, setOpen } = useSearch()
 
@@ -34,7 +36,7 @@ export function CommandMenu() {
       <CommandList>
         <ScrollArea type='hover' className='h-72 pe-1'>
           <CommandEmpty>Nenhum resultado.</CommandEmpty>
-          {navGroups.map((group) => (
+          {visibleFor(role).map((group) => (
             <CommandGroup key={group.title} heading={group.title}>
               {group.items.map((navItem, i) => {
                 if (navItem.url)

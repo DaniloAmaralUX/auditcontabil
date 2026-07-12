@@ -6,11 +6,12 @@ import {
   Users,
   UsersRound,
 } from 'lucide-react'
+import { type Role } from '@/lib/supabase'
 import { type NavGroup } from '../types'
 
 // Nav do domínio. `roles` restringe a visibilidade; app-sidebar filtra pelo perfil
 // do route context. Rótulos PT-BR; paths em inglês (§10).
-export const navGroups: NavGroup[] = [
+const navGroups: NavGroup[] = [
   {
     title: 'Operação',
     items: [
@@ -28,3 +29,15 @@ export const navGroups: NavGroup[] = [
     ],
   },
 ]
+
+/** Grupos visíveis para o papel — sidebar e command palette usam o MESMO filtro. */
+export function visibleFor(role: Role | undefined): NavGroup[] {
+  return navGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(
+        (item) => !item.roles || (role && item.roles.includes(role))
+      ),
+    }))
+    .filter((group) => group.items.length > 0)
+}

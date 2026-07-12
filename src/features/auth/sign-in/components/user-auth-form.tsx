@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Loader2, LogIn } from 'lucide-react'
-import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { strings } from '@/lib/strings'
 import { cn } from '@/lib/utils'
@@ -50,7 +49,8 @@ export function UserAuthForm({
     })
     setIsLoading(false)
     if (error) {
-      toast.error(strings.auth.invalidCredentials)
+      // Erro persistente junto ao formulário (não só um toast que some).
+      form.setError('root', { message: strings.auth.invalidCredentials })
       return
     }
     navigate({ to: redirectTo || '/', replace: true })
@@ -103,6 +103,11 @@ export function UserAuthForm({
             </FormItem>
           )}
         />
+        {form.formState.errors.root && (
+          <p role='alert' className='text-sm text-destructive'>
+            {form.formState.errors.root.message}
+          </p>
+        )}
         <Button className='mt-2' disabled={isLoading}>
           {isLoading ? <Loader2 className='animate-spin' /> : <LogIn />}
           {strings.auth.signIn}

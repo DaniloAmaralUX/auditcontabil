@@ -12,6 +12,8 @@ export type PublicSnapshot = {
     version: number
     conclusion?: string | null
     published_at: string
+    /** Nome do escritório que publica — ausente em snapshots antigos. */
+    escritorio?: string | null
   }
   summary: {
     total_rows: number

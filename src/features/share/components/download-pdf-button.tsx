@@ -56,7 +56,9 @@ function ReportPdf({ snapshot }: { snapshot: PublicSnapshot }) {
     >
       <Page size='A4' style={styles.page}>
         <View style={styles.header}>
-          <Text style={styles.brand}>AUDITVIEW</Text>
+          <Text style={styles.brand}>
+            {(audit.escritorio ?? 'AuditView').toUpperCase()}
+          </Text>
           <Text style={styles.title}>{audit.title}</Text>
           <Text style={styles.meta}>
             {audit.cliente} · {fmtPeriod(audit.period_start, audit.period_end)} ·
@@ -110,7 +112,7 @@ function ReportPdf({ snapshot }: { snapshot: PublicSnapshot }) {
               ]}
             >
               {item.severity === 'info' ? 'INFORMATIVO' : 'PRECISA DE ATENÇÃO'}
-              {item.account_code ? ` · CONTA ${item.account_code}` : ''}
+              {item.account_code ? ` · Conta ${item.account_code}` : ''}
             </Text>
             <Text>{item.message}</Text>
             {item.note && (

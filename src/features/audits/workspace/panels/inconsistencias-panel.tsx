@@ -30,6 +30,7 @@ import {
   type ReviewStatus,
   type RuleResult,
 } from '../../data/inconsistencies'
+import { PanelErrorState } from './panel-error-state'
 
 const FILTERS = [
   { key: 'todas', label: 'Todas' },
@@ -48,7 +49,9 @@ function fmtValues(v: Record<string, unknown>) {
 }
 
 export function InconsistenciasPanel({ auditId }: { auditId: string }) {
-  const { data, isLoading } = useQuery(inconsistenciesQuery(auditId))
+  const { data, isLoading, isError, refetch } = useQuery(
+    inconsistenciesQuery(auditId)
+  )
   const [filter, setFilter] = useState<(typeof FILTERS)[number]['key']>('todas')
   const [current, setCurrent] = useState<RuleResult | null>(null)
 
@@ -71,6 +74,7 @@ export function InconsistenciasPanel({ auditId }: { auditId: string }) {
   }, [data, filter])
 
   if (isLoading) return <Skeleton className='h-64 w-full' />
+  if (isError) return <PanelErrorState onRetry={() => refetch()} />
 
   const okCount = (data ?? []).filter((r) => r.severity === 'ok').length
   if ((data ?? []).filter((r) => r.severity !== 'ok').length === 0) {

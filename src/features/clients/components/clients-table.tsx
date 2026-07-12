@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import { can } from '@/lib/permissions'
 import { strings } from '@/lib/strings'
 import { useAuthStore } from '@/stores/auth-store'
@@ -96,9 +96,20 @@ export function ClientsTable() {
                     {q ? strings.clients.emptyFiltered : strings.clients.emptyTitle}
                   </p>
                   {!q && (
-                    <p className='text-sm text-muted-foreground'>
-                      {strings.clients.emptyHint}
-                    </p>
+                    <>
+                      <p className='text-sm text-muted-foreground'>
+                        {strings.clients.emptyHint}
+                      </p>
+                      {canEdit && (
+                        <Button
+                          size='sm'
+                          className='mt-3'
+                          onClick={() => setOpen('create')}
+                        >
+                          <Plus className='size-4' /> {strings.clients.new}
+                        </Button>
+                      )}
+                    </>
                   )}
                 </TableCell>
               </TableRow>

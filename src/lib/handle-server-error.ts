@@ -39,6 +39,13 @@ function friendly(raw: string): string {
   return MESSAGES[key] ?? raw
 }
 
+/** Versão para superfícies de UI: erro desconhecido NUNCA vaza texto técnico. */
+export function friendlyErrorMessage(raw: string, fallback: string): string {
+  if (!raw) return fallback
+  const key = raw.split(':')[0].trim()
+  return MESSAGES[key] ?? fallback
+}
+
 export function handleServerError(error: unknown) {
   if (import.meta.env.DEV) {
     // eslint-disable-next-line no-console

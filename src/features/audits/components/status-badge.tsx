@@ -42,12 +42,12 @@ const AUDIT_META: Record<AuditStatus, Meta> = {
   partially_processed: {
     label: 'Parcialmente processada',
     icon: CircleAlert,
-    cls: 'text-warning',
+    cls: 'text-warning-text',
   },
   processed: { label: 'Processada', icon: CircleCheck, cls: 'text-info' },
   in_review: { label: 'Em revisão', icon: Eye, cls: 'text-info' },
-  approved: { label: 'Aprovada', icon: ShieldCheck, cls: 'text-success' },
-  published: { label: 'Publicada', icon: Send, cls: 'text-success' },
+  approved: { label: 'Aprovada', icon: ShieldCheck, cls: 'text-success-text' },
+  published: { label: 'Publicada', icon: Send, cls: 'text-success-text' },
   archived: { label: 'Arquivada', icon: Archive, cls: 'text-muted-foreground' },
 }
 
@@ -69,9 +69,9 @@ export function AuditStatusBadge({ status }: { status: AuditStatus }) {
 export type Severity = 'ok' | 'info' | 'attention' | 'divergence'
 
 const SEVERITY_META: Record<Severity, Meta> = {
-  ok: { label: 'OK', icon: CircleCheck, cls: 'text-success' },
+  ok: { label: 'OK', icon: CircleCheck, cls: 'text-success-text' },
   info: { label: 'Informação', icon: Info, cls: 'text-info' },
-  attention: { label: 'Atenção', icon: TriangleAlert, cls: 'text-warning' },
+  attention: { label: 'Atenção', icon: TriangleAlert, cls: 'text-warning-text' },
   divergence: {
     label: 'Divergência',
     icon: OctagonAlert,
