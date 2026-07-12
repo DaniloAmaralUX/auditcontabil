@@ -23,6 +23,7 @@ export const strings = {
     email: 'E-mail',
     password: 'Senha',
     signIn: 'Entrar',
+    rememberMe: 'Manter conectado',
     forgot: 'Esqueci minha senha',
     forgotTitle: 'Recuperar senha',
     forgotSubtitle: 'Enviaremos um link para redefinir sua senha.',

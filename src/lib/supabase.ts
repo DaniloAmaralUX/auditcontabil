@@ -15,8 +15,70 @@ if (!url || !anonKey) {
   )
 }
 
+// "Manter conectado": a preferência decide ONDE a sessão é guardada.
+// - lembrar  → localStorage: sobrevive a fechar o navegador.
+// - não      → sessionStorage: some quando a aba/navegador fecha.
+// A própria flag vive sempre no localStorage (precisa persistir a escolha).
+const REMEMBER_KEY = 'auditview.remember'
+
+function shouldRemember(): boolean {
+  try {
+    // Padrão = lembrar (ferramenta interna, máquina própria da contadora).
+    return localStorage.getItem(REMEMBER_KEY) !== '0'
+  } catch {
+    return true
+  }
+}
+
+/** Define a preferência ANTES do login, para o token ir ao storage certo. */
+export function setRememberSession(remember: boolean) {
+  try {
+    localStorage.setItem(REMEMBER_KEY, remember ? '1' : '0')
+  } catch {
+    /* sem storage → sessão vira efêmera de qualquer jeito */
+  }
+}
+
+// Adapter que roteia entre local/session conforme a preferência atual e
+// nunca deixa cópia órfã no outro storage. Exportado para teste.
+export const hybridStorage = {
+  getItem: (key: string): string | null => {
+    try {
+      return sessionStorage.getItem(key) ?? localStorage.getItem(key)
+    } catch {
+      return null
+    }
+  },
+  setItem: (key: string, value: string): void => {
+    try {
+      if (shouldRemember()) {
+        localStorage.setItem(key, value)
+        sessionStorage.removeItem(key)
+      } else {
+        sessionStorage.setItem(key, value)
+        localStorage.removeItem(key)
+      }
+    } catch {
+      /* ignore */
+    }
+  },
+  removeItem: (key: string): void => {
+    try {
+      localStorage.removeItem(key)
+      sessionStorage.removeItem(key)
+    } catch {
+      /* ignore */
+    }
+  },
+}
+
 export const supabase: SupabaseClient = createClient(url ?? '', anonKey ?? '', {
-  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storage: hybridStorage,
+  },
 })
 
 export type Role = 'owner' | 'accountant' | 'analyst'

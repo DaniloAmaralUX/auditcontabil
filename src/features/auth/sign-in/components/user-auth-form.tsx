@@ -5,10 +5,11 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { LogIn } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { setRememberSession, supabase } from '@/lib/supabase'
 import { strings } from '@/lib/strings'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Form,
   FormControl,
@@ -18,6 +19,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { PasswordInput } from '@/components/password-input'
 
 const formSchema = z.object({
@@ -35,6 +37,7 @@ export function UserAuthForm({
   ...props
 }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const [remember, setRemember] = useState(true)
   const navigate = useNavigate()
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -44,6 +47,8 @@ export function UserAuthForm({
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
+    // Define ONDE a sessão é guardada antes do login gravar o token.
+    setRememberSession(remember)
     const { error } = await supabase.auth.signInWithPassword({
       email: data.email,
       password: data.password,
@@ -104,6 +109,19 @@ export function UserAuthForm({
             </FormItem>
           )}
         />
+        <div className='flex items-center gap-2'>
+          <Checkbox
+            id='remember'
+            checked={remember}
+            onCheckedChange={(v) => setRemember(v === true)}
+          />
+          <Label
+            htmlFor='remember'
+            className='cursor-pointer text-sm font-normal text-muted-foreground'
+          >
+            {strings.auth.rememberMe}
+          </Label>
+        </div>
         {form.formState.errors.root && (
           <p role='alert' className='text-sm text-destructive'>
             {form.formState.errors.root.message}
