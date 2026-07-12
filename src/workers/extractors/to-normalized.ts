@@ -50,6 +50,10 @@ export function extractedToNormalized(result: ExtractResult): NormalizedRow[] {
         sintetica: r.synthetic,
       },
       normalized: {
+        // 'origem' marca linha de documento EXTRAÍDO: debit/credit carregam a
+        // convenção de agregação (|saldo| na natureza), não movimentos — as
+        // regras R001/R002 pulam essas linhas (a conferência é o selo abaixo).
+        origem: meta.kind,
         account_code: r.account_code,
         account_name: r.account_name,
         kind,
@@ -83,6 +87,7 @@ export function extractedToNormalized(result: ExtractResult): NormalizedRow[] {
     row_number: out.length + 1,
     original: { checks_total: checks.length, checks_quebrados: broken.length },
     normalized: {
+      origem: meta.kind,
       resultado_calculado: dre.resultado.toFixed(2),
       resultado_declarado: dre.declarado?.toFixed(2) ?? null,
     },

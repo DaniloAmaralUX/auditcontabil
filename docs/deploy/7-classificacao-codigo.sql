@@ -132,3 +132,143 @@ begin
   return jsonb_build_object('inserted', v_inserted, 'skipped', v_dup,
     'invalid', v_invalid, 'total_so_far', v_total);
 end $$;
+
+-- ============================================================
+-- R001/R002 v1 — não se aplicam a documentos EXTRAÍDOS (balancete/DRE).
+-- Nesses documentos debit/credit carregam a convenção de agregação da DRE
+-- (|saldo| na coluna da natureza), não movimentos de partida dobrada — as
+-- equações de movimento gerariam falso alarme. A conferência desses arquivos
+-- é a RECONCILIAÇÃO do extractor (linha "Conferência com o documento").
+-- Linhas extraídas se identificam por normalized->>'origem'.
+-- ============================================================
+
+create or replace function app.rule_r001_debit_credit_v1(
+  p_audit_id uuid, p_params jsonb, p_run_id uuid
+) returns void language plpgsql security definer set search_path = public, app as $$
+declare
+  v_esc uuid; v_rule_id uuid; v_code text; v_version int; v_found int;
+begin
+  select escritorio_id into v_esc from audits where id = p_audit_id;
+  select id, code, version into v_rule_id, v_code, v_version
+    from rules where escritorio_id = v_esc and code = 'R001_DEBIT_CREDIT' and enabled
+    order by version desc limit 1;
+  if v_rule_id is null then return; end if;
+
+  -- RN-005: sem dados aplicáveis => "Não executada", nunca OK indevido.
+  if not exists (
+    select 1 from normalized_rows
+    where audit_id = p_audit_id and status in ('ok','coerced') and period is not null
+      and (debit is not null or credit is not null)
+      and coalesce(normalized->>'origem','') = ''
+  ) then
+    insert into rule_results (escritorio_id, audit_id, run_id, rule_id, rule_code, rule_version,
+      scope, severity, message, formula_snapshot, values_snapshot)
+    values (v_esc, p_audit_id, p_run_id, v_rule_id, v_code, v_version, 'audit', 'info',
+      'Não executada: este arquivo é um relatório de posição (balancete/DRE) — a conferência dele é a reconciliação com os totais declarados no próprio documento.',
+      'ABS(SUM(debit) - SUM(credit)) <= ' || coalesce(p_params->>'tolerance_abs','0.01'),
+      jsonb_build_object('executed', false));
+    return;
+  end if;
+
+  insert into rule_results (escritorio_id, audit_id, run_id, rule_id, rule_code, rule_version,
+    scope, period, severity, message, formula_snapshot, values_snapshot)
+  select v_esc, p_audit_id, p_run_id, v_rule_id, v_code, v_version,
+    'audit', t.period, 'divergence',
+    format('Período %s: total de débitos (%s) difere do total de créditos (%s) em %s',
+           to_char(t.period,'MM/YYYY'),
+           to_char(t.sum_debit,'FM999G999G990D00'),
+           to_char(t.sum_credit,'FM999G999G990D00'),
+           to_char(t.diff,'FM999G999G990D00')),
+    'ABS(SUM(debit) - SUM(credit)) <= ' || coalesce(p_params->>'tolerance_abs','0.01'),
+    jsonb_build_object('sum_debit', t.sum_debit, 'sum_credit', t.sum_credit,
+      'diff', t.diff, 'tolerance_abs', coalesce((p_params->>'tolerance_abs')::numeric, 0.01))
+  from (
+    select period,
+      sum(coalesce(debit,0))  as sum_debit,
+      sum(coalesce(credit,0)) as sum_credit,
+      abs(sum(coalesce(debit,0)) - sum(coalesce(credit,0))) as diff
+    from normalized_rows
+    where audit_id = p_audit_id and status in ('ok','coerced') and period is not null
+      and coalesce(normalized->>'origem','') = ''
+    group by period
+  ) t
+  where t.diff > coalesce((p_params->>'tolerance_abs')::numeric, 0.01);
+
+  get diagnostics v_found = row_count;
+  if v_found = 0 then
+    insert into rule_results (escritorio_id, audit_id, run_id, rule_id, rule_code, rule_version,
+      scope, severity, message, formula_snapshot, values_snapshot)
+    values (v_esc, p_audit_id, p_run_id, v_rule_id, v_code, v_version, 'audit', 'ok',
+      'Débitos e créditos batem em todos os períodos, dentro da tolerância.',
+      'ABS(SUM(debit) - SUM(credit)) <= ' || coalesce(p_params->>'tolerance_abs','0.01'),
+      jsonb_build_object('checked', true, 'tolerance_abs', coalesce((p_params->>'tolerance_abs')::numeric, 0.01)));
+  end if;
+end $$;
+
+create or replace function app.rule_r002_balance_equation_v1(
+  p_audit_id uuid, p_params jsonb, p_run_id uuid
+) returns void language plpgsql security definer set search_path = public, app as $$
+declare
+  v_esc uuid; v_rule_id uuid; v_code text; v_version int; v_found int;
+begin
+  select escritorio_id into v_esc from audits where id = p_audit_id;
+  select id, code, version into v_rule_id, v_code, v_version
+    from rules where escritorio_id = v_esc and code = 'R002_BALANCE_EQUATION' and enabled
+    order by version desc limit 1;
+  if v_rule_id is null then return; end if;
+
+  -- RN-005: a equação exige saldo inicial/final E movimentos de verdade.
+  if not exists (
+    select 1 from normalized_rows
+    where audit_id = p_audit_id and status in ('ok','coerced')
+      and account_code is not null and period is not null
+      and opening_balance is not null and closing_balance is not null
+      and coalesce(normalized->>'origem','') = ''
+  ) then
+    insert into rule_results (escritorio_id, audit_id, run_id, rule_id, rule_code, rule_version,
+      scope, severity, message, formula_snapshot, values_snapshot)
+    values (v_esc, p_audit_id, p_run_id, v_rule_id, v_code, v_version, 'audit', 'info',
+      'Não executada: este arquivo é um relatório de posição (balancete/DRE) — os totalizadores dele são conferidos pela reconciliação do importador.',
+      'ABS(opening_balance + SUM(debit) - SUM(credit) - closing_balance) <= '
+        || coalesce(p_params->>'tolerance_abs','0.01'),
+      jsonb_build_object('executed', false));
+    return;
+  end if;
+
+  insert into rule_results (escritorio_id, audit_id, run_id, rule_id, rule_code, rule_version,
+    scope, account_code, period, severity, message, formula_snapshot, values_snapshot)
+  select v_esc, p_audit_id, p_run_id, v_rule_id, v_code, v_version,
+    'account', r.account_code, r.period, 'divergence',
+    format('Conta %s (%s): saldo inicial + débitos - créditos difere do saldo final em %s',
+           r.account_code, to_char(r.period,'MM/YYYY'), to_char(r.diff,'FM999G999G990D00')),
+    'ABS(opening_balance + SUM(debit) - SUM(credit) - closing_balance) <= '
+      || coalesce(p_params->>'tolerance_abs','0.01'),
+    jsonb_build_object('opening', r.opening, 'sum_debit', r.sum_debit,
+      'sum_credit', r.sum_credit, 'closing', r.closing, 'diff', r.diff,
+      'tolerance_abs', coalesce((p_params->>'tolerance_abs')::numeric, 0.01))
+  from (
+    select account_code, period,
+      max(opening_balance) as opening, sum(coalesce(debit,0)) as sum_debit,
+      sum(coalesce(credit,0)) as sum_credit, max(closing_balance) as closing,
+      abs(max(opening_balance) + sum(coalesce(debit,0))
+          - sum(coalesce(credit,0)) - max(closing_balance)) as diff
+    from normalized_rows
+    where audit_id = p_audit_id and status in ('ok','coerced')
+      and account_code is not null and period is not null
+      and opening_balance is not null and closing_balance is not null
+      and coalesce(normalized->>'origem','') = ''
+    group by account_code, period
+  ) r
+  where r.diff > coalesce((p_params->>'tolerance_abs')::numeric, 0.01);
+
+  get diagnostics v_found = row_count;
+  if v_found = 0 then
+    insert into rule_results (escritorio_id, audit_id, run_id, rule_id, rule_code, rule_version,
+      scope, severity, message, formula_snapshot, values_snapshot)
+    values (v_esc, p_audit_id, p_run_id, v_rule_id, v_code, v_version, 'audit', 'ok',
+      'A equação de saldos fecha em todas as contas e períodos verificáveis.',
+      'ABS(opening_balance + SUM(debit) - SUM(credit) - closing_balance) <= '
+        || coalesce(p_params->>'tolerance_abs','0.01'),
+      jsonb_build_object('checked', true));
+  end if;
+end $$;
