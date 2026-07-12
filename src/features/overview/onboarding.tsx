@@ -188,7 +188,7 @@ export function HomeOnboarding() {
             <span className='text-gradient-brand'>uma auditoria visual</span>{' '}
             que ele entende.
           </h2>
-          <p className='mt-4 max-w-xl text-base text-muted-foreground md:text-lg'>
+          <p className='mt-4 max-w-xl text-base text-pretty text-muted-foreground md:text-lg'>
             O checklist logo abaixo acompanha seu primeiro ciclo completo — do
             cadastro do cliente ao link de apresentação. Ele se marca sozinho
             conforme você avança.

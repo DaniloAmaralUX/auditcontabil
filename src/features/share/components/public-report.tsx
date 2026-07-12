@@ -118,7 +118,7 @@ export function PublicReport({
             >
               {verdict.headline}
             </h1>
-            <p className='text-lg text-muted-foreground'>
+            <p className='text-lg text-pretty text-muted-foreground'>
               {audit.title} · analisamos{' '}
               <span className='font-medium tabular-nums'>
                 {summary.processed.toLocaleString('pt-BR')}
