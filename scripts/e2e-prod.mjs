@@ -11,11 +11,15 @@ const KEY = 'sb_publishable_-3jH58DCpsgWCImXOehBow_HKYT6ls0'
 const log = (s) => console.log('•', s)
 const die = (s, e) => { console.error('✗', s, e?.message ?? e ?? ''); process.exit(1) }
 
+const EMAIL = process.env.E2E_EMAIL
+const PASSWORD = process.env.E2E_PASSWORD
+if (!EMAIL || !PASSWORD) die('config', 'defina E2E_EMAIL e E2E_PASSWORD no ambiente')
+
 const supabase = createClient(URL, KEY)
 
 // 1. login
 const { data: auth, error: eLogin } = await supabase.auth.signInWithPassword({
-  email: 'teste@espacoacao.app', password: 'senha123',
+  email: EMAIL, password: PASSWORD,
 })
 if (eLogin) die('login', eLogin)
 const esc = auth.user.app_metadata.escritorio_id

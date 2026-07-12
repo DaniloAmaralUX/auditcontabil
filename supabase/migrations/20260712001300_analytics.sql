@@ -32,10 +32,12 @@ $$;
 
 create or replace function app.classify_category(p_name text) returns text
 language sql immutable as $$
+  -- Financeiras primeiro: "Juros e Encargos" tem 'juro' E 'encarg'; o grupo
+  -- financeiro deve vencer a colisão com Pessoal/Admin ('encarg').
   select case
     when p_name is null then 'Departamentais'
+    when lower(p_name) ~ '(juro|tarifas? banc|iof|multa|desconto conced|encargos financ|emprest|financiamento)' then 'Financeiras'
     when lower(p_name) ~ '(sal[aá]rio|ordenado|inss|fgts|f[eé]rias|13|d[eé]cimo|pr[oó]-?labore|encarg|indeniza|aviso pr[eé]vio|hora extra|benef[ií]cio|vale|plano de sa[uú]de|rescis)' then 'Pessoal/Admin'
-    when lower(p_name) ~ '(juro|tarifa banc|iof|multa|desconto conced|encargos financ|emprest|financiamento)' then 'Financeiras'
     else 'Departamentais'
   end
 $$;
