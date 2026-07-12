@@ -45,8 +45,9 @@ export const strings = {
   clients: {
     title: 'Clientes',
     new: 'Novo cliente',
-    emptyTitle: 'Nenhum cliente cadastrado ainda.',
-    emptyHint: 'Cadastre o primeiro para criar auditorias.',
+    emptyTitle: 'Seus clientes vão aparecer aqui.',
+    emptyHint:
+      'Clique em Novo cliente (acima) — toda auditoria pertence a um cliente do escritório.',
     emptyFiltered: 'Nenhum cliente corresponde aos filtros.',
     name: 'Nome',
     cnpj: 'CPF / CNPJ',

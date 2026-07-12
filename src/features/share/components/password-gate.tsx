@@ -46,13 +46,13 @@ export function PasswordGate({
   }
 
   return (
-    <div className='flex min-h-svh flex-col items-center justify-center gap-6 p-4'>
-      <div className='flex items-center gap-2'>
+    <div className='brand-mesh flex min-h-svh flex-col items-center justify-center gap-6 p-4'>
+      <div className='animate-rise flex items-center gap-2'>
         <Logo className='size-10' />
         <div className='text-xl font-extrabold tracking-tight'>AuditView</div>
       </div>
 
-      <Card className='w-full max-w-sm'>
+      <Card className='animate-rise w-full max-w-sm'>
         <CardHeader>
           <CardTitle className='flex items-center gap-2 text-lg'>
             <LockKeyhole className='size-5 text-muted-foreground' aria-hidden />

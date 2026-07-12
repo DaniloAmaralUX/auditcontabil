@@ -249,6 +249,41 @@ export function CompanyRanking({
   )
 }
 
+// Rótulo do gráfico divergente, sempre na PONTA da barra: dentro dela quando é
+// larga (texto claro sobre a cor), fora quando é curta (texto muted). Nota:
+// para valores negativos a recharts entrega x no eixo zero e width negativo —
+// por isso a geometria é normalizada antes de posicionar.
+function ResultBarLabel(props: {
+  x?: number
+  y?: number
+  width?: number
+  height?: number
+  value?: number
+}) {
+  const { x = 0, y = 0, width = 0, height = 0, value = 0 } = props
+  const left = Math.min(x, x + width)
+  const right = Math.max(x, x + width)
+  const neg = value < 0
+  const inside = Math.abs(width) >= 64
+  // ponta da barra: esquerda para negativos, direita para positivos
+  const tx = neg ? (inside ? left + 6 : left - 6) : inside ? right - 6 : right + 6
+  const anchor: 'start' | 'end' = neg === inside ? 'start' : 'end'
+  return (
+    <text
+      x={tx}
+      y={y + height / 2}
+      dy={4}
+      textAnchor={anchor}
+      fontSize={11}
+      fontWeight={inside ? 600 : 400}
+      className='tabular-nums'
+      fill={inside ? 'oklch(1 0 0)' : 'var(--muted-foreground)'}
+    >
+      {brl(value, true)}
+    </text>
+  )
+}
+
 export function CompanyResults({
   empresas,
   title = 'Resultado por empresa',
@@ -290,12 +325,7 @@ export function CompanyResults({
             <Bar
               dataKey='resultado'
               radius={[0, 4, 4, 0]}
-              label={{
-                position: 'right',
-                fill: 'var(--muted-foreground)',
-                fontSize: 11,
-                formatter: (v) => brl(Number(v ?? 0), true),
-              }}
+              label={<ResultBarLabel />}
             >
               {data.map((d) => (
                 <Cell
@@ -390,6 +420,7 @@ export function PeriodTrend({
               tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
             />
             <YAxis
+              domain={[0, (max: number) => Math.round(max * 1.15)]}
               tickFormatter={(v) => brl(v, true).replace('R$ ', '')}
               tickLine={false}
               axisLine={false}
