@@ -13,14 +13,11 @@ export function Overview() {
 
       <Main>
         <div className='mx-auto max-w-3xl'>
-          <div className='mb-6'>
-            <h1 className='text-2xl font-bold tracking-tight'>
-              Olá, {firstName}
-            </h1>
-            <p className='text-muted-foreground'>
-              Seu próximo passo está logo abaixo.
-            </p>
-          </div>
+          {/* Saudação discreta: o hero abaixo é o herói tipográfico */}
+          <p className='mb-4 text-sm text-muted-foreground'>
+            Olá, <span className='font-medium text-foreground'>{firstName}</span>{' '}
+            — seu próximo passo está logo abaixo.
+          </p>
 
           <HomeOnboarding />
         </div>

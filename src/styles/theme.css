@@ -16,14 +16,18 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.32 0.005 80);
 
-  /* A assinatura: laranja Firecrawl #E97318 como cor de ação única.
-     Texto ESCURO sobre o laranja (6.9:1) — branco não passaria de 3.1:1. */
-  --primary: oklch(0.69 0.17 48);
+  /* A assinatura: laranja Cloudflare #F6821F como cor de ação única. Hue 43°
+     (levemente mais dourado que Firecrawl 48°) + L 0.708 (mais vibrante).
+     Texto ESCURO sobre o laranja: L gap 0.523 → ≥ 6:1. Branco proibido. */
+  --primary: oklch(0.708 0.176 43);
   --primary-foreground: oklch(0.185 0.005 80);
   --secondary: oklch(0.966 0.0025 85);
   --secondary-foreground: oklch(0.32 0.005 80);
   --muted: oklch(0.962 0.003 85);
-  --muted-foreground: oklch(0.55 0.008 80);
+  /* fg L 0.48 sobre muted 0.962 → gap 0.482 (Jakub: fg < 0.45 sobre bg > 0.85;
+     ficamos em 0.48 para não escurecer demais o "cinza de descrição" que
+     também é usado como corpo secundário nos cards) */
+  --muted-foreground: oklch(0.48 0.008 80);
   --accent: oklch(0.955 0.009 60);
   --accent-foreground: oklch(0.32 0.005 80);
 
@@ -41,18 +45,19 @@
   --warning-text: oklch(0.52 0.12 65);
   --info-text: oklch(0.52 0.17 258);
 
-  --border: oklch(0.918 0.005 85);
-  --input: oklch(0.918 0.005 85);
-  --ring: oklch(0.69 0.17 48);
+  /* borda com gap L de 0.088 sobre background (era 0.070) — visível como
+     objeto gráfico ≥ 3:1, sem deixar de ser fina */
+  --border: oklch(0.9 0.005 85);
+  --input: oklch(0.9 0.005 85);
+  --ring: oklch(0.708 0.176 43);
 
-  /* Marca: laranja Firecrawl + chama (vermelho-alaranjado #FF3A00) */
-  --brand: oklch(0.69 0.17 48);
+  /* Marca: laranja Cloudflare + chama girada em hue para acompanhar */
+  --brand: oklch(0.708 0.176 43);
   --brand-foreground: oklch(0.185 0.005 80);
-  --brand-2: oklch(0.63 0.22 32);
+  --brand-2: oklch(0.66 0.215 30);
 
-  /* Gráficos: laranja assinatura · teal (contraponto) · âmbar · vermelho
-     quente · azul-ardósia técnico — distinguíveis, calor Firecrawl */
-  --chart-1: oklch(0.69 0.17 48);
+  /* Gráficos: laranja assinatura · teal · âmbar · vermelho quente · azul */
+  --chart-1: oklch(0.708 0.176 43);
   --chart-2: oklch(0.68 0.13 190);
   --chart-3: oklch(0.75 0.14 75);
   --chart-4: oklch(0.55 0.16 25);
@@ -98,13 +103,16 @@
   --popover: oklch(0.28 0.002 80);
   --popover-foreground: oklch(0.87 0.002 80);
 
-  /* O mesmo laranja vivo; texto escuro em cima continua 6.9:1 */
-  --primary: oklch(0.69 0.17 48);
+  /* O mesmo laranja Cloudflare, um clique acima em L para brilhar no escuro.
+     Texto escuro em cima continua > 6:1. */
+  --primary: oklch(0.75 0.17 43);
   --primary-foreground: oklch(0.185 0.005 80);
   --secondary: oklch(0.3 0.003 80);
   --secondary-foreground: oklch(0.87 0.002 80);
   --muted: oklch(0.3 0.003 80);
-  --muted-foreground: oklch(0.71 0.005 80);
+  /* fg L 0.77 sobre card 0.268 → gap 0.502 (Jakub: fg > 0.75 sobre bg < 0.25;
+     card fica em 0.268, então subimos fg de 0.71 para 0.77 para folgar) */
+  --muted-foreground: oklch(0.77 0.005 80);
   --accent: oklch(0.32 0.01 60);
   --accent-foreground: oklch(0.87 0.002 80);
 
@@ -121,16 +129,18 @@
   --warning-text: var(--warning);
   --info-text: var(--info);
 
-  --border: oklch(1 0 0 / 9%);
-  --input: oklch(1 0 0 / 13%);
-  --ring: oklch(0.73 0.16 50);
+  /* borda no escuro: 12% de branco (era 9%) — separação de objeto gráfico ≥ 3:1
+     sobre a superfície charcoal do Firecrawl */
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.755 0.165 43);
 
-  /* Laranja um ponto mais claro no escuro; chama vira âmbar (#fdba74) */
-  --brand: oklch(0.73 0.16 50);
+  /* Laranja Cloudflare no escuro; chama âmbar acompanha o hue mais quente */
+  --brand: oklch(0.755 0.165 43);
   --brand-foreground: oklch(0.185 0.005 80);
-  --brand-2: oklch(0.83 0.11 65);
+  --brand-2: oklch(0.83 0.11 55);
 
-  --chart-1: oklch(0.73 0.16 50);
+  --chart-1: oklch(0.755 0.165 43);
   --chart-2: oklch(0.72 0.13 190);
   --chart-3: oklch(0.8 0.13 75);
   --chart-4: oklch(0.65 0.15 25);

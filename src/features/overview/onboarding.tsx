@@ -167,33 +167,49 @@ export function HomeOnboarding() {
   return (
     <div className='space-y-4'>
       {!welcomed && (
-        <div className='brand-mesh animate-rise relative overflow-hidden rounded-xl border p-6'>
-          <p className='text-xs font-bold tracking-[0.14em] text-muted-foreground uppercase'>
+        <section
+          aria-labelledby='welcome-title'
+          className='brand-mesh animate-rise relative overflow-hidden rounded-xl border px-6 py-10 md:px-10 md:py-14'
+        >
+          <p className='text-[0.7rem] font-bold tracking-[0.16em] text-muted-foreground uppercase'>
             Bem-vindo ao AuditView
           </p>
-          <h2 className='mt-1 max-w-xl text-xl leading-snug font-bold tracking-tight text-balance'>
-            Transforme a planilha do cliente em uma auditoria visual:{' '}
-            <span className='text-gradient-brand'>
-              importe, revise, compartilhe.
-            </span>
-          </h2>
-          <p className='mt-1 max-w-xl text-sm text-muted-foreground'>
-            O checklist abaixo acompanha seu primeiro ciclo completo. Ele se
-            marca sozinho conforme você avança.
-          </p>
-          <Button
-            size='sm'
-            variant='outline'
-            className='mt-4'
-            onClick={() => {
-              lsSet(K.welcome)
-              setWelcomed(true)
-              track('onboarding_welcome_started')
-            }}
+          <h2
+            id='welcome-title'
+            className='mt-3 max-w-2xl text-3xl leading-[1.05] font-bold tracking-tight text-balance md:text-4xl'
           >
-            <Sparkles className='size-4' /> Começar
-          </Button>
-        </div>
+            Transforme a planilha do cliente em{' '}
+            <span className='text-gradient-brand'>uma auditoria visual</span>{' '}
+            que ele entende.
+          </h2>
+          <p className='mt-4 max-w-xl text-base text-muted-foreground md:text-lg'>
+            O checklist logo abaixo acompanha seu primeiro ciclo completo — do
+            cadastro do cliente ao link de apresentação. Ele se marca sozinho
+            conforme você avança.
+          </p>
+          <div className='mt-6 flex flex-wrap items-center gap-3'>
+            <Button
+              onClick={() => {
+                lsSet(K.welcome)
+                setWelcomed(true)
+                track('onboarding_welcome_started')
+              }}
+            >
+              <Sparkles className='size-4' /> Começar
+            </Button>
+            <Button
+              variant='ghost'
+              className='text-muted-foreground'
+              onClick={() => {
+                lsSet(K.dismissed)
+                setDismissed(true)
+                track('onboarding_dismissed', { doneCount: state.doneCount })
+              }}
+            >
+              Já conheço, pular
+            </Button>
+          </div>
+        </section>
       )}
 
       <Card className='animate-rise'>
@@ -264,20 +280,24 @@ export function HomeOnboarding() {
             })}
           </ol>
 
-          <div className='flex justify-end'>
-            <Button
-              variant='ghost'
-              size='sm'
-              className='text-muted-foreground'
-              onClick={() => {
-                lsSet(K.dismissed)
-                setDismissed(true)
-                track('onboarding_dismissed', { doneCount: state.doneCount })
-              }}
-            >
-              Já conheço, dispensar
-            </Button>
-          </div>
+          {/* O CTA "Já conheço, pular" já vive no hero acima. Se o hero foi
+              dispensado (welcomed), oferecemos aqui a mesma saída. */}
+          {welcomed && (
+            <div className='flex justify-end'>
+              <Button
+                variant='ghost'
+                size='sm'
+                className='text-muted-foreground'
+                onClick={() => {
+                  lsSet(K.dismissed)
+                  setDismissed(true)
+                  track('onboarding_dismissed', { doneCount: state.doneCount })
+                }}
+              >
+                Já conheço, dispensar
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

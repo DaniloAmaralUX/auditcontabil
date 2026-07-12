@@ -32,3 +32,6 @@ dist-ssr
 # Vitest artifacts (browser screenshots/attachments)
 **/__screenshots__/
 .vitest-attachments/
+
+# Compound Engineering — config local do usuário (nunca commitar)
+.compound-engineering/config.local.yaml
