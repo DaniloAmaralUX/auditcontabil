@@ -2,8 +2,9 @@
 
 > **O que é:** SaaS para contadores. Sobe a planilha do cliente (1 workbook, 1 aba por empresa) → aperta **1 botão** → nasce um dashboard gerencial que é auditoria e apresentação ao mesmo tempo, compartilhável com o cliente final por link com senha.
 >
-> **Produção:** https://auditcontabil.vercel.app · Login de teste: `teste@espacoacao.app` / `senha123` (Proprietária)
+> **Produção:** https://auditcontabil.vercel.app · Credenciais de teste (Proprietária): solicitar ao dono do repositório — **rotacionar antes de qualquer uso externo**.
 > **Acompanhamento:** https://auditcontabil.vercel.app/progresso/index.html
+> **Documentação completa:** [`docs/README.md`](docs/README.md) (índice de handoff)
 
 ## Rode em 3 comandos
 

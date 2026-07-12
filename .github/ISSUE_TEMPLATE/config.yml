@@ -1,5 +1,5 @@
-blank_issues_enabled: false
+blank_issues_enabled: true
 contact_links:
-  - name: Shadcn-Admin Discussions
-    url: https://github.com/satnaing/shadcn-admin/discussions
-    about: Please ask and answer questions here.
+  - name: Documentação do AuditView
+    url: https://github.com/DaniloAmaralUX/auditcontabil.v0.oficial/blob/main/docs/README.md
+    about: Índice de handoff — o que o produto faz, regras de negócio, fluxos, confiança e setup.

@@ -1,121 +1,81 @@
-# Shadcn Admin Dashboard
+# AuditView
 
-Admin Dashboard UI crafted with Shadcn and Vite. Built with responsiveness and accessibility in mind.
+> **Auditoria contábil visual para escritórios de contabilidade.** A contadora sobe a planilha do cliente, aperta **um botão**, e nasce um dashboard gerencial que é auditoria e apresentação ao mesmo tempo — compartilhável com o cliente final por link protegido por senha.
 
-![alt text](public/images/shadcn-admin.png)
+- **Produção:** https://auditcontabil.vercel.app
+- **Painel de progresso:** https://auditcontabil.vercel.app/progresso/index.html
+- **Documentação completa:** [`docs/README.md`](docs/README.md) · **Handoff de 10 min:** [`HANDOFF.md`](HANDOFF.md)
 
-[![Sponsored by Clerk](https://img.shields.io/badge/Sponsored%20by-Clerk-5b6ee1?logo=clerk)](https://go.clerk.com/GttUAaK)
+---
 
-I've been creating dashboard UIs at work and for my personal projects. I always wanted to make a reusable collection of dashboard UI for future projects; and here it is now. While I've created a few custom components, some of the code is directly adapted from ShadcnUI examples.
+## O que é
 
-> This is not a starter project (template) though. I'll probably make one in the future.
+Escritórios de contabilidade recebem arquivos imperfeitos dos clientes (XLSX, CSV, PDF) e gastam horas conferindo, consolidando, achando divergências, montando gráficos e explicando o resultado. O **AuditView** transforma esse trabalho manual numa **auditoria visual, revisável, versionada e compartilhável**:
 
-## Features
+1. A contadora sobe o arquivo que já exporta do sistema contábil.
+2. O produto normaliza os dados, roda **8 regras de auditoria determinísticas** e monta um dashboard gerencial.
+3. A equipe revisa cada achado (justifica ou marca falso positivo) e escreve a conclusão.
+4. A proprietária aprova e publica um **snapshot imutável**.
+5. O cliente final acessa uma apresentação editorial ("O Fechamento") por **link + senha**, sem criar conta.
 
-- Light/dark mode
-- Responsive
-- Accessible
-- With built-in Sidebar component
-- Global search command
-- 10+ pages
-- Extra custom components
-- RTL support
+**Fronteiras (o que o produto não faz):** não substitui o contador, não faz cálculo fiscal avançado, e **a IA nunca é fonte de verdade contábil** — todo cálculo é SQL determinístico e versionado, reconciliado ao centavo contra o próprio documento.
 
-<details>
-<summary>Customized Components (click to expand)</summary>
+Por que confiar no resultado? Veja [`docs/handoff/05-como-garantimos-confianca.md`](docs/handoff/05-como-garantimos-confianca.md).
 
-This project uses Shadcn UI components, but some have been slightly modified for better RTL (Right-to-Left) support and other improvements. These customized components differ from the original Shadcn UI versions.
-
-If you want to update components using the Shadcn CLI (e.g., `npx shadcn@latest add <component>`), it's generally safe for non-customized components. For the listed customized ones, you may need to manually merge changes to preserve the project's modifications and avoid overwriting RTL support or other updates.
-
-> If you don't require RTL support, you can safely update the 'RTL Updated Components' via the Shadcn CLI, as these changes are primarily for RTL compatibility. The 'Modified Components' may have other customizations to consider.
-
-### Modified Components
-
-- scroll-area
-- sonner
-- separator
-
-### RTL Updated Components
-
-- alert-dialog
-- calendar
-- command
-- dialog
-- dropdown-menu
-- select
-- table
-- sheet
-- sidebar
-- switch
-
-**Notes:**
-
-- **Modified Components**: These have general updates, potentially including RTL adjustments.
-- **RTL Updated Components**: These have specific changes for RTL language support (e.g., layout, positioning).
-- For implementation details, check the source files in `src/components/ui/`.
-- All other Shadcn UI components in the project are standard and can be safely updated via the CLI.
-
-</details>
-
-## Tech Stack
-
-**UI:** [ShadcnUI](https://ui.shadcn.com) (TailwindCSS + RadixUI)
-
-**Build Tool:** [Vite](https://vitejs.dev/)
-
-**Routing:** [TanStack Router](https://tanstack.com/router/latest)
-
-**Type Checking:** [TypeScript](https://www.typescriptlang.org/)
-
-**Linting/Formatting:** [ESLint](https://eslint.org/) & [Prettier](https://prettier.io/)
-
-**Icons:** [Lucide Icons](https://lucide.dev/icons/), [Tabler Icons](https://tabler.io/icons) (Brand icons only)
-
-**Auth (partial):** [Clerk](https://go.clerk.com/GttUAaK)
-
-## Run Locally
-
-Clone the project
+## Rodar localmente
 
 ```bash
-  git clone https://github.com/satnaing/shadcn-admin.git
+pnpm install
+cp .env.example .env   # cole a anon key (Supabase → Settings → API); a URL já vem preenchida
+pnpm dev               # http://localhost:5173
 ```
 
-Go to the project directory
+Teste com os arquivos reais em [`docs/fixtures/`](docs/fixtures) — `balancete-mdw-2025.csv` (balancete societário, CP1252, detectado e mapeado sozinho) e `dre-educacao-2024.pdf` (DRE em PDF). Setup completo (banco, deploy) em [`docs/handoff/07-rodando-e-deployando.md`](docs/handoff/07-rodando-e-deployando.md).
 
-```bash
-  cd shadcn-admin
+## Stack
+
+| Camada | Tecnologia |
+|---|---|
+| Front | React 19 · Vite 8 · TanStack Router/Query/Table · Zustand · TypeScript |
+| UI | shadcn/ui (Radix) · Tailwind v4 · Recharts · tema Firecrawl |
+| Processamento | Web Worker + SheetJS (XLSX) · PapaParse (CSV) · pdf.js (PDF) — parse no browser |
+| Backend | Supabase — Postgres + RLS + Storage + Edge Functions + Realtime |
+| Saídas | Dashboard (Recharts) · Deck público `/r/:token` · PDF client-side (`@react-pdf/renderer`) |
+| Qualidade | ESLint · Prettier · knip · Vitest (browser mode) · pgTAP |
+
+Decisão central de arquitetura: **parse no browser, regras no banco**. Detalhes em [`docs/handoff/06-arquitetura-tecnica.md`](docs/handoff/06-arquitetura-tecnica.md).
+
+## Estrutura
+
+```
+docs/            documentação (handoff, PRD, runbook, design, fixtures reais)
+src/
+├─ routes/       TanStack Router file-based (guardas de auth + /r/:token público)
+├─ features/     código por domínio (audits, share, clients, team, billing, ...)
+├─ workers/      parse no browser + extractors (balancete CSV, DRE PDF)
+├─ components/   layout + ui (shadcn)
+├─ lib/          supabase, permissions, strings (textos PT-BR)
+└─ styles/       theme.css (tokens do tema)
+supabase/        migrations (a verdade do backend) · functions (Edge) · tests (pgTAP)
+scripts/         e2e de produção, geradores de fixture
+public/          painel de progresso, assets
 ```
 
-Install dependencies
+## Documentação
 
-```bash
-  pnpm install
-```
+Comece por [`docs/README.md`](docs/README.md) — o índice mestre. Destaques:
 
-Start the server
+- **O que o produto faz** → [`docs/handoff/01-o-que-o-produto-faz.md`](docs/handoff/01-o-que-o-produto-faz.md)
+- **Histórias de usuário** → [`docs/handoff/02-historias-de-usuario.md`](docs/handoff/02-historias-de-usuario.md)
+- **Fluxos de usuário** → [`docs/handoff/03-fluxos-de-usuario.md`](docs/handoff/03-fluxos-de-usuario.md)
+- **Regras de negócio** → [`docs/handoff/04-regras-de-negocio.md`](docs/handoff/04-regras-de-negocio.md)
+- **Como garantimos confiança** → [`docs/handoff/05-como-garantimos-confianca.md`](docs/handoff/05-como-garantimos-confianca.md)
+- **Referência profunda** → [`docs/PRD.md`](docs/PRD.md) · [`docs/RUNBOOK-DEPLOY.md`](docs/RUNBOOK-DEPLOY.md) · [`docs/design/CRAFT.md`](docs/design/CRAFT.md)
 
-```bash
-  pnpm run dev
-```
+## Contribuindo
 
-## Sponsoring this project ❤️
+Antes de todo commit: `pnpm lint && pnpm knip && pnpm test`. Padrões e fluxo de PR em [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md). Deploy é automático no merge para `main` (Vercel).
 
-If you find this project helpful or use this in your own work, consider [sponsoring me](https://github.com/sponsors/satnaing) to support development and maintenance. You can [buy me a coffee](https://buymeacoffee.com/satnaing) as well. Don’t worry, every penny helps. Thank you! 🙏
+## Licença
 
-For questions or sponsorship inquiries, feel free to reach out at [satnaingdev@gmail.com](mailto:satnaingdev@gmail.com).
-
-### Current Sponsor
-
-- [Clerk](https://go.clerk.com/GttUAaK) - authentication and user management for the modern web
-
-## Author
-
-**Craft**: standards de design engineering em [docs/design/CRAFT.md](docs/design/CRAFT.md) — personas de [Jakub Krehel](https://jakub.kr) (superfícies) e [Emil Kowalski](https://emilkowal.ski) (motion, autor do Sonner usado aqui); auditoria pelo framework [ui-audit](https://github.com/tommygeoco/ui-audit) de Tommy Geoco; tema [Firecrawl](https://github.com/firecrawl/firecrawl-theme).
-
-Template base crafted with 🤍 by [@satnaing](https://github.com/satnaing)
-
-## License
-
-Licensed under the [MIT License](https://choosealicense.com/licenses/mit/)
+Licenciado sob a [MIT License](LICENSE). O produto foi construído sobre o template [satnaing/shadcn-admin](https://github.com/satnaing/shadcn-admin) (também MIT) — a atribuição ao autor original é preservada no arquivo [`LICENSE`](LICENSE), conforme exige a licença. Direção visual, personas de craft e créditos em [`docs/design/CRAFT.md`](docs/design/CRAFT.md).

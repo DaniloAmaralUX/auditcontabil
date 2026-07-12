@@ -1,27 +1,34 @@
 ---
-name: "\U0001F41E Bug report"
-about: Report a bug or unexpected behavior in Shadcn-Admin
+name: "\U0001F41E Reportar bug"
+about: Reporte um comportamento inesperado no AuditView
 title: "[BUG]: "
 labels: bug
 assignees: ""
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**Descreva o bug**
+Uma descrição clara e concisa do que está errado.
 
-**To Reproduce**
-Steps to reproduce the behavior:
+**Como reproduzir**
+Passos para reproduzir:
 
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+1. Vá para '...'
+2. Clique em '...'
+3. Suba o arquivo '...'
+4. Veja o erro
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+**Comportamento esperado**
+O que você esperava que acontecesse.
+
+**Contexto contábil (se aplicável)**
+Tipo de arquivo (balancete CSV, DRE PDF, XLSX), período e a divergência observada. **Não inclua dados sensíveis de clientes reais.**
 
 **Screenshots**
-If applicable, add screenshots to help explain your problem.
+Se ajudar, anexe capturas de tela.
 
-**Additional context**
-Add any other context about the problem here.
+**Ambiente**
+- Produção (auditcontabil.vercel.app) ou local?
+- Navegador / SO:
+
+**Contexto adicional**
+Qualquer outra informação relevante.

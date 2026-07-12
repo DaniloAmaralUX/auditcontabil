@@ -1,19 +1,22 @@
 ---
-name: "✨ Feature Request"
-about: Suggest an idea for improving Shadcn-Admin
-title: "[Feature Request]: "
+name: "✨ Sugerir funcionalidade"
+about: Sugira uma melhoria para o AuditView
+title: "[Feature]: "
 labels: enhancement
 assignees: ""
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+**Qual problema isso resolve?**
+Descrição clara do problema ou da dor. Ex.: "A contadora perde tempo quando [...]".
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+**Solução desejada**
+O que você gostaria que acontecesse.
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+**Alternativas consideradas**
+Outras abordagens que você pensou.
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+**Impacto no domínio**
+Isso afeta cálculo/auditoria, revisão, o deck do cliente ou operação interna? Alguma regra de negócio envolvida?
+
+**Contexto adicional**
+Qualquer outra informação, referência ou screenshot.
