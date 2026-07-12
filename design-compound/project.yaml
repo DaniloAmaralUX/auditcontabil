@@ -1,0 +1,59 @@
+schema: design-compound/project/v1
+revision: 1
+last_event_seq: 4
+
+project:
+  id: auditview
+  name: AuditView
+  mode: existing
+  foundation_profile: unresolved
+  visibility: private
+  stack: [react, shadcn, vitest, playwright, supabase]
+  created_at: 2026-07-12T01:45:00-03:00
+  updated_at: 2026-07-12T01:45:30-03:00
+
+strategy:
+  outcome: "Contador solta a planilha do cliente (grupo multi-empresa por CPF/CNPJ), aperta 1 botão e recebe um dashboard gerencial lindo e autoexplicativo que serve de auditoria E apresentação — compartilhável com o cliente final por link com senha, substituindo horas de PowerPoint."
+  audience: "Contador / dono de escritório de contabilidade / profissional de finanças contábeis (lead); cliente final = dono de grupo de empresas (leitura)."
+  jobs:
+    - "Quando recebo os balancetes das empresas de um cliente, quero gerar a análise gerencial visual em minutos, para não gastar horas montando PowerPoint."
+    - "Quando apresento o resultado ao dono do grupo (ao vivo ou por link), quero uma narrativa clara e elegante, para que ele entenda sem eu traduzir jargão."
+    - "Quando o cliente tem várias empresas (CPF dono / CNPJs), quero o consolidado e a quebra por empresa de uma vez, para priorizar onde agir."
+  constraints:
+    - "Processamento contábil determinístico; IA nunca é fonte de verdade contábil (Auditview PRD princípio 9)."
+    - "Nenhuma linha descartada silenciosamente; revisão humana antes de publicar."
+    - "Tokens do template shadcn-admin + extensão única success/warning/info (PRD v2 §10); direção visual Ramp."
+    - "Link público: senha, noindex, snapshot imutável, mobile-friendly."
+    - "Custo-alvo ~US$25/mês; stack fixada (Vite/React/Supabase/Vercel)."
+  success_signals:
+    - "Contador gera o dashboard de um workbook real multi-empresa sem ajustar mapeamento (1 botão)."
+    - "Dashboard cobre o conteúdo do PPTX de referência (KPIs, grupos, rankings, por-empresa, top contas, conclusão)."
+    - "Cliente final entende o resultado sozinho pelo link (sem contador explicar) — inclusive no celular."
+    - "Percepção do usuário: 'nunca mais faço isso no PowerPoint'."
+
+workflow:
+  status: active
+  current_stage: foundation-strategy
+  stages:
+    foundation-strategy:      { status: active,  owner: foundation-strategy,      gate: G1, started_at: 2026-07-12T01:45:30-03:00 }
+    discovery-research:       { status: pending, owner: discovery-research,       gate: G2 }
+    experience-architecture:  { status: pending, owner: experience-architecture,  gate: G3 }
+    visual-systems:           { status: pending, owner: visual-systems,           gate: G4 }
+    design-engineering:       { status: pending, owner: design-engineering,       gate: G5 }
+    quality-handoff-compound: { status: pending, owner: quality-handoff-compound, gate: G6 }
+
+gates: []
+decisions: []
+overrides: []
+evidence:
+  - id: ev-001
+    stage: foundation-strategy
+    type: file
+    ref: design-compound/evidence/briefing-original.md
+    summary: "Briefing consolidado da sessão: PRDs, exemplos XLSX/PPTX da contadora, prioridades do usuário, estado do produto em produção."
+    created_by: user
+    created_at: 2026-07-12T01:45:10-03:00
+skills_used: []
+sources_used: []
+learnings: []
+promotion_candidates: []

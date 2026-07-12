@@ -1,0 +1,4 @@
+{"seq": 1, "ts": "2026-07-12T01:45:00-03:00", "project": "auditview", "type": "project_created", "actor": "maestro", "payload": {"mode": "existing"}}
+{"seq": 2, "ts": "2026-07-12T01:45:10-03:00", "project": "auditview", "type": "evidence_added", "actor": "maestro", "payload": {"evidence_id": "ev-001", "ref": "design-compound/evidence/briefing-original.md"}}
+{"seq": 3, "ts": "2026-07-12T01:45:20-03:00", "project": "auditview", "type": "status_note", "actor": "maestro", "payload": {"note": "ce_plugin: presente; context7: ausente (fallback docs canonicas/skills locais); stack detectada: react, shadcn, vitest, playwright, supabase (package.json + supabase/config.toml); produto ja em producao (auditcontabil.vercel.app)"}}
+{"seq": 4, "ts": "2026-07-12T01:45:30-03:00", "project": "auditview", "type": "stage_started", "stage": "foundation-strategy", "actor": "maestro", "payload": {}}
