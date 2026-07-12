@@ -35,7 +35,7 @@ function fmtPeriod(start: string | null, end: string | null) {
 function clientBadge(severity: string) {
   if (severity === 'divergence' || severity === 'attention') {
     return (
-      <Badge variant='outline' className='gap-1 text-warning'>
+      <Badge variant='outline' className='gap-1 text-warning-text'>
         <TriangleAlert className='size-3.5' aria-hidden /> Precisa de atenção
       </Badge>
     )
@@ -48,7 +48,7 @@ function clientBadge(severity: string) {
     )
   }
   return (
-    <Badge variant='outline' className='gap-1 text-success'>
+    <Badge variant='outline' className='gap-1 text-success-text'>
       <CircleCheck className='size-3.5' aria-hidden /> Está tudo certo
     </Badge>
   )
@@ -143,7 +143,7 @@ export function PublicReport({
         </div>
       </div>
 
-      <div className='mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8'>
+      <div className='animate-rise-stagger mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8'>
 
       {hasAnalyticsData(snapshot.analytics) && (
         <section className='space-y-4'>

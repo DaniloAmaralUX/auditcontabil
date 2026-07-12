@@ -1,24 +1,31 @@
 :root {
-  /* Raios um pouco mais generosos (Apple/Ramp: cantos suaves, não bolha) */
-  --radius: 0.75rem;
+  /* Cantos contidos (Firecrawl: técnico e afiado, não bolha) */
+  --radius: 0.625rem;
 
-  /* Neutros Apple-grade: fundo quase branco levemente frio, texto near-black */
-  --background: oklch(0.995 0.0015 250);
-  --foreground: oklch(0.205 0.015 265);
+  /* Motion · Emil: UI ≤300ms, ease-out sempre (começa rápido = parece rápido) */
+  --dur-fast: 140ms;
+  --dur-base: 200ms;
+  --dur-slow: 300ms;
+  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+
+  /* Neutros Firecrawl light: papel levemente quente, texto charcoal (#333) */
+  --background: oklch(0.988 0.0035 85);
+  --foreground: oklch(0.32 0.005 80);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.205 0.015 265);
+  --card-foreground: oklch(0.32 0.005 80);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.205 0.015 265);
+  --popover-foreground: oklch(0.32 0.005 80);
 
-  /* Primário near-black (Ramp/Linear): botões calmos e confiantes */
-  --primary: oklch(0.245 0.018 268);
-  --primary-foreground: oklch(0.985 0.002 250);
-  --secondary: oklch(0.972 0.004 255);
-  --secondary-foreground: oklch(0.245 0.018 268);
-  --muted: oklch(0.968 0.004 255);
-  --muted-foreground: oklch(0.55 0.02 258);
-  --accent: oklch(0.966 0.006 268);
-  --accent-foreground: oklch(0.245 0.018 268);
+  /* A assinatura: laranja Firecrawl #E97318 como cor de ação única.
+     Texto ESCURO sobre o laranja (6.9:1) — branco não passaria de 3.1:1. */
+  --primary: oklch(0.69 0.17 48);
+  --primary-foreground: oklch(0.185 0.005 80);
+  --secondary: oklch(0.966 0.0025 85);
+  --secondary-foreground: oklch(0.32 0.005 80);
+  --muted: oklch(0.962 0.003 85);
+  --muted-foreground: oklch(0.55 0.008 80);
+  --accent: oklch(0.955 0.009 60);
+  --accent-foreground: oklch(0.32 0.005 80);
 
   --destructive: oklch(0.585 0.22 25);
   --success: oklch(0.62 0.14 155);
@@ -33,27 +40,33 @@
   --success-text: oklch(0.5 0.13 155);
   --warning-text: oklch(0.52 0.12 65);
 
-  --border: oklch(0.923 0.004 258);
-  --input: oklch(0.923 0.004 258);
-  --ring: oklch(0.54 0.20 274);
+  --border: oklch(0.918 0.005 85);
+  --input: oklch(0.918 0.005 85);
+  --ring: oklch(0.69 0.17 48);
 
-  /* Faísca da marca: índigo vibrante (jovem) + laranja AuditView (calor) */
-  --brand: oklch(0.54 0.20 274);
-  --brand-foreground: oklch(0.985 0.002 250);
-  --brand-2: oklch(0.72 0.17 55);
+  /* Marca: laranja Firecrawl + chama (vermelho-alaranjado #FF3A00) */
+  --brand: oklch(0.69 0.17 48);
+  --brand-foreground: oklch(0.185 0.005 80);
+  --brand-2: oklch(0.63 0.22 32);
 
-  /* Palette de gráficos coesa e moderna: índigo · teal · âmbar · rosa · violeta */
-  --chart-1: oklch(0.55 0.2 274);
+  /* Gráficos: laranja assinatura · teal (contraponto) · âmbar · vermelho
+     quente · azul-ardósia técnico — distinguíveis, calor Firecrawl */
+  --chart-1: oklch(0.69 0.17 48);
   --chart-2: oklch(0.68 0.13 190);
-  --chart-3: oklch(0.74 0.15 62);
-  --chart-4: oklch(0.63 0.2 350);
-  --chart-5: oklch(0.6 0.19 300);
+  --chart-3: oklch(0.75 0.14 75);
+  --chart-4: oklch(0.55 0.16 25);
+  --chart-5: oklch(0.58 0.1 260);
 
-  /* Sombras suaves e em camadas (Apple: profundidade discreta, nunca dura) */
-  --shadow-soft: 0 1px 2px oklch(0.2 0.02 265 / 0.04), 0 4px 12px oklch(0.2 0.02 265 / 0.06);
-  --shadow-lift: 0 2px 4px oklch(0.2 0.02 265 / 0.05), 0 12px 28px oklch(0.2 0.02 265 / 0.1);
+  /* Sombras compostas · Jakub: anel 1px como 1ª camada (sombra-como-borda,
+     adapta a qualquer fundo), profundidade quente e suave em cima */
+  --shadow-soft:
+    0 0 0 1px oklch(0 0 0 / 0.04), 0 1px 2px oklch(0.25 0.02 60 / 0.04),
+    0 4px 12px oklch(0.25 0.02 60 / 0.06);
+  --shadow-lift:
+    0 0 0 1px oklch(0 0 0 / 0.05), 0 2px 4px oklch(0.25 0.02 60 / 0.05),
+    0 12px 28px oklch(0.25 0.02 60 / 0.1);
 
-  --sidebar: oklch(0.988 0.002 255);
+  --sidebar: oklch(0.97 0.003 85);
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: var(--primary-foreground);
@@ -64,22 +77,23 @@
 }
 
 .dark {
-  /* Escuro profundo, não preto puro; cards elevados (material) */
-  --background: oklch(0.165 0.012 265);
-  --foreground: oklch(0.975 0.003 250);
-  --card: oklch(0.208 0.014 265);
-  --card-foreground: oklch(0.975 0.003 250);
-  --popover: oklch(0.216 0.015 265);
-  --popover-foreground: oklch(0.975 0.003 250);
+  /* Firecrawl dark: #1e1e1e de editor, superfícies #252526/#2a2a2a */
+  --background: oklch(0.235 0.002 80);
+  --foreground: oklch(0.87 0.002 80);
+  --card: oklch(0.268 0.002 80);
+  --card-foreground: oklch(0.87 0.002 80);
+  --popover: oklch(0.28 0.002 80);
+  --popover-foreground: oklch(0.87 0.002 80);
 
-  --primary: oklch(0.97 0.003 250);
-  --primary-foreground: oklch(0.205 0.018 265);
-  --secondary: oklch(0.27 0.02 265);
-  --secondary-foreground: oklch(0.975 0.003 250);
-  --muted: oklch(0.27 0.02 265);
-  --muted-foreground: oklch(0.712 0.02 258);
-  --accent: oklch(0.285 0.022 268);
-  --accent-foreground: oklch(0.975 0.003 250);
+  /* O mesmo laranja vivo; texto escuro em cima continua 6.9:1 */
+  --primary: oklch(0.69 0.17 48);
+  --primary-foreground: oklch(0.185 0.005 80);
+  --secondary: oklch(0.3 0.003 80);
+  --secondary-foreground: oklch(0.87 0.002 80);
+  --muted: oklch(0.3 0.003 80);
+  --muted-foreground: oklch(0.71 0.005 80);
+  --accent: oklch(0.32 0.01 60);
+  --accent-foreground: oklch(0.87 0.002 80);
 
   --destructive: oklch(0.7 0.19 22);
   --success: oklch(0.72 0.15 155);
@@ -93,24 +107,25 @@
   --success-text: var(--success);
   --warning-text: var(--warning);
 
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.62 0.19 274);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 13%);
+  --ring: oklch(0.73 0.16 50);
 
-  --brand: oklch(0.66 0.19 274);
-  --brand-foreground: oklch(0.16 0.02 265);
-  --brand-2: oklch(0.75 0.16 58);
+  /* Laranja um ponto mais claro no escuro; chama vira âmbar (#fdba74) */
+  --brand: oklch(0.73 0.16 50);
+  --brand-foreground: oklch(0.185 0.005 80);
+  --brand-2: oklch(0.83 0.11 65);
 
-  --chart-1: oklch(0.66 0.19 274);
+  --chart-1: oklch(0.73 0.16 50);
   --chart-2: oklch(0.72 0.13 190);
-  --chart-3: oklch(0.78 0.15 62);
-  --chart-4: oklch(0.7 0.19 350);
-  --chart-5: oklch(0.68 0.18 300);
+  --chart-3: oklch(0.8 0.13 75);
+  --chart-4: oklch(0.65 0.15 25);
+  --chart-5: oklch(0.68 0.09 260);
 
   --shadow-soft: 0 1px 2px oklch(0 0 0 / 0.3), 0 4px 12px oklch(0 0 0 / 0.4);
   --shadow-lift: 0 2px 4px oklch(0 0 0 / 0.35), 0 14px 32px oklch(0 0 0 / 0.55);
 
-  --sidebar: oklch(0.185 0.013 265);
+  --sidebar: oklch(0.252 0.002 80);
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: var(--primary-foreground);

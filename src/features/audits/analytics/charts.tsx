@@ -97,7 +97,7 @@ function Kpi({
   icon?: React.ComponentType<{ className?: string }>
 }) {
   return (
-    <Card className='animate-rise gap-2 py-5'>
+    <Card className='gap-2 py-5'>
       <CardHeader className='pb-0'>
         <CardTitle className='text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase'>
           {label}
@@ -271,9 +271,11 @@ function ResultBarLabel(props: {
   const right = Math.max(x, x + width)
   const neg = value < 0
   const inside = Math.abs(width) >= 64
-  // ponta da barra: esquerda para negativos, direita para positivos
-  const tx = neg ? (inside ? left + 6 : left - 6) : inside ? right - 6 : right + 6
-  const anchor: 'start' | 'end' = neg === inside ? 'start' : 'end'
+  // Dentro: na ponta da barra (esq p/ negativo, dir p/ positivo). Fora: sempre
+  // à DIREITA do eixo zero — o lado da barra negativa é o dos códigos do eixo,
+  // e em viewports estreitos o rótulo colidia com eles.
+  const tx = neg ? (inside ? left + 6 : right + 6) : inside ? right - 6 : right + 6
+  const anchor: 'start' | 'end' = inside && !neg ? 'end' : 'start'
   return (
     <text
       x={tx}

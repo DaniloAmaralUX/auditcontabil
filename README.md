@@ -112,7 +112,9 @@ For questions or sponsorship inquiries, feel free to reach out at [satnaingdev@g
 
 ## Author
 
-Crafted with 🤍 by [@satnaing](https://github.com/satnaing)
+**Craft**: standards de design engineering em [docs/design/CRAFT.md](docs/design/CRAFT.md) — personas de [Jakub Krehel](https://jakub.kr) (superfícies) e [Emil Kowalski](https://emilkowal.ski) (motion, autor do Sonner usado aqui); auditoria pelo framework [ui-audit](https://github.com/tommygeoco/ui-audit) de Tommy Geoco; tema [Firecrawl](https://github.com/firecrawl/firecrawl-theme).
+
+Template base crafted with 🤍 by [@satnaing](https://github.com/satnaing)
 
 ## License
 

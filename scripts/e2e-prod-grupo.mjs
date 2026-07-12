@@ -211,6 +211,7 @@ if (eRed) die('redeem_share', eRed)
 const pa = red.payload.analytics
 if (!pa || !(pa.consolidado?.despesas > 0)) die('snapshot público sem analytics', JSON.stringify(red.payload).slice(0, 300))
 log(`cliente vê gráficos ✓ (despesas ${brl(pa.consolidado.despesas)}, ${pa.empresas.length} empresas)`)
+log(`publicado por: ${red.payload.audit.escritorio ?? '(sem identidade — snapshot antigo?)'}`)
 
 console.log('\n=== E2E DASHBOARD MULTI-EMPRESA: TODAS AS ETAPAS PASSARAM ===')
 console.log(`Workspace (aba Dashboard): https://auditcontabil.vercel.app/audits/${auditId}`)

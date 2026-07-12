@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 // Marca AuditView — ícone minimalista: três barras de gráfico ascendentes
 // formando um "A" implícito, com traço de verificação atravessando.
 // 1 cor estrutural (currentColor, acompanha o tema) + 1 acento fixo.
-const ACCENT = '#EE7D2B'
+const ACCENT = '#E97318'
 
 export function Logo({ className, ...props }: SVGProps<SVGSVGElement>) {
   return (

@@ -53,28 +53,34 @@ Padrões: TanStack Router file-based, TanStack Query (`queryOptions` em `data/qu
 - Testes de banco: `supabase/tests/*.sql` (pgTAP) — rodam no CI.
 
 ### Designer
-- Direção: **Ramp** (limpo, denso-arejado, acento contido). Lei: tokens do template shadcn-admin; nunca comunicar status só por cor (ícone+texto sempre — ver `status-badge.tsx`).
-- Marca: **AuditView** — ícone minimalista (3 barras + traço laranja `#EE7D2B`) em `src/assets/logo.tsx` e `public/images/favicon.svg`.
+- **Régua de craft: `docs/design/CRAFT.md`** — standards assinados pelas
+  personas Jakub (superfícies, de jakub.kr) e Emil (motion, de emilkowal.ski);
+  revisores vivos em `.claude/agents/{jakub,emil}.md`. PR que viola não passa.
+- Direção visual: **Firecrawl** — laranja único `#E97318` (texto escuro em
+  cima), papel quente no claro, `#1e1e1e` no escuro. Nunca comunicar status só
+  por cor (ícone+texto — ver `status-badge.tsx`).
+- Marca: **AuditView** — ícone minimalista (3 barras + traço laranja `#E97318`) em `src/assets/logo.tsx` e `public/images/favicon.svg`.
 - Duas vozes: interna (técnica, com fórmula/origem) × cliente (`/r/:token` — zero jargão, 3 rótulos: "Precisa de atenção / Está tudo certo / Informativo").
 - Estado da esteira de design: `design-compound/` (briefing, decisões, eventos).
 
 ## Qualidade — antes de todo commit
 
 ```bash
-pnpm lint && pnpm knip && pnpm test   # vitest browser (93 testes) — tudo verde
+pnpm lint && pnpm knip && pnpm test   # vitest browser (101 testes) — tudo verde
 ```
 
 CI (`.github/workflows/deploy.yml`) roda testes de banco + front. **Deploy = merge na `main`** → Vercel publica sozinha.
 
 ## Pendências conhecidas (jul/2026)
 
-1. **Migração `docs/deploy/4-analytics.sql` no banco de produção** — sem ela a aba Dashboard mostra erro/vazio em prod (rodar no SQL Editor, 1 Run).
+1. Migrações 4 (analytics), 5 (categoria) e 6 (identidade+telemetria) **já aplicadas em produção** — um fresh deploy roda `docs/deploy/1→6` em ordem no SQL Editor.
 2. Edge Functions (convite de equipe por e-mail + Stripe) escritas mas não deployadas — `scripts/deploy-backend.ps1` (precisa de `supabase login` interativo). Trial de 90 dias já cobre o piloto.
 3. E2E de produção: `node scripts/e2e-prod.mjs` (fluxo completo via API com a conta de teste).
 
 ## Documentos de referência
 
 - `docs/PRD.md` — PRD v2 (produto, backend, frontend, design, roadmap)
+- `docs/design/CRAFT.md` — standards de design engineering (Jakub × Emil) + auditoria ui-audit
 - `docs/RUNBOOK-DEPLOY.md` — deploy do zero, passo a passo
 - `docs/deploy/` — SQLs prontos para o SQL Editor (schema, owner, conta teste, analytics)
 - `public/progresso/status.json` — atualize ao concluir blocos (o painel lê sozinho)

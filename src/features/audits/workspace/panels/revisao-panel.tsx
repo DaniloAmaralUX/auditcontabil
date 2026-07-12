@@ -150,7 +150,7 @@ export function RevisaoPanel({ auditId }: { auditId: string }) {
             aria-label='Itens revisados'
           >
             <div
-              className='h-full bg-primary transition-all'
+              className='h-full bg-primary transition-[width]'
               style={{
                 width:
                   actionable.length === 0
@@ -186,7 +186,7 @@ export function RevisaoPanel({ auditId }: { auditId: string }) {
               Iniciar revisão
             </Button>
           ) : status === 'approved' || status === 'published' ? (
-            <p className='flex items-center gap-2 text-sm text-success'>
+            <p className='flex items-center gap-2 text-sm text-success-text'>
               <ShieldCheck className='size-4' aria-hidden /> Auditoria aprovada.
             </p>
           ) : (

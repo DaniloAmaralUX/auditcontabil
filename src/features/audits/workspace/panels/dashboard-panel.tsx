@@ -71,7 +71,7 @@ export function DashboardPanel({ auditId }: { auditId: string }) {
 
   const a = data!
   return (
-    <div className='animate-rise space-y-4'>
+    <div className='space-y-4'>
       <KpiHero a={a} />
 
       <div className='grid gap-4 lg:grid-cols-2'>
