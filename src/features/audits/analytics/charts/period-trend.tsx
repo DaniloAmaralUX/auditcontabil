@@ -104,8 +104,10 @@ export function PeriodTrend({
             Despesas (tracejada)
           </span>
         </div>
-        {/* Equivalente textual do gráfico para leitores de tela. */}
-        <table className='sr-only'>
+        {/* Equivalente textual do gráfico para leitores de tela. O sr-only vai
+            no DIV: table layout trata width:1px como mínimo (scroll fantasma). */}
+        <div className='sr-only'>
+        <table>
           <caption>{title} — valores mensais</caption>
           <thead>
             <tr>
@@ -124,6 +126,7 @@ export function PeriodTrend({
             ))}
           </tbody>
         </table>
+        </div>
       </CardContent>
     </Card>
   )

@@ -79,8 +79,11 @@ export function TopAccounts({
             />
           </BarChart>
         </ChartContainer>
-        {/* Equivalente textual — nomes completos + participação. */}
-        <table className='sr-only'>
+        {/* Equivalente textual — nomes completos + participação. O sr-only vai
+            no DIV: table layout trata width:1px como mínimo e a tabela "invisível"
+            criava scroll horizontal em 375px. */}
+        <div className='sr-only'>
+        <table>
           <caption>{title} — contas, valores e participação</caption>
           <thead>
             <tr>
@@ -99,6 +102,7 @@ export function TopAccounts({
             ))}
           </tbody>
         </table>
+        </div>
       </CardContent>
     </Card>
   )
