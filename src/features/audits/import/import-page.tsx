@@ -142,8 +142,14 @@ export function ImportPage() {
       // Detalhe técnico só no console; o usuário recebe orientação humana.
       // eslint-disable-next-line no-console
       console.error('[import] preview falhou:', e)
+      // O worker manda mensagens já escritas para humanos (ex.: "Este PDF
+      // parece ser uma imagem escaneada — exporte em CSV"). Usar a específica
+      // quando existir; "abre no Excel" é conselho errado para PDF.
+      const msg = (e instanceof Error ? e.message : String(e)).replace(/^Error:\s*/, '')
       setFileError(
-        'Não foi possível ler este arquivo. Ele pode estar protegido por senha ou corrompido — verifique se ele abre no Excel e envie novamente.'
+        /PDF/.test(msg)
+          ? msg
+          : 'Não foi possível ler este arquivo. Ele pode estar protegido por senha ou corrompido — verifique se ele abre no Excel e envie novamente.'
       )
       setFile(null)
     }

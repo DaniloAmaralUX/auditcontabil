@@ -4,6 +4,7 @@
 import { describe, expect, it } from 'vitest'
 import fixtureUrl from '../../../docs/fixtures/dre-educacao-2024.pdf?url'
 import { classifyPdfRow, extractDreFromItems } from './dre-pdf'
+import { summarizeDre } from './dre-summary'
 import { loadPdfItems } from './pdf-loader'
 import { detectKind } from './detect'
 
@@ -76,6 +77,17 @@ describe('DRE real em PDF (CENTRO DE EDUCACAO MDW LTDA, 2024)', () => {
 
     const resultado = round2(receita - deducoes - despesas)
     expect(resultado).toBe(Number(meta.declaredResult))
+  })
+
+  // Regressão do dogfood: o card do import e o selo de reconciliação usam
+  // summarizeDre — que classificava PDF por CÓDIGO (não existe) e caía no
+  // fallback por nome, "calculando" -20 milhões e acusando DIVERGÊNCIA falsa.
+  it('summarizeDre concilia o PDF (o mesmo caminho do card e do selo)', async () => {
+    const pages = await loadFixture()
+    const { rows, meta } = extractDreFromItems(pages)
+    const dre = summarizeDre(rows, meta)
+    expect(dre.resultado).toBe(1346640.06)
+    expect(dre.conciliado).toBe(true)
   })
 
   it('categoriza despesas pelo grupo do documento', async () => {
