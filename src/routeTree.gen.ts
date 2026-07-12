@@ -31,6 +31,9 @@ import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_a
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
 import { Route as AuthenticatedClientsClientIdRouteImport } from './routes/_authenticated/clients/$clientId'
+import { Route as AuthenticatedAuditsAuditIdRouteRouteImport } from './routes/_authenticated/audits/$auditId/route'
+import { Route as AuthenticatedAuditsAuditIdIndexRouteImport } from './routes/_authenticated/audits/$auditId/index'
+import { Route as AuthenticatedAuditsAuditIdImportRouteImport } from './routes/_authenticated/audits/$auditId/import'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -152,6 +155,24 @@ const AuthenticatedClientsClientIdRoute =
     path: '/clients/$clientId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAuditsAuditIdRouteRoute =
+  AuthenticatedAuditsAuditIdRouteRouteImport.update({
+    id: '/audits/$auditId',
+    path: '/audits/$auditId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAuditsAuditIdIndexRoute =
+  AuthenticatedAuditsAuditIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAuditsAuditIdRouteRoute,
+  } as any)
+const AuthenticatedAuditsAuditIdImportRoute =
+  AuthenticatedAuditsAuditIdImportRouteImport.update({
+    id: '/import',
+    path: '/import',
+    getParentRoute: () => AuthenticatedAuditsAuditIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -164,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+  '/audits/$auditId': typeof AuthenticatedAuditsAuditIdRouteRouteWithChildren
   '/clients/$clientId': typeof AuthenticatedClientsClientIdRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -175,6 +197,8 @@ export interface FileRoutesByFullPath {
   '/clients/': typeof AuthenticatedClientsIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/team/': typeof AuthenticatedTeamIndexRoute
+  '/audits/$auditId/import': typeof AuthenticatedAuditsAuditIdImportRoute
+  '/audits/$auditId/': typeof AuthenticatedAuditsAuditIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/accept-invite': typeof authAcceptInviteRoute
@@ -197,6 +221,8 @@ export interface FileRoutesByTo {
   '/clients': typeof AuthenticatedClientsIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/team': typeof AuthenticatedTeamIndexRoute
+  '/audits/$auditId/import': typeof AuthenticatedAuditsAuditIdImportRoute
+  '/audits/$auditId': typeof AuthenticatedAuditsAuditIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -211,6 +237,7 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/audits/$auditId': typeof AuthenticatedAuditsAuditIdRouteRouteWithChildren
   '/_authenticated/clients/$clientId': typeof AuthenticatedClientsClientIdRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -222,6 +249,8 @@ export interface FileRoutesById {
   '/_authenticated/clients/': typeof AuthenticatedClientsIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/team/': typeof AuthenticatedTeamIndexRoute
+  '/_authenticated/audits/$auditId/import': typeof AuthenticatedAuditsAuditIdImportRoute
+  '/_authenticated/audits/$auditId/': typeof AuthenticatedAuditsAuditIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -236,6 +265,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+    | '/audits/$auditId'
     | '/clients/$clientId'
     | '/errors/$error'
     | '/settings/account'
@@ -247,6 +277,8 @@ export interface FileRouteTypes {
     | '/clients/'
     | '/settings/'
     | '/team/'
+    | '/audits/$auditId/import'
+    | '/audits/$auditId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/accept-invite'
@@ -269,6 +301,8 @@ export interface FileRouteTypes {
     | '/clients'
     | '/settings'
     | '/team'
+    | '/audits/$auditId/import'
+    | '/audits/$auditId'
   id:
     | '__root__'
     | '/_authenticated'
@@ -282,6 +316,7 @@ export interface FileRouteTypes {
     | '/(errors)/500'
     | '/(errors)/503'
     | '/_authenticated/'
+    | '/_authenticated/audits/$auditId'
     | '/_authenticated/clients/$clientId'
     | '/_authenticated/errors/$error'
     | '/_authenticated/settings/account'
@@ -293,6 +328,8 @@ export interface FileRouteTypes {
     | '/_authenticated/clients/'
     | '/_authenticated/settings/'
     | '/_authenticated/team/'
+    | '/_authenticated/audits/$auditId/import'
+    | '/_authenticated/audits/$auditId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -463,6 +500,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientsClientIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/audits/$auditId': {
+      id: '/_authenticated/audits/$auditId'
+      path: '/audits/$auditId'
+      fullPath: '/audits/$auditId'
+      preLoaderRoute: typeof AuthenticatedAuditsAuditIdRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/audits/$auditId/': {
+      id: '/_authenticated/audits/$auditId/'
+      path: '/'
+      fullPath: '/audits/$auditId/'
+      preLoaderRoute: typeof AuthenticatedAuditsAuditIdIndexRouteImport
+      parentRoute: typeof AuthenticatedAuditsAuditIdRouteRoute
+    }
+    '/_authenticated/audits/$auditId/import': {
+      id: '/_authenticated/audits/$auditId/import'
+      path: '/import'
+      fullPath: '/audits/$auditId/import'
+      preLoaderRoute: typeof AuthenticatedAuditsAuditIdImportRouteImport
+      parentRoute: typeof AuthenticatedAuditsAuditIdRouteRoute
+    }
   }
 }
 
@@ -489,9 +547,27 @@ const AuthenticatedSettingsRouteRouteWithChildren =
     AuthenticatedSettingsRouteRouteChildren,
   )
 
+interface AuthenticatedAuditsAuditIdRouteRouteChildren {
+  AuthenticatedAuditsAuditIdImportRoute: typeof AuthenticatedAuditsAuditIdImportRoute
+  AuthenticatedAuditsAuditIdIndexRoute: typeof AuthenticatedAuditsAuditIdIndexRoute
+}
+
+const AuthenticatedAuditsAuditIdRouteRouteChildren: AuthenticatedAuditsAuditIdRouteRouteChildren =
+  {
+    AuthenticatedAuditsAuditIdImportRoute:
+      AuthenticatedAuditsAuditIdImportRoute,
+    AuthenticatedAuditsAuditIdIndexRoute: AuthenticatedAuditsAuditIdIndexRoute,
+  }
+
+const AuthenticatedAuditsAuditIdRouteRouteWithChildren =
+  AuthenticatedAuditsAuditIdRouteRoute._addFileChildren(
+    AuthenticatedAuditsAuditIdRouteRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedAuditsAuditIdRouteRoute: typeof AuthenticatedAuditsAuditIdRouteRouteWithChildren
   AuthenticatedClientsClientIdRoute: typeof AuthenticatedClientsClientIdRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
   AuthenticatedAuditsIndexRoute: typeof AuthenticatedAuditsIndexRoute
@@ -503,6 +579,8 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedAuditsAuditIdRouteRoute:
+    AuthenticatedAuditsAuditIdRouteRouteWithChildren,
   AuthenticatedClientsClientIdRoute: AuthenticatedClientsClientIdRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
   AuthenticatedAuditsIndexRoute: AuthenticatedAuditsIndexRoute,

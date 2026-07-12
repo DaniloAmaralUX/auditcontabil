@@ -1,11 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { PagePlaceholder } from '@/components/page-placeholder'
+import { Audits } from '@/features/audits'
+import { auditsListQuery } from '@/features/audits/data/queries'
 
 export const Route = createFileRoute('/_authenticated/audits/')({
-  component: () => (
-    <PagePlaceholder
-      title='Auditorias'
-      description='Em construção. Aqui você vai criar auditorias, importar planilhas, revisar inconsistências e publicar.'
-    />
-  ),
+  component: Audits,
+  loader: ({ context }) => context.queryClient.ensureQueryData(auditsListQuery()),
 })

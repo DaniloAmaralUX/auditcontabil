@@ -1,0 +1,80 @@
+{
+  "updatedAt": "2026-07-11T21:45:00-03:00",
+  "now": "Criando o painel de progresso e revalidando o código do workspace",
+  "groups": [
+    {
+      "title": "🗄️ Backend (banco + funções)",
+      "items": [
+        { "label": "Schema completo (23 tabelas + RLS multi-tenant)", "state": "done" },
+        { "label": "7 regras de auditoria em SQL versionado", "state": "done" },
+        { "label": "RPCs: importação, transição, publicação, share", "state": "done" },
+        { "label": "Share seguro: senha bcrypt + rate limit + snapshot", "state": "done" },
+        { "label": "Edge Functions: convite + Stripe (3)", "state": "done" },
+        { "label": "Testes de banco (pgTAP)", "state": "done" },
+        { "label": "Piloto: trial 90 dias + regras semeadas", "state": "done" }
+      ]
+    },
+    {
+      "title": "🖥️ Telas base",
+      "items": [
+        { "label": "Login / recuperar senha / aceitar convite", "state": "done" },
+        { "label": "Marca Espaço Ação (logo + favicon)", "state": "done" },
+        { "label": "Menu por perfil (owner/contador/analista)", "state": "done" },
+        { "label": "Clientes (cadastrar, editar, remover)", "state": "done" },
+        { "label": "Início (visão geral)", "state": "done" }
+      ]
+    },
+    {
+      "title": "📊 Auditorias",
+      "items": [
+        { "label": "Lista de auditorias + criar nova", "state": "doing" },
+        { "label": "Workspace com 6 abas", "state": "doing" },
+        { "label": "Importação: enviar arquivo + mapear colunas", "state": "doing" },
+        { "label": "Processamento com regras no banco", "state": "doing" },
+        { "label": "Revisão com justificativa", "state": "doing" },
+        { "label": "Aprovação e publicação", "state": "doing" }
+      ]
+    },
+    {
+      "title": "🔗 Cliente final",
+      "items": [
+        { "label": "Página pública /r/link com senha", "state": "todo" },
+        { "label": "Dashboard do cliente (linguagem simples)", "state": "todo" },
+        { "label": "PDF para download", "state": "todo" }
+      ]
+    },
+    {
+      "title": "👥 Escritório",
+      "items": [
+        { "label": "Equipe: convidar por e-mail", "state": "todo" },
+        { "label": "Faturamento: status do trial", "state": "todo" }
+      ]
+    },
+    {
+      "title": "✨ Qualidade",
+      "items": [
+        { "label": "Visual estilo Ramp (passada ui-skills)", "state": "todo" },
+        { "label": "Testes automatizados extras", "state": "todo" },
+        { "label": "Limpeza de código (knip + react-doctor)", "state": "todo" }
+      ]
+    },
+    {
+      "title": "🚀 Deploy",
+      "items": [
+        { "label": "Config Cloudflare Pages + CI", "state": "todo" },
+        { "label": "Runbook de deploy (passo a passo)", "state": "todo" },
+        { "label": "Planilha de teste de exemplo", "state": "todo" }
+      ]
+    },
+    {
+      "title": "🔑 Seu checklist final (~5 min, só você pode)",
+      "items": [
+        { "label": "supabase db push (senha do banco)", "state": "todo" },
+        { "label": "supabase functions deploy", "state": "todo" },
+        { "label": "Colar a anon key no .env", "state": "todo" },
+        { "label": "Criar owner no dashboard + bind_pilot_owner.sql", "state": "todo" },
+        { "label": "wrangler pages deploy → LINK DE TESTE", "state": "todo" }
+      ]
+    }
+  ]
+}
