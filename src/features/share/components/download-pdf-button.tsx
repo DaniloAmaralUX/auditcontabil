@@ -16,7 +16,7 @@ import { type PublicSnapshot } from '../data/api'
 const styles = StyleSheet.create({
   page: { padding: 40, fontSize: 11, fontFamily: 'Helvetica', color: '#1a1a1a' },
   header: { marginBottom: 16 },
-  brand: { fontSize: 9, letterSpacing: 2, color: '#E97318' },
+  brand: { fontSize: 9, letterSpacing: 2, color: '#666666' },
   title: { fontSize: 18, fontFamily: 'Helvetica-Bold', marginTop: 2 },
   meta: { fontSize: 10, color: '#666', marginTop: 2 },
   summary: { marginVertical: 12, lineHeight: 1.5 },

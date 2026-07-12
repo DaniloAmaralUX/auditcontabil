@@ -164,12 +164,12 @@ export function RevisaoPanel({ auditId }: { auditId: string }) {
             aria-label='Itens revisados'
           >
             <div
-              className='h-full bg-primary transition-[width]'
+              className='h-full w-full origin-left bg-primary transition-transform duration-200 ease-[cubic-bezier(0.25,1,0.5,1)]'
               style={{
-                width:
+                transform:
                   actionable.length === 0
-                    ? '100%'
-                    : `${(reviewed / actionable.length) * 100}%`,
+                    ? 'scaleX(1)'
+                    : `scaleX(${reviewed / actionable.length})`,
               }}
             />
           </div>

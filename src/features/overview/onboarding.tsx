@@ -205,9 +205,9 @@ export function HomeOnboarding() {
             className='h-1.5 overflow-hidden rounded-full bg-muted'
           >
             <div
-              className='h-full rounded-full bg-brand transition-[width] duration-500'
+              className='h-full w-full origin-left rounded-full bg-brand transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]'
               style={{
-                width: `${(state.doneCount / state.steps.length) * 100}%`,
+                transform: `scaleX(${state.doneCount / state.steps.length})`,
               }}
             />
           </div>
