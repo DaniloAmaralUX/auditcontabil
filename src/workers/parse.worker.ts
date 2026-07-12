@@ -126,6 +126,17 @@ function toDetected(result: ExtractResult): DetectedDocument {
 }
 
 async function handlePreview(fileId: string, file: File, limit: number) {
+  // Mesmo guard do parse: o preview lê o arquivo inteiro para detectar o tipo,
+  // então um arquivo gigante trava o worker antes do usuário conseguir cancelar.
+  if (file.size > MAX_BYTES) {
+    post({
+      type: 'FATAL',
+      fileId,
+      code: 'FILE_TOO_LARGE',
+      message: 'Arquivo acima de 20 MB.',
+    })
+    return
+  }
   try {
     // documentos contábeis reconhecidos: preview falante, sem mapping
     const doc = await tryExtractDocument(file)
