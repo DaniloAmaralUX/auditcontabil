@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Spinner } from '@/components/ui/spinner'
 import {
   queryOptions,
   useMutation,
@@ -7,7 +8,7 @@ import {
 } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, UserPlus } from 'lucide-react'
+import { UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { qk } from '@/lib/query-keys'
@@ -286,7 +287,7 @@ export function Team() {
               Cancelar
             </Button>
             <Button type='submit' form='invite-form' disabled={invite.isPending}>
-              {invite.isPending && <Loader2 className='animate-spin' />}
+              {invite.isPending && <Spinner className='size-4' />}
               Enviar convite
             </Button>
           </DialogFooter>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
+import { Spinner } from '@/components/ui/spinner'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Loader2, ShieldCheck } from 'lucide-react'
+import { ShieldCheck } from 'lucide-react'
 import { qk } from '@/lib/query-keys'
 import { can } from '@/lib/permissions'
 import { supabase } from '@/lib/supabase'
@@ -13,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { auditDetailQuery } from '../../data/queries'
@@ -95,7 +97,7 @@ function ConclusionCard({
             onClick={() => saveNow(text)}
             disabled={save.isPending || saved}
           >
-            {save.isPending && <Loader2 className='size-4 animate-spin' />}
+            {save.isPending && <Spinner className='size-4' />}
             Salvar conclusão
           </Button>
           <span aria-live='polite' className='text-xs text-muted-foreground'>
@@ -155,24 +157,11 @@ export function RevisaoPanel({ auditId }: { auditId: string }) {
           </CardDescription>
         </CardHeader>
         <CardContent className='space-y-2'>
-          <div
-            className='h-2 w-full overflow-hidden rounded-full bg-muted'
-            role='progressbar'
-            aria-valuemin={0}
-            aria-valuemax={actionable.length}
-            aria-valuenow={reviewed}
+          <Progress
             aria-label='Itens revisados'
-          >
-            <div
-              className='h-full w-full origin-left bg-primary transition-transform duration-200 ease-[cubic-bezier(0.25,1,0.5,1)]'
-              style={{
-                transform:
-                  actionable.length === 0
-                    ? 'scaleX(1)'
-                    : `scaleX(${reviewed / actionable.length})`,
-              }}
-            />
-          </div>
+            value={actionable.length === 0 ? 100 : (reviewed / actionable.length) * 100}
+            className='bg-muted'
+          />
           {pending.length > 0 && (
             <p className='text-sm text-muted-foreground'>
               Revise os {pending.length} itens pendentes na aba Inconsistências.

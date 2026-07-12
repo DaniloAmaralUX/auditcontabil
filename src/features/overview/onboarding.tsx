@@ -15,6 +15,15 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemTitle,
+} from '@/components/ui/item'
+import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAuthStore } from '@/stores/auth-store'
 import { track } from '@/lib/track'
@@ -196,21 +205,11 @@ export function HomeOnboarding() {
             </span>
           </div>
 
-          <div
-            role='progressbar'
+          <Progress
             aria-label='Progresso do primeiro ciclo'
-            aria-valuemin={0}
-            aria-valuemax={state.steps.length}
-            aria-valuenow={state.doneCount}
-            className='h-1.5 overflow-hidden rounded-full bg-muted'
-          >
-            <div
-              className='h-full w-full origin-left rounded-full bg-brand transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]'
-              style={{
-                transform: `scaleX(${state.doneCount / state.steps.length})`,
-              }}
-            />
-          </div>
+            value={(state.doneCount / state.steps.length) * 100}
+            className='h-1.5 bg-muted'
+          />
 
           <ol className='space-y-1'>
             {state.steps.map((step, i) => {
@@ -399,47 +398,46 @@ function ContinuePanel({
             </Link>
           </Button>
         </div>
-        <ul className='divide-y'>
+        <ItemGroup className='divide-y'>
           {pending.slice(0, 5).map((a) => {
             const na = nextAction(a.status)
             return (
-              <li
-                key={a.id}
-                className='flex flex-wrap items-center gap-x-3 gap-y-1 py-2.5'
-              >
-                <div className='min-w-0 flex-1'>
-                  <p className='truncate text-sm font-medium'>
+              <Item key={a.id} className='gap-3 px-0 py-2.5'>
+                <ItemContent className='gap-0.5'>
+                  <ItemTitle className='truncate'>
                     {a.title || 'Auditoria sem nome'}
-                  </p>
-                  <p className='truncate text-xs text-muted-foreground'>
+                  </ItemTitle>
+                  <ItemDescription className='truncate'>
                     {a.cliente_name}
-                  </p>
-                </div>
-                <AuditStatusBadge status={a.status} />
-                {na.toImport ? (
-                  <Button size='sm' variant='outline' asChild>
-                    <Link
-                      to='/audits/$auditId/import'
-                      params={{ auditId: a.id }}
-                    >
-                      {na.label}
-                    </Link>
-                  </Button>
-                ) : (
-                  <Button size='sm' variant='outline' asChild>
-                    <Link
-                      to='/audits/$auditId'
-                      params={{ auditId: a.id }}
-                      search={{ tab: na.tab ?? 'resumo' }}
-                    >
-                      {na.label}
-                    </Link>
-                  </Button>
-                )}
-              </li>
+                  </ItemDescription>
+                </ItemContent>
+                <ItemActions className='gap-2'>
+                  <AuditStatusBadge status={a.status} />
+                  {na.toImport ? (
+                    <Button size='sm' variant='outline' asChild>
+                      <Link
+                        to='/audits/$auditId/import'
+                        params={{ auditId: a.id }}
+                      >
+                        {na.label}
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button size='sm' variant='outline' asChild>
+                      <Link
+                        to='/audits/$auditId'
+                        params={{ auditId: a.id }}
+                        search={{ tab: na.tab ?? 'resumo' }}
+                      >
+                        {na.label}
+                      </Link>
+                    </Button>
+                  )}
+                </ItemActions>
+              </Item>
             )
           })}
-        </ul>
+        </ItemGroup>
         {restoreButton}
       </CardContent>
     </Card>

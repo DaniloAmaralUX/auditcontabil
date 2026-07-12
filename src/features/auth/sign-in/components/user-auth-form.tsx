@@ -1,9 +1,10 @@
 import { useState } from 'react'
+import { Spinner } from '@/components/ui/spinner'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { Loader2, LogIn } from 'lucide-react'
+import { LogIn } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { strings } from '@/lib/strings'
 import { cn } from '@/lib/utils'
@@ -109,7 +110,7 @@ export function UserAuthForm({
           </p>
         )}
         <Button className='mt-2' disabled={isLoading}>
-          {isLoading ? <Loader2 className='animate-spin' /> : <LogIn />}
+          {isLoading ? <Spinner className='size-4' /> : <LogIn />}
           {strings.auth.signIn}
         </Button>
       </form>

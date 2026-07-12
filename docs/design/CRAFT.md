@@ -60,3 +60,28 @@ Tokens: `--dur-fast: 140ms` · `--dur-base: 200ms` · `--dur-slow: 300ms` ·
   (workflow `ui-audit-10`); meta permanente = zero fail/warn confirmado.
 - Acessibilidade não negocia: contraste 4.5:1, foco visível, aria em erro e
   status, equivalente textual para gráficos (tabela sr-only), skip link.
+
+## O deck "O Fechamento" (/r/:token)
+
+A apresentação do cliente é EDITORIAL, não dashboard. Direção assinada:
+
+- **Tokens nomeados** (theme.css): Papel/Tinta/Brasa/Receita/Despesa/Névoa em
+  OKLCH, contrastes MEDIDOS nos dois temas (texto pequeno usa as variantes
+  `-text` >=4.5:1; Névoa só em objeto gráfico >=3:1 — leader dots).
+- **Fraunces** (opsz 9..144) é reservada a DUAS coisas: o eyebrow de seção
+  (`.deck-eyebrow`, opsz 20) e a figura do RESULTADO (`.result-figure`,
+  opsz 144). Corpo e números de tabela continuam Inter `tabular-nums`.
+- **DRE = tabela semântica** (income-statement.tsx): leader dots decorativos
+  em célula vazia, filete cinza nos subtotais, régua-brasa (`.bottom-rule`)
+  UMA vez, imediatamente antes do resultado. Negativo nunca só por cor:
+  sinal +/− + parênteses contábeis + tag Superávit/Déficit.
+- **Narrativa numa fonte só**: veredito da capa e insight de cada seção vêm
+  de `analytics/insights.ts` (puro, testado). Deck, capa e PDF compõem as
+  MESMAS frases — thresholds documentados nos testes.
+- **Motion**: reveal-once por seção via IntersectionObserver
+  (`use-reveal-on-scroll.ts`) — 450ms `--ease-out` (momento de apresentação,
+  autorizado pela regra 3), nunca re-anima em scroll repetido, no-op em
+  reduced-motion, conteúdo visível sem JS.
+- **Selo de confiança**: quando `summary.invalid === 0`, a DRE exibe
+  "Conferido com o documento: os totais batem ao centavo" — a reconciliação
+  do importador é a fonte desse selo, nunca texto decorativo.

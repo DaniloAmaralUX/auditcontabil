@@ -1,9 +1,10 @@
 import { useState } from 'react'
+import { Spinner } from '@/components/ui/spinner'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
-import { Loader2 } from 'lucide-react'
+
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { strings } from '@/lib/strings'
@@ -89,7 +90,7 @@ export function AcceptInviteForm({
           )}
         />
         <Button className='mt-2' disabled={isLoading}>
-          {isLoading && <Loader2 className='animate-spin' />}
+          {isLoading && <Spinner className='size-4' />}
           {strings.auth.setPassword}
         </Button>
       </form>

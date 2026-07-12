@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
+import { Spinner } from '@/components/ui/spinner'
 import { useParams } from '@tanstack/react-router'
-import { Loader2 } from 'lucide-react'
+
 import { PasswordGate } from './components/password-gate'
 import { PublicReport } from './components/public-report'
 import { getSharedSnapshot, type SharedView } from './data/api'
@@ -27,7 +28,7 @@ export function PublicReportPage() {
   if (checking) {
     return (
       <div className='flex min-h-svh items-center justify-center'>
-        <Loader2 className='size-6 animate-spin text-muted-foreground' />
+        <Spinner className='size-6 text-muted-foreground' />
         <span className='sr-only'>Carregando…</span>
       </div>
     )

@@ -37,7 +37,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { type ColumnMapping } from '@/workers/parse-protocol'
+import {
+  type ColumnMapping,
+  type DetectedDocument,
+} from '@/workers/parse-protocol'
 import { auditDetailQuery } from '../data/queries'
 import { useIngestPipeline } from '../data/use-ingest-pipeline'
 
@@ -56,6 +59,9 @@ const TARGETS = [
 ] as const
 
 const NONE = '__none__'
+
+const brlFromString = (v: string) =>
+  Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
 function guessMapping(headers: string[]): Record<string, string> {
   const guess: Record<string, string> = {}
@@ -91,6 +97,7 @@ export function ImportPage() {
 
   const inputRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
+  const [detected, setDetected] = useState<DetectedDocument | null>(null)
   const [headers, setHeaders] = useState<string[]>([])
   const [sheets, setSheets] = useState<{ name: string; rows: number }[]>([])
   const [map, setMap] = useState<Record<string, string>>({})
@@ -106,9 +113,9 @@ export function ImportPage() {
     setFileError(null)
     if (!f) return
     const ext = f.name.split('.').pop()?.toLowerCase()
-    if (!['xlsx', 'xls', 'csv'].includes(ext ?? '')) {
+    if (!['xlsx', 'xls', 'csv', 'pdf'].includes(ext ?? '')) {
       setFileError(
-        'Este arquivo não é uma planilha que conseguimos ler. Formatos aceitos: .xlsx, .xls e .csv.'
+        'Este arquivo não é um formato que conseguimos ler. Aceitos: .xlsx, .xls, .csv e .pdf (relatórios do sistema contábil).'
       )
       return
     }
@@ -119,17 +126,30 @@ export function ImportPage() {
       return
     }
     setFile(f)
+    setDetected(null)
     try {
       const p = await preview(f)
       setHeaders(p.headers)
       setSheets(p.sheets)
-      setMap(guessMapping(p.headers))
+      if (p.detected) {
+        // documento reconhecido: preset automático, sem mapping manual
+        setDetected(p.detected)
+        setMap({ account_code: 'Conta', account_name: 'Descrição', amount: 'Saldo' })
+      } else {
+        setMap(guessMapping(p.headers))
+      }
     } catch (e) {
       // Detalhe técnico só no console; o usuário recebe orientação humana.
       // eslint-disable-next-line no-console
       console.error('[import] preview falhou:', e)
+      // O worker manda mensagens já escritas para humanos (ex.: "Este PDF
+      // parece ser uma imagem escaneada — exporte em CSV"). Usar a específica
+      // quando existir; "abre no Excel" é conselho errado para PDF.
+      const msg = (e instanceof Error ? e.message : String(e)).replace(/^Error:\s*/, '')
       setFileError(
-        'Não foi possível ler este arquivo. Ele pode estar protegido por senha ou corrompido — verifique se ele abre no Excel e envie novamente.'
+        /PDF/.test(msg)
+          ? msg
+          : 'Não foi possível ler este arquivo. Ele pode estar protegido por senha ou corrompido — verifique se ele abre no Excel e envie novamente.'
       )
       setFile(null)
     }
@@ -142,7 +162,7 @@ export function ImportPage() {
     !!map.amount ||
     !!map.opening_balance ||
     !!map.closing_balance
-  const ready = !!file && hasAccount && hasValue
+  const ready = !!file && (!!detected || (hasAccount && hasValue))
   const defaultPeriod =
     audit.data?.period_end ?? audit.data?.period_start ?? undefined
   const busy = !['idle', 'done', 'error'].includes(state.phase)
@@ -211,7 +231,7 @@ export function ImportPage() {
             <input
               ref={inputRef}
               type='file'
-              accept='.xlsx,.xls,.csv'
+              accept='.xlsx,.xls,.csv,.pdf'
               className='hidden'
               onChange={(e) => onPick(e.target.files?.[0])}
             />
@@ -237,7 +257,8 @@ export function ImportPage() {
                   Arraste a planilha aqui ou clique para escolher
                 </p>
                 <p className='text-sm text-muted-foreground'>
-                  .xlsx, .xls ou .csv · até 20 MB · cada aba vira uma empresa
+                  Balancete ou DRE do seu sistema contábil · .csv, .xlsx ou
+                  .pdf · até 20 MB
                 </p>
               </>
             )}
@@ -273,8 +294,59 @@ export function ImportPage() {
             </Button>
           )}
 
+          {/* Documento contábil reconhecido: preview falante, sem mapping */}
+          {file && detected && (
+            <Card className='accent-top'>
+              <CardHeader className='pb-2'>
+                <CardTitle className='flex items-center gap-2 text-base'>
+                  <CircleCheck className='size-4 text-success' aria-hidden />
+                  {detected.kind === 'balancete-csv'
+                    ? 'Balancete Societário reconhecido'
+                    : 'Demonstração do Resultado (DRE) reconhecida'}
+                </CardTitle>
+                <CardDescription className='space-y-0.5'>
+                  <span className='block font-medium text-foreground'>
+                    {detected.company ?? 'Empresa não identificada'}
+                    {detected.cnpj ? ` · CNPJ ${detected.cnpj}` : ''}
+                  </span>
+                  <span className='block'>
+                    {detected.periodStart && detected.periodEnd
+                      ? `Período ${detected.periodStart.split('-').reverse().join('/')} a ${detected.periodEnd.split('-').reverse().join('/')} · `
+                      : ''}
+                    {detected.analyticRows.toLocaleString('pt-BR')} contas
+                    analíticas de {detected.totalRows.toLocaleString('pt-BR')}
+                  </span>
+                </CardDescription>
+              </CardHeader>
+              <CardContent className='space-y-1 text-sm'>
+                <p
+                  role='status'
+                  className={
+                    detected.conciliado
+                      ? 'flex items-center gap-2 text-success-text'
+                      : 'flex items-center gap-2 text-warning-text'
+                  }
+                >
+                  {detected.conciliado ? (
+                    <CircleCheck className='size-4 shrink-0' aria-hidden />
+                  ) : (
+                    <CircleAlert className='size-4 shrink-0' aria-hidden />
+                  )}
+                  {detected.conciliado
+                    ? `Números conferidos: resultado de ${brlFromString(detected.resultadoCalculado)} bate com o declarado no documento.`
+                    : `Atenção: o resultado calculado (${brlFromString(detected.resultadoCalculado)}) difere do declarado — a divergência ficará registrada na auditoria.`}
+                </p>
+                {detected.warnings.map((w) => (
+                  <p key={w} className='text-xs text-muted-foreground'>
+                    {w}
+                  </p>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Reconhecimento automático + ajuste avançado */}
-          {file && headers.length > 0 && (
+          {file && !detected && headers.length > 0 && (
             <Card>
               <CardHeader className='pb-2'>
                 <CardTitle className='flex items-center gap-2 text-base'>
