@@ -32,6 +32,10 @@ select set_config('request.jwt.claims', '{"sub":"44444444-4444-4444-8444-4444444
 create temp table sh on commit drop as
   select public.create_share('a1aaaaaa-0000-4000-8000-000000000003', 'senha1234', null) as r;
 
+-- Temp table é dono da role atual (authenticated); o teste de redeem abaixo
+-- precisa lê-la sob anon, então damos SELECT explícito.
+grant select on sh to anon;
+
 select ok((select (r->>'token') is not null from sh), 'create_share devolve token');
 
 -- redeem como anon.
