@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Ban, Copy, Link as LinkIcon, Send } from 'lucide-react'
 import { toast } from 'sonner'
-import { can } from '@/lib/permissions'
 import { useAuthStore } from '@/stores/auth-store'
+import { can } from '@/lib/permissions'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -12,12 +12,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { ConfirmDialog } from '@/components/confirm-dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
-import { PanelErrorState } from './panel-error-state'
 import { Switch } from '@/components/ui/switch'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { auditDetailQuery } from '../../data/queries'
 import {
   sharesQuery,
@@ -25,6 +24,7 @@ import {
   usePublishAudit,
   useRevokeShare,
 } from '../../data/shares'
+import { PanelErrorState } from './panel-error-state'
 
 export function CompartilharPanel({ auditId }: { auditId: string }) {
   const role = useAuthStore((s) => s.auth.role)
@@ -59,13 +59,17 @@ export function CompartilharPanel({ auditId }: { auditId: string }) {
   async function onCreate() {
     const { token } = await createShare.mutateAsync({
       password,
-      expires_at: expiresAt ? new Date(expiresAt + 'T23:59:59').toISOString() : null,
+      expires_at: expiresAt
+        ? new Date(expiresAt + 'T23:59:59').toISOString()
+        : null,
       allow_download: allowDownload,
     })
     const url = `${window.location.origin}/r/${token}`
     setFreshUrl(url)
     setPassword('')
-    toast.success('Link criado. Copie agora — ele não pode ser recuperado depois.')
+    toast.success(
+      'Link criado. Copie agora — ele não pode ser recuperado depois.'
+    )
   }
 
   return (
@@ -82,7 +86,9 @@ export function CompartilharPanel({ auditId }: { auditId: string }) {
           <CardContent className='space-y-2'>
             <Button
               onClick={() => publish.mutate()}
-              disabled={!canPublish || status !== 'approved' || publish.isPending}
+              disabled={
+                !canPublish || status !== 'approved' || publish.isPending
+              }
             >
               <Send className='size-4' /> Publicar e liberar compartilhamento
             </Button>
@@ -109,7 +115,11 @@ export function CompartilharPanel({ auditId }: { auditId: string }) {
               <div className='space-y-1 rounded-md border bg-muted/30 p-3'>
                 <Label>Link gerado — copie agora</Label>
                 <div className='flex gap-2'>
-                  <Input readOnly value={freshUrl} className='font-mono text-xs' />
+                  <Input
+                    readOnly
+                    value={freshUrl}
+                    className='font-mono text-xs'
+                  />
                   <Button
                     size='icon'
                     variant='outline'
@@ -155,11 +165,16 @@ export function CompartilharPanel({ auditId }: { auditId: string }) {
                   Desligado, o cliente só visualiza na tela.
                 </p>
               </div>
-              <Switch checked={allowDownload} onCheckedChange={setAllowDownload} />
+              <Switch
+                checked={allowDownload}
+                onCheckedChange={setAllowDownload}
+              />
             </div>
             <Button
               onClick={onCreate}
-              disabled={!canShare || password.length < 8 || createShare.isPending}
+              disabled={
+                !canShare || password.length < 8 || createShare.isPending
+              }
             >
               <LinkIcon className='size-4' /> Gerar link
             </Button>

@@ -1,4 +1,8 @@
-import { useMutation, useQueryClient, queryOptions } from '@tanstack/react-query'
+import {
+  useMutation,
+  useQueryClient,
+  queryOptions,
+} from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { qk } from '@/lib/query-keys'
 import { supabase } from '@/lib/supabase'
@@ -69,7 +73,9 @@ export function useReviewResult(auditId: string) {
     },
     onSuccess: () => {
       toast.success('Revisão salva.')
-      qc.invalidateQueries({ queryKey: qk.audits.inconsistencies(auditId, 'all') })
+      qc.invalidateQueries({
+        queryKey: qk.audits.inconsistencies(auditId, 'all'),
+      })
       qc.invalidateQueries({ queryKey: qk.audits.detail(auditId) })
     },
   })

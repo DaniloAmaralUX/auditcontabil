@@ -35,7 +35,13 @@ function ResultBarLabel(props: {
   // Dentro: na ponta da barra (esq p/ negativo, dir p/ positivo). Fora: sempre
   // à DIREITA do eixo zero — o lado da barra negativa é o dos códigos do eixo,
   // e em viewports estreitos o rótulo colidia com eles.
-  const tx = neg ? (inside ? left + 6 : right + 6) : inside ? right - 6 : right + 6
+  const tx = neg
+    ? inside
+      ? left + 6
+      : right + 6
+    : inside
+      ? right - 6
+      : right + 6
   const anchor: 'start' | 'end' = inside && !neg ? 'end' : 'start'
   return (
     <text
@@ -115,7 +121,9 @@ export function CompanyResults({
               {data.map((d) => (
                 <Cell
                   key={d.codigo}
-                  fill={d.resultado < 0 ? 'var(--destructive)' : 'var(--success)'}
+                  fill={
+                    d.resultado < 0 ? 'var(--destructive)' : 'var(--success)'
+                  }
                 />
               ))}
             </Bar>

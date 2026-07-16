@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Spinner } from '@/components/ui/spinner'
 import { LockKeyhole } from 'lucide-react'
 import { Logo } from '@/assets/logo'
 import { Button } from '@/components/ui/button'
@@ -12,6 +11,7 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Spinner } from '@/components/ui/spinner'
 import { redeemShare, type SharedView } from '../data/api'
 
 // Erro sempre genérico: não revela se o link existe/expirou (§8.5.2).
@@ -47,13 +47,13 @@ export function PasswordGate({
   }
 
   return (
-    <div className='brand-mesh flex min-h-svh flex-col items-center justify-center gap-6 p-4'>
-      <div className='animate-rise flex items-center gap-2'>
+    <div className='flex min-h-svh flex-col items-center justify-center gap-6 brand-mesh p-4'>
+      <div className='flex animate-rise items-center gap-2'>
         <Logo className='size-10' />
         <div className='text-xl font-extrabold tracking-tight'>AuditView</div>
       </div>
 
-      <Card className='animate-rise w-full max-w-sm'>
+      <Card className='w-full max-w-sm animate-rise'>
         <CardHeader>
           <CardTitle className='flex items-center gap-2 text-lg'>
             <LockKeyhole className='size-5 text-muted-foreground' aria-hidden />

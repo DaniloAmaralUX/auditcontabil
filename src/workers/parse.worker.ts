@@ -30,7 +30,11 @@ function isCsv(file: File) {
   return file.name.toLowerCase().endsWith('.csv') || file.type === 'text/csv'
 }
 
-type Sheet = { name: string; rows: Record<string, unknown>[]; headers: string[] }
+type Sheet = {
+  name: string
+  rows: Record<string, unknown>[]
+  headers: string[]
+}
 
 async function readXlsxSheets(file: File): Promise<Sheet[]> {
   const buf = await file.arrayBuffer()
@@ -149,7 +153,9 @@ async function handlePreview(fileId: string, file: File, limit: number) {
         rows: analiticas
           .slice(0, limit)
           .map((r) => [r.account_code, r.account_name, r.saldo]),
-        sheets: [{ name: doc.meta.company ?? file.name, rows: doc.rows.length }],
+        sheets: [
+          { name: doc.meta.company ?? file.name, rows: doc.rows.length },
+        ],
         detected: toDetected(doc),
       })
       return
@@ -227,7 +233,13 @@ async function handleParse(
 
     const flush = () => {
       if (batch.length === 0) return
-      post({ type: 'BATCH', fileId, batchSeq, rows: batch, rowErrors: batchErrors })
+      post({
+        type: 'BATCH',
+        fileId,
+        batchSeq,
+        rows: batch,
+        rowErrors: batchErrors,
+      })
       post({ type: 'PROGRESS', fileId, parsedRows: rowNumber })
       batchSeq++
       batch = []
@@ -291,6 +303,7 @@ self.onmessage = (ev: MessageEvent<ParseWorkerRequest>) => {
     cancelled.add(msg.fileId)
     return
   }
-  if (msg.type === 'PREVIEW') void handlePreview(msg.fileId, msg.file, msg.limit)
+  if (msg.type === 'PREVIEW')
+    void handlePreview(msg.fileId, msg.file, msg.limit)
   if (msg.type === 'PARSE_FILE') void handleParse(msg)
 }

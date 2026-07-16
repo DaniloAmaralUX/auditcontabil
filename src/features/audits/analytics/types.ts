@@ -10,7 +10,11 @@ export type AnalyticsConsolidado = {
   margem_pct: number | null
 }
 
-export type AnalyticsGrupo = { grupo: string; valor: number; pct: number | null }
+export type AnalyticsGrupo = {
+  grupo: string
+  valor: number
+  pct: number | null
+}
 
 export type AnalyticsEmpresa = {
   codigo: string
@@ -52,7 +56,26 @@ export type AuditAnalytics = {
   por_periodo: AnalyticsPeriodo[]
 }
 
-export function hasAnalyticsData(a: AuditAnalytics | null | undefined): boolean {
+export type ReconciliationStatus = 'reconciled' | 'divergent' | 'not_applicable'
+
+/**
+ * Shape de payload.reconciliation no snapshot publicado (snake_case como o
+ * resto do payload). Ausente em snapshots publicados antes da migração 8.
+ */
+export type ReconciliationSummary = {
+  status: ReconciliationStatus
+  /** Preenchidos apenas quando há exatamente 1 documento conferido. */
+  calculated_amount: number | null
+  declared_amount: number | null
+  broken_checks: number
+  /** 'balancete-csv' | 'dre-pdf' | 'multiplos' | null */
+  source: string | null
+  documents: number
+}
+
+export function hasAnalyticsData(
+  a: AuditAnalytics | null | undefined
+): boolean {
   if (!a) return false
   const c = a.consolidado
   return (c?.receita_bruta ?? 0) !== 0 || (c?.despesas ?? 0) !== 0
@@ -75,6 +98,11 @@ export function brl(v: number | null | undefined, compact = false): string {
   })
 }
 
+/** R$ ao centavo — conferência com o documento exige a cifra exata. */
+export function brlExact(v: number): string {
+  return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
 export function pct(v: number | null | undefined): string {
   if (v === null || v === undefined) return '—'
   return `${v.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`
@@ -82,6 +110,19 @@ export function pct(v: number | null | undefined): string {
 
 export function mesLabel(yyyymm: string): string {
   const [y, m] = yyyymm.split('-')
-  const nomes = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+  const nomes = [
+    'jan',
+    'fev',
+    'mar',
+    'abr',
+    'mai',
+    'jun',
+    'jul',
+    'ago',
+    'set',
+    'out',
+    'nov',
+    'dez',
+  ]
   return `${nomes[Number(m) - 1] ?? m}/${y.slice(2)}`
 }

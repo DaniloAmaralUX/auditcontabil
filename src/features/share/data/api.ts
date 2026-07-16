@@ -1,7 +1,10 @@
 // Acesso do cliente externo — sem sessão Supabase; apenas RPCs anon.
 import { supabase } from '@/lib/supabase'
+import {
+  type AuditAnalytics,
+  type ReconciliationSummary,
+} from '@/features/audits/analytics/types'
 import { type Severity } from '@/features/audits/components/status-badge'
-import { type AuditAnalytics } from '@/features/audits/analytics/types'
 
 export type PublicSnapshot = {
   audit: {
@@ -31,6 +34,8 @@ export type PublicSnapshot = {
     note: string | null
   }>
   analytics?: AuditAnalytics
+  /** Conferência real com o documento — ausente em snapshots antigos. */
+  reconciliation?: ReconciliationSummary
 }
 
 const SESSION_KEY = 'share_session'
@@ -54,9 +59,15 @@ export async function redeemShare(
   }
   sessionStorage.setItem(
     SESSION_KEY,
-    JSON.stringify({ token: result.session_token, expiresAt: result.expires_at })
+    JSON.stringify({
+      token: result.session_token,
+      expiresAt: result.expires_at,
+    })
   )
-  return { payload: result.payload, allowDownload: result.allow_download ?? true }
+  return {
+    payload: result.payload,
+    allowDownload: result.allow_download ?? true,
+  }
 }
 
 export async function getSharedSnapshot(): Promise<SharedView | null> {

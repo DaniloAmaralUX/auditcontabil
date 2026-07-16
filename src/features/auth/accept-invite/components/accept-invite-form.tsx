@@ -1,13 +1,11 @@
 import { useState } from 'react'
-import { Spinner } from '@/components/ui/spinner'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
-
 import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
 import { strings } from '@/lib/strings'
+import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -18,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { Spinner } from '@/components/ui/spinner'
 import { PasswordInput } from '@/components/password-input'
 
 const formSchema = z
@@ -44,7 +43,9 @@ export function AcceptInviteForm({
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
-    const { error } = await supabase.auth.updateUser({ password: data.password })
+    const { error } = await supabase.auth.updateUser({
+      password: data.password,
+    })
     setIsLoading(false)
     if (error) {
       toast.error(

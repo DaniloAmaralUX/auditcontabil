@@ -40,6 +40,10 @@ select throws_ok(
   '42501', null, 'analyst não pode inserir auditoria');
 
 -- 4: anon não lê snapshots diretamente.
+-- reset role antes do switch: temp tables e tabelas RLS-restritas ficam
+-- inacessíveis à role de destino se não voltarmos ao superuser primeiro.
+-- Padrão canônico: publish_reconciliation_test.sql:86.
+reset role;
 set local role anon;
 select set_config('request.jwt.claims', '', true);
 select is_empty(

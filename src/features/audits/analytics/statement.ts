@@ -4,7 +4,12 @@
 import { type AnalyticsConsolidado } from './types'
 
 type StatementLine = {
-  key: 'receita_bruta' | 'deducoes' | 'receita_liquida' | 'despesas' | 'resultado'
+  key:
+    | 'receita_bruta'
+    | 'deducoes'
+    | 'receita_liquida'
+    | 'despesas'
+    | 'resultado'
   label: string
   value: number
   kind: 'base' | 'subtotal' | 'result'

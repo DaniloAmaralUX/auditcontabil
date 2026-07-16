@@ -8,12 +8,14 @@ const MESSAGES: Record<string, string> = {
   subscription_inactive:
     'A assinatura do escritório está inativa. Regularize para continuar.',
   audit_not_found: 'Auditoria não encontrada.',
-  audit_not_accepting_files: 'Esta auditoria não está aceitando novos arquivos.',
+  audit_not_accepting_files:
+    'Esta auditoria não está aceitando novos arquivos.',
   file_too_large: 'O arquivo passa do limite de 20 MB.',
   unsupported_mime: 'Formato não aceito. Use .xlsx, .xls ou .csv.',
   duplicate_file: 'Este arquivo já foi enviado nesta auditoria.',
   file_limit_reached: 'Esta auditoria já atingiu o limite de 5 arquivos.',
-  storage_object_missing: 'O upload não foi concluído. Envie o arquivo novamente.',
+  storage_object_missing:
+    'O upload não foi concluído. Envie o arquivo novamente.',
   file_not_found: 'Arquivo não encontrado.',
   batch_too_large: 'Lote de linhas grande demais.',
   row_limit_exceeded: 'O arquivo passou do limite de linhas do piloto.',

@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import { Spinner } from '@/components/ui/spinner'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { LogIn } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
 import { strings } from '@/lib/strings'
+import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -18,6 +17,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Spinner } from '@/components/ui/spinner'
 import { PasswordInput } from '@/components/password-input'
 
 const formSchema = z.object({

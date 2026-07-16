@@ -4,17 +4,27 @@
 // horizontal em 375px — o sr-only tem que ficar num DIV embrulhando a tabela.
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { afterEach, describe, expect, it } from 'vitest'
-import { PeriodTrend, TopAccounts } from './index'
 // A medição depende da classe utilitária .sr-only real (Tailwind)
 import '@/styles/index.css'
+import { afterEach, describe, expect, it } from 'vitest'
+import { PeriodTrend, TopAccounts } from './index'
 
 const CONTAS = [
-  { conta: 'Custo Mercadoria Vendida - Cadernos e Materiais Escolares', codigo: '3.2.01', valor: 607834, pct: 77.6 },
+  {
+    conta: 'Custo Mercadoria Vendida - Cadernos e Materiais Escolares',
+    codigo: '3.2.01',
+    valor: 607834,
+    pct: 77.6,
+  },
   { conta: 'Honorários Contábeis', codigo: '3.7.03', valor: 32466, pct: 4.1 },
 ]
 const PERIODOS = [
-  { mes: '2026-06', receita_liquida: 100000, despesas: 85000, resultado: 15000 },
+  {
+    mes: '2026-06',
+    receita_liquida: 100000,
+    despesas: 85000,
+    resultado: 15000,
+  },
   { mes: '2026-07', receita_liquida: 100000, despesas: 95000, resultado: 5000 },
 ]
 

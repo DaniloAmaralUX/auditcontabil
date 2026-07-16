@@ -26,7 +26,15 @@
     font-feature-settings: 'tnum';
   }
   /* Foco visível e macio (ring da marca) em tudo que é interativo */
-  :where(a, button, [role='button'], input, select, textarea, [tabindex]):focus-visible {
+  :where(
+    a,
+    button,
+    [role='button'],
+    input,
+    select,
+    textarea,
+    [tabindex]
+  ):focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
@@ -158,9 +166,21 @@
 @utility brand-mesh {
   background-color: var(--background);
   background-image:
-    radial-gradient(60% 60% at 15% 10%, color-mix(in oklch, var(--brand) 16%, transparent), transparent 70%),
-    radial-gradient(50% 50% at 90% 20%, color-mix(in oklch, var(--brand-2) 14%, transparent), transparent 70%),
-    radial-gradient(55% 55% at 60% 100%, color-mix(in oklch, var(--chart-2) 12%, transparent), transparent 70%);
+    radial-gradient(
+      60% 60% at 15% 10%,
+      color-mix(in oklch, var(--brand) 16%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      50% 50% at 90% 20%,
+      color-mix(in oklch, var(--brand-2) 14%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      55% 55% at 60% 100%,
+      color-mix(in oklch, var(--chart-2) 12%, transparent),
+      transparent 70%
+    );
 }
 
 /* Texto com gradiente de marca (títulos de destaque) */

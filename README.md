@@ -34,14 +34,14 @@ Teste com os arquivos reais em [`docs/fixtures/`](docs/fixtures) — `balancete-
 
 ## Stack
 
-| Camada | Tecnologia |
-|---|---|
-| Front | React 19 · Vite 8 · TanStack Router/Query/Table · Zustand · TypeScript |
-| UI | shadcn/ui (Radix) · Tailwind v4 · Recharts · tema Firecrawl |
-| Processamento | Web Worker + SheetJS (XLSX) · PapaParse (CSV) · pdf.js (PDF) — parse no browser |
-| Backend | Supabase — Postgres + RLS + Storage + Edge Functions + Realtime |
-| Saídas | Dashboard (Recharts) · Deck público `/r/:token` · PDF client-side (`@react-pdf/renderer`) |
-| Qualidade | ESLint · Prettier · knip · Vitest (browser mode) · pgTAP |
+| Camada        | Tecnologia                                                                                |
+| ------------- | ----------------------------------------------------------------------------------------- |
+| Front         | React 19 · Vite 8 · TanStack Router/Query/Table · Zustand · TypeScript                    |
+| UI            | shadcn/ui (Radix) · Tailwind v4 · Recharts · tema Firecrawl                               |
+| Processamento | Web Worker + SheetJS (XLSX) · PapaParse (CSV) · pdf.js (PDF) — parse no browser           |
+| Backend       | Supabase — Postgres + RLS + Storage + Edge Functions + Realtime                           |
+| Saídas        | Dashboard (Recharts) · Deck público `/r/:token` · PDF client-side (`@react-pdf/renderer`) |
+| Qualidade     | ESLint · Prettier · knip · Vitest (browser mode) · pgTAP                                  |
 
 Decisão central de arquitetura: **parse no browser, regras no banco**. Detalhes em [`docs/handoff/06-arquitetura-tecnica.md`](docs/handoff/06-arquitetura-tecnica.md).
 

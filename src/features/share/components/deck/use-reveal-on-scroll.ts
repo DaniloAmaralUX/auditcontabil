@@ -18,7 +18,9 @@ export function useRevealOnScroll(root: React.RefObject<HTMLElement | null>) {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduce || !('IntersectionObserver' in window)) return
 
-    const targets = Array.from(el.querySelectorAll<HTMLElement>('[data-reveal]'))
+    const targets = Array.from(
+      el.querySelectorAll<HTMLElement>('[data-reveal]')
+    )
     const reveal = (t: Element) => t.setAttribute('data-revealed', '')
 
     // Acima da dobra: revela já (a animação roda no primeiro frame).

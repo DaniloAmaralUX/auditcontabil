@@ -14,8 +14,6 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
-import { analyticsQuery } from '../../analytics/query'
-import { PanelErrorState } from './panel-error-state'
 import {
   CompanyRanking,
   CompanyResults,
@@ -25,10 +23,14 @@ import {
   PeriodTrend,
   TopAccounts,
 } from '../../analytics/charts'
+import { analyticsQuery } from '../../analytics/query'
 import { hasAnalyticsData } from '../../analytics/types'
+import { PanelErrorState } from './panel-error-state'
 
 export function DashboardPanel({ auditId }: { auditId: string }) {
-  const { data, isLoading, isError, refetch } = useQuery(analyticsQuery(auditId))
+  const { data, isLoading, isError, refetch } = useQuery(
+    analyticsQuery(auditId)
+  )
 
   if (isLoading) {
     return (

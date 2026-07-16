@@ -32,7 +32,11 @@ function groupIntoLines(
     const parts = l.parts.sort((a, b) => a.x - b.x)
     return {
       x: parts[0].x,
-      text: parts.map((p) => p.str).join(' ').replace(/\s+/g, ' ').trim(),
+      text: parts
+        .map((p) => p.str)
+        .join(' ')
+        .replace(/\s+/g, ' ')
+        .trim(),
       parts,
     }
   })
@@ -205,7 +209,9 @@ export function extractDreFromItems(pages: PdfItem[][]): ExtractResult {
   }
 
   if (rows.length === 0)
-    warnings.push('Nenhuma linha reconhecida — o PDF pode ser escaneado (imagem).')
+    warnings.push(
+      'Nenhuma linha reconhecida — o PDF pode ser escaneado (imagem).'
+    )
 
   return { meta, rows, checks, warnings }
 }

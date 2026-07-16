@@ -15,8 +15,11 @@ import { Download } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
+import {
+  deriveSectionSummaries,
+  type SectionSummary,
+} from '@/features/audits/analytics/insights'
 import { buildIncomeStatement } from '@/features/audits/analytics/statement'
-import { deriveVerdict } from '@/features/audits/analytics/insights'
 import { hasAnalyticsData, pct } from '@/features/audits/analytics/types'
 import { type PublicSnapshot } from '../data/api'
 import { fmtPeriod } from '../report-format'
@@ -26,7 +29,12 @@ const NEG = '#b91c1c'
 const POS = '#15803d'
 
 const styles = StyleSheet.create({
-  page: { padding: 40, fontSize: 11, fontFamily: 'Helvetica', color: '#1a1a1a' },
+  page: {
+    padding: 40,
+    fontSize: 11,
+    fontFamily: 'Helvetica',
+    color: '#1a1a1a',
+  },
   header: { marginBottom: 16 },
   brand: { fontSize: 9, letterSpacing: 2, color: '#666666' },
   title: { fontSize: 18, fontFamily: 'Helvetica-Bold', marginTop: 2 },
@@ -38,6 +46,8 @@ const styles = StyleSheet.create({
     lineHeight: 1.4,
   },
   summary: { marginVertical: 12, lineHeight: 1.5 },
+  summaryLabel: { fontSize: 9, fontFamily: 'Helvetica-Bold', marginTop: 6 },
+  summaryLine: { lineHeight: 1.4 },
   item: {
     marginBottom: 10,
     padding: 10,
@@ -76,10 +86,20 @@ const styles = StyleSheet.create({
 const money = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
+// Tom → cor de texto legível sobre papel branco (mesma paleta dos itens).
+const toneColor = (s: SectionSummary) =>
+  s.tone === 'critical' ? NEG : s.tone === 'attention' ? '#b45309' : '#1a1a1a'
+
 function ReportPdf({ snapshot }: { snapshot: PublicSnapshot }) {
   const { audit, summary, items } = snapshot
   const a = hasAnalyticsData(snapshot.analytics) ? snapshot.analytics! : null
-  const verdict = deriveVerdict(a, items.length)
+  const { performance, quality, review } = deriveSectionSummaries({
+    analytics: a,
+    counts: summary,
+    reconciliation: snapshot.reconciliation ?? null,
+    conclusion: audit.conclusion,
+    attention: items.length,
+  })
   return (
     <Document
       title={`Relatório de auditoria — ${audit.cliente}`}
@@ -92,25 +112,29 @@ function ReportPdf({ snapshot }: { snapshot: PublicSnapshot }) {
           </Text>
           <Text style={styles.title}>{audit.title}</Text>
           <Text style={styles.meta}>
-            {audit.cliente} · {fmtPeriod(audit.period_start, audit.period_end)} ·
-            versão {audit.version}
+            {audit.cliente} · {fmtPeriod(audit.period_start, audit.period_end)}{' '}
+            · versão {audit.version}
           </Text>
-          <Text
-            style={[
-              styles.verdict,
-              { color: verdict.tone === 'critical' ? NEG : '#1a1a1a' },
-            ]}
-          >
-            {verdict.headline}
+          <Text style={[styles.verdict, { color: toneColor(performance) }]}>
+            {performance.headline}
           </Text>
         </View>
 
-        <Text style={styles.summary}>
-          Analisamos {summary.processed.toLocaleString('pt-BR')} movimentos do
-          período.
-          {summary.invalid > 0 &&
-            ' Algumas linhas das planilhas enviadas não puderam ser lidas e não fazem parte desta análise.'}
-        </Text>
+        <View style={styles.summary}>
+          <Text style={styles.summaryLabel}>RESULTADO DO PERÍODO</Text>
+          <Text style={[styles.summaryLine, { color: toneColor(performance) }]}>
+            {performance.short ?? performance.headline}
+          </Text>
+          <Text style={styles.summaryLabel}>CONFIABILIDADE DOS DADOS</Text>
+          <Text style={[styles.summaryLine, { color: toneColor(quality) }]}>
+            {quality.headline}
+            {quality.detail ? ` ${quality.detail}` : ''}
+          </Text>
+          <Text style={styles.summaryLabel}>PONTOS QUE EXIGEM REVISÃO</Text>
+          <Text style={[styles.summaryLine, { color: toneColor(review) }]}>
+            {review.headline}
+          </Text>
+        </View>
 
         {a && (
           <View style={styles.item} wrap={false}>
@@ -119,7 +143,9 @@ function ReportPdf({ snapshot }: { snapshot: PublicSnapshot }) {
               l.kind === 'result' ? (
                 <View key={l.key} style={styles.dreResult}>
                   <Text style={styles.bold}>= {l.label}</Text>
-                  <Text style={[styles.bold, { color: l.value < 0 ? NEG : POS }]}>
+                  <Text
+                    style={[styles.bold, { color: l.value < 0 ? NEG : POS }]}
+                  >
                     {l.value < 0
                       ? `(${money(Math.abs(l.value))})`
                       : money(l.value)}
@@ -210,8 +236,9 @@ function ReportPdf({ snapshot }: { snapshot: PublicSnapshot }) {
         ))}
 
         <Text style={styles.footer} fixed>
-          Publicado em {new Date(audit.published_at).toLocaleDateString('pt-BR')}{' '}
-          · Gerado com AuditView — auditoria contábil visual
+          Publicado em{' '}
+          {new Date(audit.published_at).toLocaleDateString('pt-BR')} · Gerado
+          com AuditView — auditoria contábil visual
         </Text>
       </Page>
     </Document>

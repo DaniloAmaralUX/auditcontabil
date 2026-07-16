@@ -104,7 +104,9 @@ export function extractBalanceteCsv(text: string): ExtractResult {
     // --- metadados do cabeçalho (aparecem repetidos; captura só a 1ª vez)
     if (!meta.company) {
       // "0089  MATERIAIS MDW LTDA\nCNPJ: 48.386.085/0001-14"
-      const mCompany = joined.match(/^\s*(\d{3,6})\s{2,}(.+?)\s*CNPJ:\s*([\d./-]+)/s)
+      const mCompany = joined.match(
+        /^\s*(\d{3,6})\s{2,}(.+?)\s*CNPJ:\s*([\d./-]+)/s
+      )
       if (mCompany) {
         meta.company = mCompany[2].replace(/\s+/g, ' ').trim()
         meta.cnpj = mCompany[3]
@@ -118,7 +120,10 @@ export function extractBalanceteCsv(text: string): ExtractResult {
       }
     }
     if (!meta.title && /Balancete/i.test(joined)) {
-      meta.title = joined.replace(/["\s]+/g, ' ').trim().slice(0, 80)
+      meta.title = joined
+        .replace(/["\s]+/g, ' ')
+        .trim()
+        .slice(0, 80)
     }
 
     // --- linha de dados: alguma célula casa com "código  nome"
@@ -134,11 +139,17 @@ export function extractBalanceteCsv(text: string): ExtractResult {
     const synthetic = flag === 'S'
 
     // após a classificação vêm: Saldo Ant. · (vazia) · Débito · Crédito · Saldo
-    const nums = cells
-      .slice(classIdx + 1)
-      .map((c) => parseDecimal(c).value)
+    const nums = cells.slice(classIdx + 1).map((c) => parseDecimal(c).value)
     const [saldo_ant, , debit, credit, saldo] =
-      nums.length >= 5 ? nums : [nums[0] ?? null, null, nums[1] ?? null, nums[2] ?? null, nums[3] ?? null]
+      nums.length >= 5
+        ? nums
+        : [
+            nums[0] ?? null,
+            null,
+            nums[1] ?? null,
+            nums[2] ?? null,
+            nums[3] ?? null,
+          ]
 
     rows.push({
       account_code: cls.code,
@@ -149,7 +160,11 @@ export function extractBalanceteCsv(text: string): ExtractResult {
       debit,
       credit,
       saldo,
-      raw: { classificacao: cells[classIdx], flag, valores: cells.slice(classIdx + 1) },
+      raw: {
+        classificacao: cells[classIdx],
+        flag,
+        valores: cells.slice(classIdx + 1),
+      },
     })
 
     // resultado declarado: grupo 3 raiz (RESULTADO DO PERÍODO)

@@ -3,10 +3,10 @@
 // "(=) LUCRO LIQUIDO DO EXERCICIO" declarado no documento.
 import { describe, expect, it } from 'vitest'
 import fixtureUrl from '../../../docs/fixtures/dre-educacao-2024.pdf?url'
+import { detectKind } from './detect'
 import { classifyPdfRow, extractDreFromItems } from './dre-pdf'
 import { summarizeDre } from './dre-summary'
 import { loadPdfItems } from './pdf-loader'
-import { detectKind } from './detect'
 
 async function loadFixture() {
   const res = await fetch(fixtureUrl)
@@ -37,7 +37,8 @@ describe('DRE real em PDF (CENTRO DE EDUCACAO MDW LTDA, 2024)', () => {
     expect(rows.length).toBeGreaterThan(50)
 
     // pdfjs fragmenta palavras — compara sem espaços
-    const flat = (s: string | null) => (s ?? '').toUpperCase().replace(/\s+/g, '')
+    const flat = (s: string | null) =>
+      (s ?? '').toUpperCase().replace(/\s+/g, '')
     const receita = rows.find((r) =>
       /RECEITAOPERACIONALBRUTA/.test(flat(r.account_name))
     )

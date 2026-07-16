@@ -33,7 +33,9 @@ describe('buildIncomeStatement', () => {
 
   it('receita líquida é subtotal; resultado é result', () => {
     const lines = buildIncomeStatement(c)
-    expect(lines.find((l) => l.key === 'receita_liquida')!.kind).toBe('subtotal')
+    expect(lines.find((l) => l.key === 'receita_liquida')!.kind).toBe(
+      'subtotal'
+    )
     expect(lines.find((l) => l.key === 'resultado')!.kind).toBe('result')
   })
 

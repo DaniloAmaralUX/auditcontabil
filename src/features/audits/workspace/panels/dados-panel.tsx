@@ -3,12 +3,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { FileSpreadsheet, Trash2, Upload } from 'lucide-react'
 import { toast } from 'sonner'
-import { qk } from '@/lib/query-keys'
-import { can } from '@/lib/permissions'
-import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth-store'
+import { can } from '@/lib/permissions'
+import { qk } from '@/lib/query-keys'
+import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
-import { ConfirmDialog } from '@/components/confirm-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
@@ -18,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { auditDetailQuery, auditFilesQuery } from '../../data/queries'
 import { PanelErrorState } from './panel-error-state'
 
@@ -49,7 +49,9 @@ export function DadosPanel({ auditId }: { auditId: string }) {
     onSuccess: () => {
       toast.success('Arquivo removido.')
       qc.invalidateQueries({ queryKey: qk.audits.files(auditId) })
-      qc.invalidateQueries({ queryKey: qk.audits.inconsistencies(auditId, 'all') })
+      qc.invalidateQueries({
+        queryKey: qk.audits.inconsistencies(auditId, 'all'),
+      })
       qc.invalidateQueries({ queryKey: qk.audits.detail(auditId) })
     },
   })

@@ -11,10 +11,7 @@ type FileKind =
 const PDF_MAGIC = '%PDF-'
 
 /** Detecta o tipo pelo início do conteúdo (texto já decodificado p/ CSV). */
-export function detectKind(opts: {
-  fileName: string
-  head: string
-}): FileKind {
+export function detectKind(opts: { fileName: string; head: string }): FileKind {
   const { fileName, head } = opts
   const lower = fileName.toLowerCase()
 

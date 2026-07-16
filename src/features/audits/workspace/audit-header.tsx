@@ -3,8 +3,8 @@ import { Link } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { auditDetailQuery } from '../data/queries'
 import { AuditStatusBadge } from '../components/status-badge'
+import { auditDetailQuery } from '../data/queries'
 
 function fmtPeriod(start: string | null, end: string | null) {
   if (!start || !end) return 'período não definido'
@@ -17,7 +17,7 @@ export function AuditHeader({ auditId }: { auditId: string }) {
 
   return (
     <div className='sticky top-16 z-30 -mx-4 border-b bg-background/85 px-4 py-3 backdrop-blur'>
-      <Button variant='ghost' size='sm' asChild className='mb-1 -ms-2'>
+      <Button variant='ghost' size='sm' asChild className='-ms-2 mb-1'>
         <Link to='/audits'>
           <ArrowLeft className='size-4' /> Auditorias
         </Link>
@@ -31,7 +31,8 @@ export function AuditHeader({ auditId }: { auditId: string }) {
           </h1>
           <AuditStatusBadge status={data.status} />
           <span className='text-sm text-muted-foreground'>
-            {data.cliente_name} · {fmtPeriod(data.period_start, data.period_end)}
+            {data.cliente_name} ·{' '}
+            {fmtPeriod(data.period_start, data.period_end)}
           </span>
         </div>
       )}

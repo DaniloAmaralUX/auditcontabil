@@ -1,14 +1,12 @@
 # Runbook de deploy — do zero ao link de teste (~5–10 min)
 
-> Tudo abaixo usa credenciais SUAS (senha do banco, tokens, login Cloudflare) — por isso só você pode rodar. Os comandos estão prontos para copiar e colar no **PowerShell**, na pasta do projeto.
+> Produção real: **Vercel** (front, deploy automático no merge para `main`) + **Supabase** (banco/Auth/Edge Functions). Tudo abaixo usa credenciais SUAS (senha do banco, tokens) — por isso só você pode rodar. Comandos prontos para o **PowerShell**, na pasta do projeto.
 
 ## 0. Pré-requisitos (uma vez só)
 
 ```powershell
 # Supabase CLI (se ainda não tiver)
 winget install Supabase.CLI
-# Wrangler (Cloudflare)
-npm i -g wrangler
 ```
 
 ## 1. Banco de dados (Supabase) — ~2 min
@@ -18,21 +16,25 @@ supabase login                 # abre o browser; entre com sua conta
 supabase db push               # pede a SENHA DO BANCO (Dashboard > Project Settings > Database)
 ```
 
-Isso cria todo o schema: 23 tabelas, RLS, 7 regras, RPCs, bucket `audit-files`, escritório piloto com **trial de 90 dias** e as regras semeadas.
+Isso cria todo o schema: tabelas, RLS, regras, RPCs, bucket `audit-files`, escritório piloto com **trial de 90 dias** e as regras semeadas.
+
+> Alternativa sem CLI: colar os scripts numerados de `docs/deploy/` (1 → 8, em ordem) no SQL Editor do Dashboard.
 
 ```powershell
 # Edge Functions (convite + Stripe)
 supabase functions deploy create-checkout-session customer-portal invite-user
 supabase functions deploy stripe-webhook --no-verify-jwt
+supabase secrets set APP_URL=https://auditcontabil.vercel.app
 ```
 
 > Stripe é opcional no piloto (trial sem cartão). Quando for ativar:
-> `supabase secrets set STRIPE_SECRET_KEY=sk_... STRIPE_WEBHOOK_SECRET=whsec_... APP_URL=https://SEU-DOMINIO`
+> `supabase secrets set STRIPE_SECRET_KEY=sk_... STRIPE_WEBHOOK_SECRET=whsec_...`
+> e configure `VITE_STRIPE_PRICE_ID` nas Environment Variables do projeto na Vercel.
 
 ## 2. Anon key no front — ~1 min
 
 1. Dashboard → **Project Settings → API** → copie a **anon public key**.
-2. Cole no arquivo `.env` (linha `VITE_SUPABASE_ANON_KEY=`).
+2. Cole no arquivo `.env` (linha `VITE_SUPABASE_ANON_KEY=`). Em produção ela já está commitada em `.env.production` (pública por design; a segurança vem da RLS).
 
 ## 3. Criar a proprietária (owner) — ~1 min
 
@@ -48,36 +50,24 @@ pnpm dev
 
 Abra http://localhost:5173 → login com o owner → crie um cliente → crie uma auditoria → importe `docs/fixtures/balancete-exemplo.xlsx` → veja as inconsistências → revise → aprove → publique → gere o link → abra o `/r/...` numa aba anônima.
 
-## 5. Deploy do front (Cloudflare Pages) — ~2 min
+## 5. Deploy do front (Vercel) — automático
 
-```powershell
-pnpm build
-wrangler login                                    # abre o browser
-wrangler pages project create auditcontabil --production-branch main   # só na 1ª vez
-wrangler pages deploy dist --project-name auditcontabil
-```
+O projeto está conectado ao repositório: **merge na `main` = deploy em https://auditcontabil.vercel.app**. Não há passo manual. O `vercel.json` na raiz define o rewrite de SPA (excluindo `/progresso/`) e os headers de segurança de `/r/*`.
 
-O comando imprime a URL: **https://auditcontabil.pages.dev** ← seu link de teste.
+- Variáveis de build: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_APP_URL` vêm do `.env.production` commitado (ou das Environment Variables do projeto na Vercel, que têm precedência). Para billing real, adicione `VITE_STRIPE_PRICE_ID` lá.
+- Deploy manual avulso (raro): `npx vercel deploy --prod` na pasta do projeto.
 
-> IMPORTANTE: o build embute a anon key do `.env`. Rode `pnpm build` DEPOIS do passo 2.
-
-### CORS/Redirect do Supabase Auth
+### CORS/Redirect do Supabase Auth (IMPORTANTE)
 
 Dashboard → **Authentication → URL Configuration**:
-- Site URL: `https://auditcontabil.pages.dev`
-- Redirect URLs: adicione `https://auditcontabil.pages.dev/**` (e mantenha `http://localhost:5173/**` para dev).
+- Site URL: `https://auditcontabil.vercel.app`
+- Redirect URLs: adicione `https://auditcontabil.vercel.app/**` (e mantenha `http://localhost:5173/**` para dev).
 
-## 6. CI automático (opcional)
+Sem isso, os links de convite (`/accept-invite`) e de reset de senha redirecionam para o domínio errado.
 
-`.github/workflows/deploy.yml` já faz test → db push → functions deploy → Pages deploy a cada push na `main`. Configure os secrets no GitHub:
+## 6. CI automático
 
-| Secret | Onde pegar |
-|---|---|
-| `SUPABASE_ACCESS_TOKEN` | app.supabase.com → Account → Access Tokens |
-| `SUPABASE_DB_PASSWORD` | a senha do banco |
-| `CLOUDFLARE_API_TOKEN` | dash.cloudflare.com → My Profile → API Tokens (template "Cloudflare Pages — Edit") |
-| `CLOUDFLARE_ACCOUNT_ID` | dash.cloudflare.com → Workers & Pages (barra lateral) |
-| `VITE_SUPABASE_ANON_KEY` | Project Settings → API |
+`.github/workflows/ci.yml` roda a cada push/PR na `main`: pgTAP (`supabase test db`), lint, format, testes e build. O deploy do front é responsabilidade da integração Git da Vercel — não há workflow de deploy no GitHub Actions.
 
 ## Roteiro de teste do produto (5 min)
 

@@ -1,3 +1,4 @@
+import { strings } from '@/lib/strings'
 import {
   Card,
   CardContent,
@@ -5,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { strings } from '@/lib/strings'
 import { AuthLayout } from '../auth-layout'
 import { AcceptInviteForm } from './components/accept-invite-form'
 

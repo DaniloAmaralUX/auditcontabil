@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { FileText, Plus } from 'lucide-react'
+import { useAuthStore } from '@/stores/auth-store'
 import { can } from '@/lib/permissions'
 import { strings } from '@/lib/strings'
-import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
 import {
   Empty,

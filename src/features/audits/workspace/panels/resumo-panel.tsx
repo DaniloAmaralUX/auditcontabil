@@ -1,13 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { auditFilesQuery } from '../../data/queries'
 import { inconsistenciesQuery } from '../../data/inconsistencies'
+import { auditFilesQuery } from '../../data/queries'
 import { PanelErrorState } from './panel-error-state'
 
 function Kpi({
@@ -87,9 +82,17 @@ export function ResumoPanel({ auditId }: { auditId: string }) {
             label='Aproveitamento das linhas'
             value={usablePct ?? 0}
             suffix='%'
-            cls={usablePct !== null && usablePct < 100 ? 'text-warning' : 'text-success'}
+            cls={
+              usablePct !== null && usablePct < 100
+                ? 'text-warning'
+                : 'text-success'
+            }
           />
-          <Kpi label='Linhas com erro de leitura' value={invalidRows} cls={invalidRows > 0 ? 'text-warning' : ''} />
+          <Kpi
+            label='Linhas com erro de leitura'
+            value={invalidRows}
+            cls={invalidRows > 0 ? 'text-warning' : ''}
+          />
           <Kpi label='Verificações não executadas' value={notExecuted} />
         </div>
       )}

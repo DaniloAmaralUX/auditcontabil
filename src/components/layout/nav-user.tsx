@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { BadgeCheck, ChevronsUpDown, CreditCard, LogOut } from 'lucide-react'
-import { roleLabels } from '@/lib/permissions'
 import { useAuthStore } from '@/stores/auth-store'
+import { roleLabels } from '@/lib/permissions'
 import useDialogState from '@/hooks/use-dialog-state'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {

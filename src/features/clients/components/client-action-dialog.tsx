@@ -1,8 +1,6 @@
 import { useEffect } from 'react'
-import { Spinner } from '@/components/ui/spinner'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-
 import { strings } from '@/lib/strings'
 import { Button } from '@/components/ui/button'
 import {
@@ -23,9 +21,14 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Spinner } from '@/components/ui/spinner'
 import { Switch } from '@/components/ui/switch'
 import { useCreateClient, useUpdateClient } from '../data/mutations'
-import { clienteFormSchema, type Cliente, type ClienteForm } from '../data/schema'
+import {
+  clienteFormSchema,
+  type Cliente,
+  type ClienteForm,
+} from '../data/schema'
 
 /** Máscara progressiva: 000.000.000-00 (CPF) → 00.000.000/0000-00 (CNPJ). */
 function maskCpfCnpj(value: string): string {
@@ -159,7 +162,9 @@ export function ClientActionDialog({ open, onOpenChange, currentRow }: Props) {
               name='is_active'
               render={({ field }) => (
                 <FormItem className='flex items-center justify-between rounded-md border p-3'>
-                  <FormLabel className='mb-0'>{strings.clients.active}</FormLabel>
+                  <FormLabel className='mb-0'>
+                    {strings.clients.active}
+                  </FormLabel>
                   <FormControl>
                     <Switch
                       checked={field.value}

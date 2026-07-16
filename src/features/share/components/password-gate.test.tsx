@@ -36,7 +36,14 @@ describe('PasswordGate — erro genérico, sem vazar dados (§8.5.2)', () => {
 
   it('senha correta destrava com o payload', async () => {
     const payload = {
-      audit: { title: 'T', cliente: 'C', period_start: null, period_end: null, version: 1, published_at: '2026-07-11' },
+      audit: {
+        title: 'T',
+        cliente: 'C',
+        period_start: null,
+        period_end: null,
+        version: 1,
+        published_at: '2026-07-11',
+      },
       summary: { total_rows: 1, processed: 1, invalid: 0, ok: 1, coerced: 0 },
       items: [],
     }

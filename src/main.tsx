@@ -5,12 +5,12 @@ import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
-import { AuthError, PostgrestError } from '@supabase/supabase-js'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { AuthError, PostgrestError } from '@supabase/supabase-js'
 import { toast } from 'sonner'
+import { useAuthStore } from '@/stores/auth-store'
 import { handleServerError } from '@/lib/handle-server-error'
 import { invalidateSessionCache, supabase } from '@/lib/supabase'
-import { useAuthStore } from '@/stores/auth-store'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
 import { ThemeProvider } from './context/theme-provider'

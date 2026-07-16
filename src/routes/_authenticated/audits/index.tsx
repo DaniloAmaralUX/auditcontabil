@@ -4,5 +4,6 @@ import { auditsListQuery } from '@/features/audits/data/queries'
 
 export const Route = createFileRoute('/_authenticated/audits/')({
   component: Audits,
-  loader: ({ context }) => context.queryClient.ensureQueryData(auditsListQuery()),
+  loader: ({ context }) =>
+    context.queryClient.ensureQueryData(auditsListQuery()),
 })

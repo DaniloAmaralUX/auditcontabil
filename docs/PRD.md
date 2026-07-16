@@ -4,6 +4,8 @@
 **Substitui:** PRD v1 (jul/2026) + Arquitetura do Produto V1 — este documento consolida os dois e adiciona as especificações completas de **Backend**, **Frontend** e **Design**.
 **Repositório:** `DaniloAmaralUX/auditcontabil` · **Pasta local:** `C:\Users\PITANG\Desktop\AuditContabilidade\shadcn-admin-main`
 **Infra:** Supabase (projeto `lgqexlhbpxfkzrsvbknz`, já linkado) + Stripe + Cloudflare — **~US$ 25/mês + R$ 40/ano de domínio + taxas por transação.**
+
+> **Atualização (jul/2026):** a produção atual roda na **Vercel** (`auditcontabil.vercel.app`, deploy automático no merge para `main`), não em Cloudflare Pages. As menções a Cloudflare neste documento refletem o plano original — a reconciliação está em `docs/handoff/07-rodando-e-deployando.md` e o runbook vigente em `docs/RUNBOOK-DEPLOY.md`.
 **Anexos:** `docs/arquitetura-v1.html` (perfis, user stories, RF-001–068, matriz) · `docs/pesquisa-ux-financeiro.md` (deep research Mobbin/Airtable) · `docs/PROMPT-NOVA-SESSAO.md` (retomada em sessão nova).
 
 ---
@@ -679,7 +681,7 @@ Ordem estrita dentro do RPC:
 
 - `revoke_share(p_share_id)` (owner/accountant): `status='revoked'`, deleta `share_sessions`, log `share.revoked`. Arquivamento da audit revoga em lote.
 - Tela interna lista por share: criação, expiração, status, total de acessos, último acesso, tabela de acessos (data, ip_hash truncado, UA) + tentativas falhas — SELECT tenant-scoped nas tabelas de log.
-- `/r/:token`: `<meta name="robots" content="noindex,nofollow">` + header `X-Robots-Tag: noindex` via regra no Cloudflare para `/r/*`.
+- `/r/:token`: `<meta name="robots" content="noindex,nofollow">` + header `X-Robots-Tag: noindex` para `/r/*` (hoje configurado no `vercel.json`).
 
 ## 8.6 Stripe
 

@@ -2,10 +2,14 @@
 // <table> semântica com leader dots; régua-brasa conduz ao RESULTADO em
 // Fraunces (opsz 144). Positivo/negativo nunca só por cor: sinal + parênteses
 // contábeis + tag textual Superávit/Déficit.
-import { CircleCheck } from 'lucide-react'
+import { CircleCheck, TriangleAlert } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { buildIncomeStatement } from '../statement'
-import { pct, type AnalyticsConsolidado } from '../types'
+import {
+  pct,
+  type AnalyticsConsolidado,
+  type ReconciliationStatus,
+} from '../types'
 
 const money = (v: number) =>
   Math.abs(v).toLocaleString('pt-BR', {
@@ -23,12 +27,16 @@ function signed(value: number, sign: '+' | '−' | '=') {
 
 export function IncomeStatement({
   consolidado,
-  reconciled,
+  reconciliation,
   className,
 }: {
   consolidado: AnalyticsConsolidado
-  /** true = totais conferidos com o documento enviado (selo). */
-  reconciled?: boolean
+  /**
+   * Conferência REAL com o documento enviado: 'reconciled' → selo verde,
+   * 'divergent' → alerta. 'not_applicable'/undefined (snapshot antigo ou
+   * planilha sem conferência) → nada — sem selo falso.
+   */
+  reconciliation?: ReconciliationStatus
   className?: string
 }) {
   const lines = buildIncomeStatement(consolidado)
@@ -95,10 +103,17 @@ export function IncomeStatement({
         </div>
       </dl>
 
-      {reconciled && (
+      {reconciliation === 'reconciled' && (
         <p className='flex items-center gap-1.5 text-xs text-success-text'>
           <CircleCheck className='size-3.5 shrink-0' aria-hidden />
           Conferido com o documento: os totais batem ao centavo.
+        </p>
+      )}
+      {reconciliation === 'divergent' && (
+        <p className='flex items-center gap-1.5 text-xs text-warning-text'>
+          <TriangleAlert className='size-3.5 shrink-0' aria-hidden />
+          Atenção: os totais calculados não batem com o documento enviado — o
+          escritório está tratando a divergência.
         </p>
       )}
     </div>

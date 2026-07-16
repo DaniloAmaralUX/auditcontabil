@@ -102,6 +102,10 @@ export type ParseWorkerResponse =
   | {
       type: 'FATAL'
       fileId: string
-      code: 'FILE_TOO_LARGE' | 'UNSUPPORTED_FORMAT' | 'ENCRYPTED' | 'PARSE_ERROR'
+      code:
+        | 'FILE_TOO_LARGE'
+        | 'UNSUPPORTED_FORMAT'
+        | 'ENCRYPTED'
+        | 'PARSE_ERROR'
       message: string
     }

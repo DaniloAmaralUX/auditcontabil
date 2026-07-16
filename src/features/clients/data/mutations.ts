@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { useAuthStore } from '@/stores/auth-store'
 import { qk } from '@/lib/query-keys'
 import { strings } from '@/lib/strings'
 import { supabase } from '@/lib/supabase'
-import { useAuthStore } from '@/stores/auth-store'
 import { type Cliente, type ClienteForm } from './schema'
 
 function toPayload(values: ClienteForm) {
@@ -54,7 +54,10 @@ export function useDeleteClient() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (client: Cliente) => {
-      const { error } = await supabase.from('clientes').delete().eq('id', client.id)
+      const { error } = await supabase
+        .from('clientes')
+        .delete()
+        .eq('id', client.id)
       if (error) throw error
     },
     onSuccess: () => {

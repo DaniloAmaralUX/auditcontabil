@@ -38,16 +38,35 @@ export function PeriodTrend({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={config} className='aspect-auto h-[220px] w-full'>
+        <ChartContainer
+          config={config}
+          className='aspect-auto h-[220px] w-full'
+        >
           <AreaChart data={data} margin={{ left: 8, right: 16, top: 8 }}>
             <defs>
               <linearGradient id='fillReceita' x1='0' y1='0' x2='0' y2='1'>
-                <stop offset='5%' stopColor='var(--success)' stopOpacity={0.22} />
-                <stop offset='95%' stopColor='var(--success)' stopOpacity={0.02} />
+                <stop
+                  offset='5%'
+                  stopColor='var(--success)'
+                  stopOpacity={0.22}
+                />
+                <stop
+                  offset='95%'
+                  stopColor='var(--success)'
+                  stopOpacity={0.02}
+                />
               </linearGradient>
               <linearGradient id='fillDespesas' x1='0' y1='0' x2='0' y2='1'>
-                <stop offset='5%' stopColor='var(--chart-1)' stopOpacity={0.18} />
-                <stop offset='95%' stopColor='var(--chart-1)' stopOpacity={0.02} />
+                <stop
+                  offset='5%'
+                  stopColor='var(--chart-1)'
+                  stopOpacity={0.18}
+                />
+                <stop
+                  offset='95%'
+                  stopColor='var(--chart-1)'
+                  stopOpacity={0.02}
+                />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray='3 3' stroke='var(--border)' />
@@ -67,7 +86,9 @@ export function PeriodTrend({
               tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
             />
             <ChartTooltip
-              content={<ChartTooltipContent formatter={(v) => brl(Number(v))} />}
+              content={
+                <ChartTooltipContent formatter={(v) => brl(Number(v))} />
+              }
             />
             <Area
               type='monotone'
@@ -93,7 +114,10 @@ export function PeriodTrend({
         {/* Legenda: cor + padrão de traço (não só cor) para daltônicos */}
         <div className='mt-1 flex gap-4 text-xs text-muted-foreground'>
           <span className='flex items-center gap-1.5'>
-            <span className='h-0.5 w-4 rounded' style={{ background: 'var(--success)' }} />
+            <span
+              className='h-0.5 w-4 rounded'
+              style={{ background: 'var(--success)' }}
+            />
             Receita líquida (linha cheia)
           </span>
           <span className='flex items-center gap-1.5'>
@@ -107,25 +131,25 @@ export function PeriodTrend({
         {/* Equivalente textual do gráfico para leitores de tela. O sr-only vai
             no DIV: table layout trata width:1px como mínimo (scroll fantasma). */}
         <div className='sr-only'>
-        <table>
-          <caption>{title} — valores mensais</caption>
-          <thead>
-            <tr>
-              <th scope='col'>Mês</th>
-              <th scope='col'>Receita líquida</th>
-              <th scope='col'>Despesas</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((p) => (
-              <tr key={p.mes}>
-                <th scope='row'>{p.mes}</th>
-                <td>{brl(p.receita_liquida)}</td>
-                <td>{brl(p.despesas)}</td>
+          <table>
+            <caption>{title} — valores mensais</caption>
+            <thead>
+              <tr>
+                <th scope='col'>Mês</th>
+                <th scope='col'>Receita líquida</th>
+                <th scope='col'>Despesas</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.map((p) => (
+                <tr key={p.mes}>
+                  <th scope='row'>{p.mes}</th>
+                  <td>{brl(p.receita_liquida)}</td>
+                  <td>{brl(p.despesas)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </CardContent>
     </Card>

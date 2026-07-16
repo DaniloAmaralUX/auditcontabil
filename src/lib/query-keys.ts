@@ -13,7 +13,10 @@ export const qk = {
     snapshot: (id: string) => ['audits', id, 'snapshot'] as const,
     events: (id: string) => ['audits', id, 'events'] as const,
   },
-  team: { members: ['team', 'members'] as const, invites: ['team', 'invites'] as const },
+  team: {
+    members: ['team', 'members'] as const,
+    invites: ['team', 'invites'] as const,
+  },
   billing: { subscription: ['billing', 'subscription'] as const },
   share: { report: (token: string) => ['share', token] as const },
   overview: { queue: ['overview', 'queue'] as const },

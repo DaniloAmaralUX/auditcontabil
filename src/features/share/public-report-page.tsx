@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Spinner } from '@/components/ui/spinner'
 import { useParams } from '@tanstack/react-router'
-
+import { Spinner } from '@/components/ui/spinner'
 import { PasswordGate } from './components/password-gate'
 import { PublicReport } from './components/public-report'
 import { getSharedSnapshot, type SharedView } from './data/api'
@@ -38,5 +37,7 @@ export function PublicReportPage() {
     return <PasswordGate token={token} onUnlocked={setView} />
   }
 
-  return <PublicReport snapshot={view.payload} allowDownload={view.allowDownload} />
+  return (
+    <PublicReport snapshot={view.payload} allowDownload={view.allowDownload} />
+  )
 }
