@@ -48,12 +48,10 @@ Criar a proprietária (owner): criar o usuário no Dashboard → rodar `supabase
 |---|---|---|
 | **Produção no ar** | **Vercel** (`auditcontabil.vercel.app`) | ✅ real — deploy automático no merge para `main` |
 | `vercel.json` | Vercel (rewrites SPA + headers de segurança) | ✅ ativo |
-| `docs/PRD.md`, `.github/workflows/deploy.yml` | Cloudflare Pages | ⚠️ legado — a intenção mudou, a doc não foi atualizada |
-| `netlify.toml` | Netlify | ⚠️ residual — pode ser removido |
+| `docs/PRD.md` | Cloudflare Pages (plano original) | ✅ nota de atualização no topo aponta para Vercel |
+| `.github/workflows/deploy.yml`, `netlify.toml` | Cloudflare/Netlify | ✅ removidos (jul/2026) — pgTAP migrou para o `ci.yml` |
 
 **Deploy hoje = merge na `main` → a Vercel publica sozinha.** O `vercel.json` força `X-Robots-Tag: noindex` em `/r/*` (o deck do cliente não é indexado) e headers de segurança (`X-Frame-Options: DENY`, `nosniff`).
-
-Ação recomendada de limpeza (fora do escopo deste handoff): alinhar `PRD.md`/`deploy.yml` ao alvo Vercel e remover `netlify.toml`.
 
 ### Edge Functions (Stripe/convite)
 

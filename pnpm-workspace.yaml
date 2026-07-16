@@ -1,2 +1,6 @@
 neverBuiltDependencies:
   - esbuild
+# pnpm >= 11 exige reconhecer explicitamente cada build script;
+# false = nunca executar (coerente com neverBuiltDependencies acima).
+allowBuilds:
+  esbuild: false

@@ -15,7 +15,7 @@ Estou continuando o projeto **Plataforma de Auditoria Contábil Visual** (auditc
 - **Parse no browser (Web Worker SheetJS/Papaparse), regras determinísticas em SQL versionado no Postgres** (Edge Functions têm 2s de CPU — verificado nas docs; nunca postar arquivo em função).
 - Share público `/r/:token`: RPC SECURITY DEFINER + bcrypt + rate limit em tabela + snapshot imutável.
 - Stripe preparado (Checkout/Portal/webhook padrão `withSupabase({auth:'none'})`), piloto em trial de 90 dias sem cartão.
-- Front = este repo (fork satnaing/shadcn-admin v2.2.1): remover Clerk/axios/demos, TanStack Router com workspace de abas via `?tab=` validado com `@tanstack/zod-adapter`. Hosting: Cloudflare (free). PDF: @react-pdf/renderer client-side.
+- Front = este repo (fork satnaing/shadcn-admin v2.2.1): remover Clerk/axios/demos, TanStack Router com workspace de abas via `?tab=` validado com `@tanstack/zod-adapter`. Hosting: Vercel (`auditcontabil.vercel.app`, deploy no merge para `main`). PDF: @react-pdf/renderer client-side.
 - Custo-alvo: ~US$25/mês (Supabase Pro) + R$40/ano domínio.
 
 **Estado atual:** repo conectado ao GitHub (`DaniloAmaralUX/auditcontabil`), supabase init+link feitos, NENHUMA migration ou código de domínio ainda — o próximo passo é a **Fase F1 do roadmap (§11 do PRD)**: migrations core + RLS base + Edge `invite-user` + seed do trial, e no front a remoção do Clerk/axios + auth Supabase + guard por perfil.

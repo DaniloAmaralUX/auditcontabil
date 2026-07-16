@@ -10,6 +10,16 @@ on:
       - main
 
 jobs:
+  # pgTAP no Postgres local do Supabase CLI — cobre RPCs, RLS e o payload do
+  # snapshot (publish_reconciliation_test.sql), que não rodam sem Docker.
+  test-db:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+      - run: supabase db start
+      - run: supabase test db
+
   install-lint-build:
     runs-on: ubuntu-latest
 
