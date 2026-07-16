@@ -112,7 +112,9 @@ export function RelatorioPanel({ auditId }: { auditId: string }) {
             <CardTitle className='text-base'>Conclusão do escritório</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className='text-sm whitespace-pre-wrap'>{data.audit.conclusion}</p>
+            <p className='text-sm whitespace-pre-wrap'>
+              {data.audit.conclusion}
+            </p>
           </CardContent>
         </Card>
       )}

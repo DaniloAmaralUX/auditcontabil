@@ -83,7 +83,11 @@ type Kind = 'revenue' | 'deduction' | 'expense' | 'other'
 function classifyKind(name: string | null): Kind {
   if (!name) return 'expense'
   const l = name.toLowerCase()
-  if (/(dedu|imposto sobre|iss|icms|pis|cofins|simples nacional|cancelamento)/.test(l))
+  if (
+    /(dedu|imposto sobre|iss|icms|pis|cofins|simples nacional|cancelamento)/.test(
+      l
+    )
+  )
     return 'deduction'
   if (/(receita|faturamento|venda|mensalidade|patroc)/.test(l)) return 'revenue'
   if (/(total|subtotal|resultado|soma)/.test(l)) return 'other'
@@ -189,7 +193,8 @@ export function normalizeRow(
   // linha de totalização/section header (sem conta, sem valor e sem erro)
   // é preservada como 'other'; linha com erro nunca vira estrutural
   const isStructural =
-    kind === 'other' || (!account_code && !account_name && !hasValue && !invalid)
+    kind === 'other' ||
+    (!account_code && !account_name && !hasValue && !invalid)
 
   if (!isStructural) {
     if (!account_code && !account_name) {

@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { Spinner } from '@/components/ui/spinner'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ShieldCheck } from 'lucide-react'
-import { qk } from '@/lib/query-keys'
-import { can } from '@/lib/permissions'
-import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth-store'
+import { can } from '@/lib/permissions'
+import { qk } from '@/lib/query-keys'
+import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -16,10 +15,11 @@ import {
 } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Spinner } from '@/components/ui/spinner'
 import { Textarea } from '@/components/ui/textarea'
-import { auditDetailQuery } from '../../data/queries'
 import { inconsistenciesQuery } from '../../data/inconsistencies'
 import { useTransitionAudit } from '../../data/mutations'
+import { auditDetailQuery } from '../../data/queries'
 import { PanelErrorState } from './panel-error-state'
 
 // RF-052: conclusão geral — vai para o snapshot, o cliente e o PDF.
@@ -159,7 +159,11 @@ export function RevisaoPanel({ auditId }: { auditId: string }) {
         <CardContent className='space-y-2'>
           <Progress
             aria-label='Itens revisados'
-            value={actionable.length === 0 ? 100 : (reviewed / actionable.length) * 100}
+            value={
+              actionable.length === 0
+                ? 100
+                : (reviewed / actionable.length) * 100
+            }
             className='bg-muted'
           />
           {pending.length > 0 && (
@@ -170,7 +174,10 @@ export function RevisaoPanel({ auditId }: { auditId: string }) {
         </CardContent>
       </Card>
 
-      <ConclusionCard auditId={auditId} initial={audit.data?.conclusion ?? ''} />
+      <ConclusionCard
+        auditId={auditId}
+        initial={audit.data?.conclusion ?? ''}
+      />
 
       <Card>
         <CardHeader>
@@ -196,7 +203,9 @@ export function RevisaoPanel({ auditId }: { auditId: string }) {
             <>
               <Button
                 onClick={() => transition.mutate('approved')}
-                disabled={!canApprove || !readyToApprove || transition.isPending}
+                disabled={
+                  !canApprove || !readyToApprove || transition.isPending
+                }
               >
                 <ShieldCheck className='size-4' /> Aprovar auditoria
               </Button>

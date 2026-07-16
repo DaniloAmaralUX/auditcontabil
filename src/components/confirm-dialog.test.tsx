@@ -78,7 +78,9 @@ describe('ConfirmDialog', () => {
       />
     )
 
-    await expect.element(getByRole('button', { name: 'Cancelar' })).toBeDisabled()
+    await expect
+      .element(getByRole('button', { name: 'Cancelar' }))
+      .toBeDisabled()
     await expect
       .element(getByRole('button', { name: 'Continuar' }))
       .toBeDisabled()

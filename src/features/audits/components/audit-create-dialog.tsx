@@ -1,10 +1,7 @@
 import { useForm } from 'react-hook-form'
-import { Spinner } from '@/components/ui/spinner'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-
-import { clientsQuery } from '@/features/clients/data/queries'
 import { strings } from '@/lib/strings'
 import { Button } from '@/components/ui/button'
 import {
@@ -31,6 +28,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Spinner } from '@/components/ui/spinner'
+import { clientsQuery } from '@/features/clients/data/queries'
 import { useCreateAudit } from '../data/mutations'
 import { auditFormSchema, type AuditForm } from '../data/schema'
 
@@ -43,7 +42,12 @@ export function AuditCreateDialog({ open, onOpenChange }: Props) {
 
   const form = useForm<AuditForm>({
     resolver: zodResolver(auditFormSchema),
-    defaultValues: { cliente_id: '', title: '', period_start: '', period_end: '' },
+    defaultValues: {
+      cliente_id: '',
+      title: '',
+      period_start: '',
+      period_end: '',
+    },
   })
 
   async function onSubmit(values: AuditForm) {
@@ -99,7 +103,10 @@ export function AuditCreateDialog({ open, onOpenChange }: Props) {
                 <FormItem>
                   <FormLabel>Nome da auditoria</FormLabel>
                   <FormControl>
-                    <Input placeholder='Ex.: Fechamento Junho/2026' {...field} />
+                    <Input
+                      placeholder='Ex.: Fechamento Junho/2026'
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -19,8 +19,24 @@ export function Logo({ className, ...props }: SVGProps<SVGSVGElement>) {
     >
       <title>AuditView</title>
       {/* barras do gráfico (estrutura, cor do tema) */}
-      <rect x='8' y='26' width='8' height='14' rx='2' fill='currentColor' opacity='0.45' />
-      <rect x='20' y='16' width='8' height='24' rx='2' fill='currentColor' opacity='0.75' />
+      <rect
+        x='8'
+        y='26'
+        width='8'
+        height='14'
+        rx='2'
+        fill='currentColor'
+        opacity='0.45'
+      />
+      <rect
+        x='20'
+        y='16'
+        width='8'
+        height='24'
+        rx='2'
+        fill='currentColor'
+        opacity='0.75'
+      />
       <rect x='32' y='8' width='8' height='32' rx='2' fill='currentColor' />
       {/* traço de verificação (acento da marca) */}
       <path

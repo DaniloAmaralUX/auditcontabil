@@ -1,10 +1,5 @@
 import { useNavigate, useSearch } from '@tanstack/react-router'
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CompartilharPanel } from './panels/compartilhar-panel'
 import { DadosPanel } from './panels/dados-panel'
 import { DashboardPanel } from './panels/dashboard-panel'
@@ -36,7 +31,9 @@ export function AuditWorkspace({ auditId }: { auditId: string }) {
       className='gap-4'
       value={tab}
       onValueChange={(value) =>
-        navigate({ search: (prev) => ({ ...prev, tab: value as WorkspaceTab }) })
+        navigate({
+          search: (prev) => ({ ...prev, tab: value as WorkspaceTab }),
+        })
       }
     >
       <TabsList className='w-full justify-start overflow-x-auto'>

@@ -1,6 +1,6 @@
+import { strings } from '@/lib/strings'
 import { Main } from '@/components/layout/main'
 import { PageHeader, PageTitle } from '@/components/page-header'
-import { strings } from '@/lib/strings'
 import { ClientsDialogs } from './components/clients-dialogs'
 import { ClientsPrimaryButtons } from './components/clients-primary-buttons'
 import { ClientsProvider } from './components/clients-provider'

@@ -25,5 +25,4 @@ type NavGroup = {
   items: NavItem[]
 }
 
-
 export type { NavGroup, NavItem, NavCollapsible, NavLink }

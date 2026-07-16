@@ -24,7 +24,12 @@ const navGroups: NavGroup[] = [
     title: 'Escritório',
     items: [
       { title: 'Equipe', url: '/team', icon: UsersRound, roles: ['owner'] },
-      { title: 'Faturamento', url: '/billing', icon: CreditCard, roles: ['owner'] },
+      {
+        title: 'Faturamento',
+        url: '/billing',
+        icon: CreditCard,
+        roles: ['owner'],
+      },
       { title: 'Configurações', url: '/settings', icon: Settings },
     ],
   },

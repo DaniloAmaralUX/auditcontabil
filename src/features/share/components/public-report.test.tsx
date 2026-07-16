@@ -3,11 +3,11 @@
 // snapshot — nunca o proxy invalid === 0 (linha válida ≠ total reconciliado).
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import '@/styles/index.css'
 import { afterEach, describe, expect, it } from 'vitest'
 import { type ReconciliationSummary } from '@/features/audits/analytics/types'
 import { type PublicSnapshot } from '../data/api'
 import { PublicReport } from './public-report'
-import '@/styles/index.css'
 
 const snapshot = (over: Partial<PublicSnapshot> = {}): PublicSnapshot => ({
   audit: {
@@ -101,7 +101,10 @@ describe('selo da DRE usa a reconciliação real', () => {
   it('divergent → alerta de divergência no lugar do selo', async () => {
     await render(
       snapshot({
-        reconciliation: reconciliation({ status: 'divergent', broken_checks: 2 }),
+        reconciliation: reconciliation({
+          status: 'divergent',
+          broken_checks: 2,
+        }),
       })
     )
     expect(host!.textContent).not.toContain('batem ao centavo')

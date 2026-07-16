@@ -33,7 +33,9 @@ import { SummaryBlock } from './deck/summary-block'
 import { useRevealOnScroll } from './deck/use-reveal-on-scroll'
 
 const DownloadPdfButton = lazy(() =>
-  import('./download-pdf-button').then((m) => ({ default: m.DownloadPdfButton }))
+  import('./download-pdf-button').then((m) => ({
+    default: m.DownloadPdfButton,
+  }))
 )
 
 // Voz do cliente (§10.2.14): sem jargão; 3 rótulos apenas.
@@ -91,8 +93,8 @@ export function PublicReport({
 
       {/* Capa — a manchete é o DESEMPENHO; confiabilidade e conclusão
           profissional vêm em blocos próprios: são perguntas diferentes. */}
-      <header className='brand-mesh border-b'>
-        <div className='animate-rise mx-auto flex max-w-2xl flex-col gap-6 px-4 py-12 md:py-16'>
+      <header className='border-b brand-mesh'>
+        <div className='mx-auto flex max-w-2xl animate-rise flex-col gap-6 px-4 py-12 md:py-16'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-2'>
               <Logo className='size-9' />
@@ -300,7 +302,9 @@ export function PublicReport({
                 <CardTitle>Conclusão do escritório</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className='text-sm whitespace-pre-wrap'>{audit.conclusion}</p>
+                <p className='text-sm whitespace-pre-wrap'>
+                  {audit.conclusion}
+                </p>
               </CardContent>
             </Card>
           </DeckSection>

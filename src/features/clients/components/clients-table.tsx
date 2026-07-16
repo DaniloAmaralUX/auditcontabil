@@ -2,11 +2,17 @@ import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { MoreHorizontal, Pencil, Plus, Trash2, Users } from 'lucide-react'
+import { useAuthStore } from '@/stores/auth-store'
 import { can } from '@/lib/permissions'
 import { strings } from '@/lib/strings'
-import { useAuthStore } from '@/stores/auth-store'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import {
   Empty,
   EmptyContent,
@@ -15,12 +21,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
@@ -143,7 +143,9 @@ export function ClientsTable() {
                 <TableCell>{c.contact_email ?? '—'}</TableCell>
                 <TableCell>
                   <Badge variant='outline'>
-                    {c.is_active ? strings.clients.active : strings.clients.inactive}
+                    {c.is_active
+                      ? strings.clients.active
+                      : strings.clients.inactive}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -174,7 +176,8 @@ export function ClientsTable() {
                               setOpen('delete')
                             }}
                           >
-                            <Trash2 className='size-4' /> {strings.common.remove}
+                            <Trash2 className='size-4' />{' '}
+                            {strings.common.remove}
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>

@@ -3,8 +3,6 @@ import { CreditCard, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
 import { qk } from '@/lib/query-keys'
 import { supabase } from '@/lib/supabase'
-import { Main } from '@/components/layout/main'
-import { PageHeader, PageTitle } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -15,6 +13,8 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Main } from '@/components/layout/main'
+import { PageHeader, PageTitle } from '@/components/page-header'
 
 type Subscription = {
   status: string
@@ -118,7 +118,9 @@ export function Billing() {
 
                 <div className='flex gap-2'>
                   {!data.stripe_subscription_id && (
-                    <Button onClick={() => openPortal('create-checkout-session')}>
+                    <Button
+                      onClick={() => openPortal('create-checkout-session')}
+                    >
                       Assinar
                     </Button>
                   )}

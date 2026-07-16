@@ -16,7 +16,11 @@ if (!url || !anonKey) {
 }
 
 export const supabase: SupabaseClient = createClient(url ?? '', anonKey ?? '', {
-  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
 })
 
 export type Role = 'owner' | 'accountant' | 'analyst'
@@ -30,7 +34,9 @@ type SessionClaims = {
   fullName: string
 }
 
-export function claimsFromSession(session: Session | null): SessionClaims | null {
+export function claimsFromSession(
+  session: Session | null
+): SessionClaims | null {
   if (!session) return null
   const meta = session.user.app_metadata ?? {}
   const escritorioId = meta.escritorio_id as string | undefined

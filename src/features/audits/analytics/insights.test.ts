@@ -21,7 +21,9 @@ import {
   type ReconciliationSummary,
 } from './types'
 
-const consolidado = (over: Partial<AnalyticsConsolidado> = {}): AnalyticsConsolidado => ({
+const consolidado = (
+  over: Partial<AnalyticsConsolidado> = {}
+): AnalyticsConsolidado => ({
   receita_bruta: 1_073_096.61,
   deducoes: 56_658.69,
   receita_liquida: 1_016_437.92,
@@ -108,14 +110,20 @@ describe('derivePerformanceSummary — só desempenho', () => {
     expect(
       derivePerformanceSummary(
         analytics({
-          consolidado: consolidado({ despesa_receita_pct: 98.3, resultado: 20000 }),
+          consolidado: consolidado({
+            despesa_receita_pct: 98.3,
+            resultado: 20000,
+          }),
         })
       ).tone
     ).toBe('attention')
     expect(
       derivePerformanceSummary(
         analytics({
-          empresas: [empresa({}), empresa({ codigo: '0102', status: 'Deficitária' })],
+          empresas: [
+            empresa({}),
+            empresa({ codigo: '0102', status: 'Deficitária' }),
+          ],
         })
       ).tone
     ).toBe('attention')
@@ -232,7 +240,9 @@ describe('insights por seção', () => {
     ).toContain('Sobrou pouco')
   })
   it('dreInsight: negativo fala em vermelho', () => {
-    expect(dreInsight(consolidado({ resultado: -5000 }))).toContain('no vermelho')
+    expect(dreInsight(consolidado({ resultado: -5000 }))).toContain(
+      'no vermelho'
+    )
   })
 
   it('composicaoInsight: concentração >=60% nomeia o grupo (com relabel)', () => {
@@ -301,9 +311,19 @@ describe('insights por seção', () => {
 describe('principalGastoPorEmpresa', () => {
   it('colapsa a matriz grupo×empresa na maior conta por empresa', () => {
     const out = principalGastoPorEmpresa([
-      { empresa: '0101', grupo: 'Pessoal/Admin', conta: 'Salários', valor: 191_000 },
+      {
+        empresa: '0101',
+        grupo: 'Pessoal/Admin',
+        conta: 'Salários',
+        valor: 191_000,
+      },
       { empresa: '0101', grupo: 'Financeiras', conta: 'Juros', valor: 12_000 },
-      { empresa: '0102', grupo: 'Pessoal/Admin', conta: 'Salários', valor: 424_000 },
+      {
+        empresa: '0102',
+        grupo: 'Pessoal/Admin',
+        conta: 'Salários',
+        valor: 424_000,
+      },
     ])
     expect(out).toHaveLength(2)
     expect(out[0]).toMatchObject({ empresa: '0102', conta: 'Salários' })

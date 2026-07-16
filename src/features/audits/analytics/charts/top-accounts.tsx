@@ -16,7 +16,8 @@ import {
 } from '@/components/ui/chart'
 import { brl, pct, type AnalyticsConta } from '../types'
 
-const short = (s: string, n = 18) => (s.length > n ? `${s.slice(0, n - 1)}…` : s)
+const short = (s: string, n = 18) =>
+  s.length > n ? `${s.slice(0, n - 1)}…` : s
 
 export function TopAccounts({
   contas,
@@ -83,25 +84,25 @@ export function TopAccounts({
             no DIV: table layout trata width:1px como mínimo e a tabela "invisível"
             criava scroll horizontal em 375px. */}
         <div className='sr-only'>
-        <table>
-          <caption>{title} — contas, valores e participação</caption>
-          <thead>
-            <tr>
-              <th scope='col'>Conta</th>
-              <th scope='col'>Valor</th>
-              <th scope='col'>Participação</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((c) => (
-              <tr key={`${c.conta}-${c.codigo}`}>
-                <th scope='row'>{c.conta}</th>
-                <td>{brl(c.valor)}</td>
-                <td>{pct(c.pct)}</td>
+          <table>
+            <caption>{title} — contas, valores e participação</caption>
+            <thead>
+              <tr>
+                <th scope='col'>Conta</th>
+                <th scope='col'>Valor</th>
+                <th scope='col'>Participação</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.map((c) => (
+                <tr key={`${c.conta}-${c.codigo}`}>
+                  <th scope='row'>{c.conta}</th>
+                  <td>{brl(c.valor)}</td>
+                  <td>{pct(c.pct)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </CardContent>
     </Card>

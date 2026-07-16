@@ -30,7 +30,8 @@ export function deriveOnboarding(
   clientCount: number,
   audits: Pick<AuditListItem, 'status'>[]
 ): OnboardingState {
-  const has = (list: AuditStatus[]) => audits.some((a) => list.includes(a.status))
+  const has = (list: AuditStatus[]) =>
+    audits.some((a) => list.includes(a.status))
   const steps: OnboardingStep[] = [
     {
       key: 'client',

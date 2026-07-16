@@ -1,5 +1,6 @@
 // Detalhe por empresa — a tabela real que serve de equivalente textual
 // para os dois bar charts (ranking e resultado, aria-hidden).
+import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import {
   Card,
@@ -16,7 +17,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { cn } from '@/lib/utils'
 import { brl, pct, type AnalyticsEmpresa } from '../types'
 
 function statusBadge(status: AnalyticsEmpresa['status']) {

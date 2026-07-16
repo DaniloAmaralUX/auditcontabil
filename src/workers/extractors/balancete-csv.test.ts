@@ -3,11 +3,15 @@
 // o documento declara — é a garantia de zero erro de cálculo nos charts.
 import { describe, expect, it } from 'vitest'
 import fixtureUrl from '../../../docs/fixtures/balancete-mdw-2025.csv?url'
-import { extractBalanceteCsv, splitClassificacao, parsePeriodo } from './balancete-csv'
+import {
+  extractBalanceteCsv,
+  splitClassificacao,
+  parsePeriodo,
+} from './balancete-csv'
 import { classifyCategoryByCode, classifyKindByCode } from './classify'
-import { decodeSmart } from './encoding'
 import { detectKind } from './detect'
 import { summarizeDre } from './dre-summary'
+import { decodeSmart } from './encoding'
 
 async function loadFixture() {
   const res = await fetch(fixtureUrl)
@@ -26,7 +30,10 @@ describe('balancete real (MATERIAIS MDW LTDA, 2025)', () => {
   it('detecta o tipo balancete-csv pelo conteúdo', async () => {
     const { text } = await loadFixture()
     expect(
-      detectKind({ fileName: 'balancete-mdw-2025.csv', head: text.slice(0, 4096) })
+      detectKind({
+        fileName: 'balancete-mdw-2025.csv',
+        head: text.slice(0, 4096),
+      })
     ).toBe('balancete-csv')
   })
 
@@ -49,9 +56,7 @@ describe('balancete real (MATERIAIS MDW LTDA, 2025)', () => {
     expect(ativo?.synthetic).toBe(true)
     expect(ativo?.saldo).toBe('1756202.63')
 
-    const sicredi = rows.find(
-      (r) => r.account_code === '1.1.01.002.001'
-    )
+    const sicredi = rows.find((r) => r.account_code === '1.1.01.002.001')
     expect(sicredi?.synthetic).toBe(false)
     expect(sicredi?.account_name).toBe('Banco Sicredi')
     expect(sicredi?.level).toBe(5)
@@ -89,9 +94,9 @@ describe('balancete real (MATERIAIS MDW LTDA, 2025)', () => {
   it('classifica por código: balanço fora da DRE, grupos certos', async () => {
     expect(classifyKindByCode('1.1.01.002.001', 'Banco Sicredi')).toBe('other')
     expect(classifyKindByCode('2.1.03.001.029', 'Fornecedor X')).toBe('other')
-    expect(
-      classifyKindByCode('3.1.01.003.001.007', 'Vendas de cadernos')
-    ).toBe('revenue')
+    expect(classifyKindByCode('3.1.01.003.001.007', 'Vendas de cadernos')).toBe(
+      'revenue'
+    )
     expect(classifyKindByCode('3.1.03.005.002', '(-) ICMS')).toBe('deduction')
     expect(
       classifyKindByCode('3.2.03.001.015', 'Custo Mercadoria Vendida')

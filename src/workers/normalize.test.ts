@@ -11,10 +11,16 @@ const mapping: ColumnMapping = {
 
 describe('parseDecimal', () => {
   it('converte formato brasileiro "1.234,56"', () => {
-    expect(parseDecimal('1.234,56')).toEqual({ value: '1234.56', coerced: true })
+    expect(parseDecimal('1.234,56')).toEqual({
+      value: '1234.56',
+      coerced: true,
+    })
   })
   it('aceita número limpo sem coerção', () => {
-    expect(parseDecimal('1234.56')).toEqual({ value: '1234.56', coerced: false })
+    expect(parseDecimal('1234.56')).toEqual({
+      value: '1234.56',
+      coerced: false,
+    })
     expect(parseDecimal(1234.56)).toEqual({ value: '1234.56', coerced: false })
   })
   it('trata negativo entre parênteses', () => {
@@ -33,7 +39,10 @@ describe('parseDateBR', () => {
     expect(parseDateBR('2026-06-05').value).toBe('2026-06-05')
   })
   it('mm/yyyy vira dia 1 (coagido)', () => {
-    expect(parseDateBR('06/2026')).toEqual({ value: '2026-06-01', coerced: true })
+    expect(parseDateBR('06/2026')).toEqual({
+      value: '2026-06-01',
+      coerced: true,
+    })
   })
   it('devolve null para lixo', () => {
     expect(parseDateBR('ontem').value).toBeNull()
@@ -44,7 +53,7 @@ describe('normalizeRow — nenhuma linha é descartada', () => {
   it('linha válida vira status ok', () => {
     const { row, errors } = normalizeRow(
       1,
-      { Conta: '1.1.01', Data: '05/06/2026', 'Débito': '100.00', 'Crédito': '' },
+      { Conta: '1.1.01', Data: '05/06/2026', Débito: '100.00', Crédito: '' },
       mapping
     )
     expect(row.status).toBe('ok')
@@ -55,7 +64,7 @@ describe('normalizeRow — nenhuma linha é descartada', () => {
   it('valor pt-BR gera coerced com mensagem', () => {
     const { row } = normalizeRow(
       2,
-      { Conta: '1.1.01', Data: '05/06/2026', 'Débito': '1.234,56', 'Crédito': '' },
+      { Conta: '1.1.01', Data: '05/06/2026', Débito: '1.234,56', Crédito: '' },
       mapping
     )
     expect(row.status).toBe('coerced')
@@ -66,7 +75,7 @@ describe('normalizeRow — nenhuma linha é descartada', () => {
   it('linha inválida é PRESERVADA com status invalid + RowError', () => {
     const { row, errors } = normalizeRow(
       3,
-      { Conta: '', Data: 'data-quebrada', 'Débito': 'xx', 'Crédito': '' },
+      { Conta: '', Data: 'data-quebrada', Débito: 'xx', Crédito: '' },
       mapping
     )
     expect(row.status).toBe('invalid')
@@ -77,8 +86,8 @@ describe('normalizeRow — nenhuma linha é descartada', () => {
     expect(row.original).toEqual({
       Conta: '',
       Data: 'data-quebrada',
-      'Débito': 'xx',
-      'Crédito': '',
+      Débito: 'xx',
+      Crédito: '',
     })
   })
 })

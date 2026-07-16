@@ -4,6 +4,10 @@ import { useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useNavigate, useParams } from '@tanstack/react-router'
 import {
+  type ColumnMapping,
+  type DetectedDocument,
+} from '@/workers/parse-protocol'
+import {
   ArrowLeft,
   ChevronDown,
   CircleAlert,
@@ -14,8 +18,6 @@ import {
   Sparkles,
   Upload,
 } from 'lucide-react'
-import { Main } from '@/components/layout/main'
-import { PageHeader } from '@/components/page-header'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -37,10 +39,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  type ColumnMapping,
-  type DetectedDocument,
-} from '@/workers/parse-protocol'
+import { Main } from '@/components/layout/main'
+import { PageHeader } from '@/components/page-header'
 import { auditDetailQuery } from '../data/queries'
 import { useIngestPipeline } from '../data/use-ingest-pipeline'
 
@@ -67,16 +67,22 @@ function guessMapping(headers: string[]): Record<string, string> {
   const guess: Record<string, string> = {}
   for (const h of headers) {
     const l = h.toLowerCase()
-    if (!guess.account_code && /(c[oó]digo|^conta$)/.test(l)) guess.account_code = h
-    if (!guess.account_name && /(descri|nome|hist[oó]rico)/.test(l)) guess.account_name = h
-    if (!guess.period && /(^data|per[ií]odo|compet|m[eê]s)/.test(l)) guess.period = h
+    if (!guess.account_code && /(c[oó]digo|^conta$)/.test(l))
+      guess.account_code = h
+    if (!guess.account_name && /(descri|nome|hist[oó]rico)/.test(l))
+      guess.account_name = h
+    if (!guess.period && /(^data|per[ií]odo|compet|m[eê]s)/.test(l))
+      guess.period = h
     if (!guess.debit && /d[eé]bito/.test(l)) guess.debit = h
     if (!guess.credit && /cr[eé]dito/.test(l)) guess.credit = h
-    if (!guess.amount && /^(valor|montante|total geral)$/.test(l)) guess.amount = h
+    if (!guess.amount && /^(valor|montante|total geral)$/.test(l))
+      guess.amount = h
     if (!guess.opening_balance && /inicial/.test(l)) guess.opening_balance = h
-    if (!guess.closing_balance && /(final|atual)/.test(l)) guess.closing_balance = h
+    if (!guess.closing_balance && /(final|atual)/.test(l))
+      guess.closing_balance = h
     if (!guess.entity && /(empresa|filial|unidade)/.test(l)) guess.entity = h
-    if (!guess.category && /(grupo|categoria|classifica)/.test(l)) guess.category = h
+    if (!guess.category && /(grupo|categoria|classifica)/.test(l))
+      guess.category = h
     if (!guess.kind && /^(tipo|natureza)$/.test(l)) guess.kind = h
   }
   // planilhas com uma única coluna de nome de conta
@@ -134,7 +140,11 @@ export function ImportPage() {
       if (p.detected) {
         // documento reconhecido: preset automático, sem mapping manual
         setDetected(p.detected)
-        setMap({ account_code: 'Conta', account_name: 'Descrição', amount: 'Saldo' })
+        setMap({
+          account_code: 'Conta',
+          account_name: 'Descrição',
+          amount: 'Saldo',
+        })
       } else {
         setMap(guessMapping(p.headers))
       }
@@ -145,7 +155,10 @@ export function ImportPage() {
       // O worker manda mensagens já escritas para humanos (ex.: "Este PDF
       // parece ser uma imagem escaneada — exporte em CSV"). Usar a específica
       // quando existir; "abre no Excel" é conselho errado para PDF.
-      const msg = (e instanceof Error ? e.message : String(e)).replace(/^Error:\s*/, '')
+      const msg = (e instanceof Error ? e.message : String(e)).replace(
+        /^Error:\s*/,
+        ''
+      )
       setFileError(
         /PDF/.test(msg)
           ? msg
@@ -257,8 +270,8 @@ export function ImportPage() {
                   Arraste a planilha aqui ou clique para escolher
                 </p>
                 <p className='text-sm text-muted-foreground'>
-                  Balancete ou DRE do seu sistema contábil · .csv, .xlsx ou
-                  .pdf · até 20 MB
+                  Balancete ou DRE do seu sistema contábil · .csv, .xlsx ou .pdf
+                  · até 20 MB
                 </p>
               </>
             )}

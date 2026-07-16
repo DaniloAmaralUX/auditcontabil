@@ -4,7 +4,9 @@ import { fmtMoney, fmtPeriod, humanizeKey } from './report-format'
 
 describe('fmtPeriod', () => {
   it('dd/mm/aaaa a dd/mm/aaaa', () => {
-    expect(fmtPeriod('2025-01-01', '2025-12-31')).toBe('01/01/2025 a 31/12/2025')
+    expect(fmtPeriod('2025-01-01', '2025-12-31')).toBe(
+      '01/01/2025 a 31/12/2025'
+    )
   })
   it('nulls viram vazio', () => {
     expect(fmtPeriod(null, '2025-12-31')).toBe('')

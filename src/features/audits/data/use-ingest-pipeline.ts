@@ -2,16 +2,16 @@
 // parse no worker -> ingest_rows por lote -> finalize_file -> run_rules.
 import { useCallback, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import * as tus from 'tus-js-client'
-import { friendlyErrorMessage } from '@/lib/handle-server-error'
-import { qk } from '@/lib/query-keys'
-import { supabase } from '@/lib/supabase'
-import { useAuthStore } from '@/stores/auth-store'
 import {
   type ColumnMapping,
   type DetectedDocument,
   type ParseWorkerResponse,
 } from '@/workers/parse-protocol'
+import * as tus from 'tus-js-client'
+import { useAuthStore } from '@/stores/auth-store'
+import { friendlyErrorMessage } from '@/lib/handle-server-error'
+import { qk } from '@/lib/query-keys'
+import { supabase } from '@/lib/supabase'
 
 type PipelinePhase =
   | 'idle'
@@ -139,7 +139,12 @@ export function useIngestPipeline(auditId: string) {
           }
         }
         worker.addEventListener('message', onMsg)
-        worker.postMessage({ type: 'PREVIEW', fileId: 'preview', file, limit: 5 })
+        worker.postMessage({
+          type: 'PREVIEW',
+          fileId: 'preview',
+          file,
+          limit: 5,
+        })
       })
     },
     [getWorker]

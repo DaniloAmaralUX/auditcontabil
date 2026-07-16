@@ -1,7 +1,7 @@
 // KPIs do topo — 4 números que resumem o período.
 import { TrendingDown, TrendingUp } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { brl, pct, type AuditAnalytics } from '../types'
 
 export function KpiHero({ a }: { a: AuditAnalytics }) {

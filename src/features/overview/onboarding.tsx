@@ -13,6 +13,9 @@ import {
   Upload,
   Users,
 } from 'lucide-react'
+import { useAuthStore } from '@/stores/auth-store'
+import { track } from '@/lib/track'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -25,14 +28,11 @@ import {
 } from '@/components/ui/item'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useAuthStore } from '@/stores/auth-store'
-import { track } from '@/lib/track'
-import { cn } from '@/lib/utils'
 import { clientsQuery } from '@/features/clients/data/queries'
+import { nextAction } from '../audits/components/next-action'
+import { AuditStatusBadge } from '../audits/components/status-badge'
 import { auditsListQuery } from '../audits/data/queries'
 import { type AuditListItem } from '../audits/data/schema'
-import { AuditStatusBadge } from '../audits/components/status-badge'
-import { nextAction } from '../audits/components/next-action'
 import {
   auditsNeedingAction,
   deriveOnboarding,
@@ -167,7 +167,7 @@ export function HomeOnboarding() {
   return (
     <div className='space-y-4'>
       {!welcomed && (
-        <div className='brand-mesh animate-rise relative overflow-hidden rounded-xl border p-6'>
+        <div className='relative animate-rise overflow-hidden rounded-xl border brand-mesh p-6'>
           <p className='text-xs font-bold tracking-[0.14em] text-muted-foreground uppercase'>
             Bem-vindo ao AuditView
           </p>

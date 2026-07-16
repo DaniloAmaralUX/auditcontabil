@@ -1,22 +1,19 @@
 import { useState } from 'react'
-import { Spinner } from '@/components/ui/spinner'
+import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   queryOptions,
   useMutation,
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
-import { z } from 'zod'
-import { qk } from '@/lib/query-keys'
-import { roleLabels } from '@/lib/permissions'
-import { supabase, type Role } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth-store'
-import { Main } from '@/components/layout/main'
-import { PageHeader, PageTitle } from '@/components/page-header'
+import { roleLabels } from '@/lib/permissions'
+import { qk } from '@/lib/query-keys'
+import { supabase, type Role } from '@/lib/supabase'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -44,6 +41,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Spinner } from '@/components/ui/spinner'
 import { Switch } from '@/components/ui/switch'
 import {
   Table,
@@ -53,6 +51,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Main } from '@/components/layout/main'
+import { PageHeader, PageTitle } from '@/components/page-header'
 
 type Member = {
   id: string
@@ -196,7 +196,9 @@ export function Team() {
                         checked={m.is_active}
                         onCheckedChange={() => toggleActive.mutate(m)}
                         disabled={m.id === myId || toggleActive.isPending}
-                        aria-label={m.is_active ? 'Desativar usuário' : 'Ativar usuário'}
+                        aria-label={
+                          m.is_active ? 'Desativar usuário' : 'Ativar usuário'
+                        }
                       />
                       <span className='text-sm text-muted-foreground'>
                         {m.is_active ? 'Ativo' : 'Desativado'}
@@ -286,7 +288,11 @@ export function Team() {
             >
               Cancelar
             </Button>
-            <Button type='submit' form='invite-form' disabled={invite.isPending}>
+            <Button
+              type='submit'
+              form='invite-form'
+              disabled={invite.isPending}
+            >
               {invite.isPending && <Spinner className='size-4' />}
               Enviar convite
             </Button>

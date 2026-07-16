@@ -29,11 +29,20 @@ function classifyKindByName(name: string | null): AccountKind {
   const l = name.toLowerCase()
   if (/\(-\)/.test(l) && /(dedu|imposto|cancelamento|devolu)/.test(l))
     return 'deduction'
-  if (/(dedu[çc][õo]es|imposto sobre|iss|icms|pis|cofins|simples nacional|cancelamento)/.test(l))
+  if (
+    /(dedu[çc][õo]es|imposto sobre|iss|icms|pis|cofins|simples nacional|cancelamento)/.test(
+      l
+    )
+  )
     return 'deduction'
-  if (/(receita|faturamento|venda|mensalidade|patroc|rendimento|juros receb|descontos obtidos)/.test(l))
+  if (
+    /(receita|faturamento|venda|mensalidade|patroc|rendimento|juros receb|descontos obtidos)/.test(
+      l
+    )
+  )
     return 'revenue'
-  if (/(total|subtotal|resultado|soma|lucro|preju[íi]zo)/.test(l)) return 'other'
+  if (/(total|subtotal|resultado|soma|lucro|preju[íi]zo)/.test(l))
+    return 'other'
   return 'expense'
 }
 
@@ -62,13 +71,25 @@ export function classifyCategoryByName(name: string | null): string {
   if (!name) return 'Despesas gerais'
   const l = name.toLowerCase()
   if (/(custo)/.test(l)) return 'Custo das mercadorias'
-  if (/(sal[aá]rio|ordenado|inss|fgts|f[eé]rias|13|d[eé]cimo|pr[oó]-?labore|indeniza|aviso pr[eé]vio|hora extra|benef[ií]cio|vale|plano de sa[uú]de|plano dent|rescis|grrf|treinament|uniforme|exames m[eé]dic|pessoal)/.test(l))
+  if (
+    /(sal[aá]rio|ordenado|inss|fgts|f[eé]rias|13|d[eé]cimo|pr[oó]-?labore|indeniza|aviso pr[eé]vio|hora extra|benef[ií]cio|vale|plano de sa[uú]de|plano dent|rescis|grrf|treinament|uniforme|exames m[eé]dic|pessoal)/.test(
+      l
+    )
+  )
     return 'Pessoal'
-  if (/(juro|tarifa banc|iof|multa|desconto conced|financ|emprest|cart[aã]o de cr[eé]dito|banc[aá]ri)/.test(l))
+  if (
+    /(juro|tarifa banc|iof|multa|desconto conced|financ|emprest|cart[aã]o de cr[eé]dito|banc[aá]ri)/.test(
+      l
+    )
+  )
     return 'Financeiras'
   if (/(deprecia|amortiza|exaust)/.test(l)) return 'Depreciações'
   if (/(imposto|taxa|tribut)/.test(l)) return 'Tributárias'
-  if (/([aá]gua|energia|telecom|telefone|internet|aluguel|alugu[ée]is|condom[ií]nio|ocupa[çc])/.test(l))
+  if (
+    /([aá]gua|energia|telecom|telefone|internet|aluguel|alugu[ée]is|condom[ií]nio|ocupa[çc])/.test(
+      l
+    )
+  )
     return 'Utilidades e serviços'
   if (/(propaganda|publicidade|marketing)/.test(l)) return 'Comercial'
   return 'Despesas gerais'

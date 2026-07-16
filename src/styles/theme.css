@@ -72,7 +72,9 @@
   --paper: oklch(0.985 0.004 91.4); /* Papel — canvas do deck */
   --ink: oklch(0.233 0.007 67.5); /* Tinta — 16.1:1 sobre papel */
   --brasa: var(--brand); /* Brasa = laranja assinatura */
-  --receita: oklch(0.631 0.105 175.2); /* Verde — fills / figura grande (3.17:1) */
+  --receita: oklch(
+    0.631 0.105 175.2
+  ); /* Verde — fills / figura grande (3.17:1) */
   --receita-text: oklch(0.522 0.089 174.4); /* texto pequeno 4.99:1 */
   --despesa: oklch(0.553 0.168 30.9); /* Vermelho — 4.98:1, texto E fill */
   --despesa-text: var(--despesa);

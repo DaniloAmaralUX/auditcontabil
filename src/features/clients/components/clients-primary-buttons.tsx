@@ -1,7 +1,7 @@
 import { UserPlus } from 'lucide-react'
+import { useAuthStore } from '@/stores/auth-store'
 import { can } from '@/lib/permissions'
 import { strings } from '@/lib/strings'
-import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
 import { useClients } from './clients-provider'
 

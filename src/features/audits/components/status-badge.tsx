@@ -51,7 +51,6 @@ const AUDIT_META: Record<AuditStatus, Meta> = {
   archived: { label: 'Arquivada', icon: Archive, cls: 'text-muted-foreground' },
 }
 
-
 export function AuditStatusBadge({ status }: { status: AuditStatus }) {
   const meta = AUDIT_META[status]
   const Icon = meta.icon
@@ -71,14 +70,17 @@ export type Severity = 'ok' | 'info' | 'attention' | 'divergence'
 const SEVERITY_META: Record<Severity, Meta> = {
   ok: { label: 'OK', icon: CircleCheck, cls: 'text-success-text' },
   info: { label: 'Informação', icon: Info, cls: 'text-info' },
-  attention: { label: 'Atenção', icon: TriangleAlert, cls: 'text-warning-text' },
+  attention: {
+    label: 'Atenção',
+    icon: TriangleAlert,
+    cls: 'text-warning-text',
+  },
   divergence: {
     label: 'Divergência',
     icon: OctagonAlert,
     cls: 'text-destructive',
   },
 }
-
 
 export function SeverityBadge({ severity }: { severity: Severity }) {
   const meta = SEVERITY_META[severity]

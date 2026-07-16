@@ -15,11 +15,11 @@ import { Download } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { buildIncomeStatement } from '@/features/audits/analytics/statement'
 import {
   deriveSectionSummaries,
   type SectionSummary,
 } from '@/features/audits/analytics/insights'
+import { buildIncomeStatement } from '@/features/audits/analytics/statement'
 import { hasAnalyticsData, pct } from '@/features/audits/analytics/types'
 import { type PublicSnapshot } from '../data/api'
 import { fmtPeriod } from '../report-format'
@@ -29,7 +29,12 @@ const NEG = '#b91c1c'
 const POS = '#15803d'
 
 const styles = StyleSheet.create({
-  page: { padding: 40, fontSize: 11, fontFamily: 'Helvetica', color: '#1a1a1a' },
+  page: {
+    padding: 40,
+    fontSize: 11,
+    fontFamily: 'Helvetica',
+    color: '#1a1a1a',
+  },
   header: { marginBottom: 16 },
   brand: { fontSize: 9, letterSpacing: 2, color: '#666666' },
   title: { fontSize: 18, fontFamily: 'Helvetica-Bold', marginTop: 2 },
@@ -107,8 +112,8 @@ function ReportPdf({ snapshot }: { snapshot: PublicSnapshot }) {
           </Text>
           <Text style={styles.title}>{audit.title}</Text>
           <Text style={styles.meta}>
-            {audit.cliente} · {fmtPeriod(audit.period_start, audit.period_end)} ·
-            versão {audit.version}
+            {audit.cliente} · {fmtPeriod(audit.period_start, audit.period_end)}{' '}
+            · versão {audit.version}
           </Text>
           <Text style={[styles.verdict, { color: toneColor(performance) }]}>
             {performance.headline}
@@ -138,7 +143,9 @@ function ReportPdf({ snapshot }: { snapshot: PublicSnapshot }) {
               l.kind === 'result' ? (
                 <View key={l.key} style={styles.dreResult}>
                   <Text style={styles.bold}>= {l.label}</Text>
-                  <Text style={[styles.bold, { color: l.value < 0 ? NEG : POS }]}>
+                  <Text
+                    style={[styles.bold, { color: l.value < 0 ? NEG : POS }]}
+                  >
                     {l.value < 0
                       ? `(${money(Math.abs(l.value))})`
                       : money(l.value)}
@@ -229,8 +236,9 @@ function ReportPdf({ snapshot }: { snapshot: PublicSnapshot }) {
         ))}
 
         <Text style={styles.footer} fixed>
-          Publicado em {new Date(audit.published_at).toLocaleDateString('pt-BR')}{' '}
-          · Gerado com AuditView — auditoria contábil visual
+          Publicado em{' '}
+          {new Date(audit.published_at).toLocaleDateString('pt-BR')} · Gerado
+          com AuditView — auditoria contábil visual
         </Text>
       </Page>
     </Document>

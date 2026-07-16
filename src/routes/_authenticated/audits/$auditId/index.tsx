@@ -1,14 +1,22 @@
 import { z } from 'zod'
 import { createFileRoute, useParams } from '@tanstack/react-router'
 import { zodValidator } from '@tanstack/zod-adapter'
-import { AuditHeader } from '@/features/audits/workspace/audit-header'
-import { AuditWorkspace } from '@/features/audits/workspace/audit-workspace'
 import { Main } from '@/components/layout/main'
 import { PageHeader } from '@/components/page-header'
+import { AuditHeader } from '@/features/audits/workspace/audit-header'
+import { AuditWorkspace } from '@/features/audits/workspace/audit-workspace'
 
 const workspaceSearchSchema = z.object({
   tab: z
-    .enum(['dashboard', 'resumo', 'dados', 'inconsistencias', 'revisao', 'relatorio', 'compartilhar'])
+    .enum([
+      'dashboard',
+      'resumo',
+      'dados',
+      'inconsistencias',
+      'revisao',
+      'relatorio',
+      'compartilhar',
+    ])
     .catch('dashboard'),
 })
 

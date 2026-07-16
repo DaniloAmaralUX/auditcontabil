@@ -10,7 +10,11 @@ export type AnalyticsConsolidado = {
   margem_pct: number | null
 }
 
-export type AnalyticsGrupo = { grupo: string; valor: number; pct: number | null }
+export type AnalyticsGrupo = {
+  grupo: string
+  valor: number
+  pct: number | null
+}
 
 export type AnalyticsEmpresa = {
   codigo: string
@@ -69,7 +73,9 @@ export type ReconciliationSummary = {
   documents: number
 }
 
-export function hasAnalyticsData(a: AuditAnalytics | null | undefined): boolean {
+export function hasAnalyticsData(
+  a: AuditAnalytics | null | undefined
+): boolean {
   if (!a) return false
   const c = a.consolidado
   return (c?.receita_bruta ?? 0) !== 0 || (c?.despesas ?? 0) !== 0
@@ -104,6 +110,19 @@ export function pct(v: number | null | undefined): string {
 
 export function mesLabel(yyyymm: string): string {
   const [y, m] = yyyymm.split('-')
-  const nomes = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+  const nomes = [
+    'jan',
+    'fev',
+    'mar',
+    'abr',
+    'mai',
+    'jun',
+    'jul',
+    'ago',
+    'set',
+    'out',
+    'nov',
+    'dez',
+  ]
   return `${nomes[Number(m) - 1] ?? m}/${y.slice(2)}`
 }
