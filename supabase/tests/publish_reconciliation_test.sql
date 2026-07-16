@@ -32,13 +32,13 @@ insert into audits (id, escritorio_id, cliente_id, title, status) values
 
 insert into files (id, escritorio_id, audit_id, original_name, status) values
   ('f1aaaaaa-0000-4000-8000-000000000082', 'aaaaaaaa-0000-4000-8000-000000000008',
-     'a1aaaaaa-0000-4000-8000-000000000082', 'balancete.csv', 'processed'),
+     'a1aaaaaa-0000-4000-8000-000000000082', 'balancete.csv', 'ingested'),
   ('f1aaaaaa-0000-4000-8000-000000000083', 'aaaaaaaa-0000-4000-8000-000000000008',
-     'a1aaaaaa-0000-4000-8000-000000000083', 'balancete.csv', 'processed'),
+     'a1aaaaaa-0000-4000-8000-000000000083', 'balancete.csv', 'ingested'),
   ('f2aaaaaa-0000-4000-8000-000000000083', 'aaaaaaaa-0000-4000-8000-000000000008',
-     'a1aaaaaa-0000-4000-8000-000000000083', 'dre.pdf', 'processed'),
+     'a1aaaaaa-0000-4000-8000-000000000083', 'dre.pdf', 'ingested'),
   ('f1aaaaaa-0000-4000-8000-000000000084', 'aaaaaaaa-0000-4000-8000-000000000008',
-     'a1aaaaaa-0000-4000-8000-000000000084', 'planilha.xlsx', 'processed');
+     'a1aaaaaa-0000-4000-8000-000000000084', 'planilha.xlsx', 'ingested');
 
 -- Cenário 2: uma linha-selo OK (balancete conciliado ao centavo).
 insert into normalized_rows (escritorio_id, audit_id, file_id, row_number, original, normalized,
