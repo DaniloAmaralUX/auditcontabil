@@ -97,6 +97,20 @@ select is_empty(
 - **Não** se aplica a testes que só usam uma role (ex.: `state_machine_test.sql`, todo `set local role authenticated`).
 - **Não** se aplica ao lado da aplicação (React/TS) — isso é semântica de Postgres pgTAP.
 
+## Descoberta 2026-07-16 — GRANT ausente sob CLI novo
+
+`reset role;` sozinho não bastou. O CI seguia vermelho com `permission denied for table audits` na linha 30 do `rls_test.sql` — o teste rodava sob `authenticated`, e authenticated **não tinha GRANT SELECT** em audits.
+
+Causa: o Supabase CLI mudou o comportamento default — `supabase/config.toml` documenta que "novas entidades no schema public NÃO são auto-expostas aos Data API roles (anon/authenticated/service_role) sem GRANT explícito". Produção (Supabase Cloud, projeto criado antes da mudança) herdou os grants; local/CI (CLI novo) não.
+
+Duas correções combinadas fecharam o gate:
+
+1. **`supabase/config.toml`**: descomentar `auto_expose_new_tables = true` — restaura o comportamento legado localmente (tech debt: a flag será removida em 2026-10-30; até lá, adicionar migration com grants explícitos).
+
+2. **`share_test.sql`**: `grant select on sh to anon;` logo após criar a temp table — a flag `auto_expose_new_tables` só cobre o schema public, não pg_temp_N, então temp tables lidas sob role trocada precisam de GRANT explícito individual.
+
+O padrão `reset role;` continua correto e necessário — apenas não era suficiente sozinho.
+
 ## Referências
 
 - Padrão canônico: [`supabase/tests/publish_reconciliation_test.sql:86`](../../supabase/tests/publish_reconciliation_test.sql)
