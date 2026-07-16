@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button'
 import { strings } from '@/lib/strings'
+import { Button } from '@/components/ui/button'
 
 // Falha de rede/query NUNCA pode virar um empty state enganoso
 // ("nenhuma inconsistência encontrada" com a query quebrada).
