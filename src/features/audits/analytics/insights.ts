@@ -129,11 +129,14 @@ export function deriveDataQualitySummary(
   }
   if (reconciliation?.status === 'divergent') {
     const broken = reconciliation.broken_checks
+    // Sem cifras (multi-documento), a headline já carrega a contagem de
+    // totalizadores — NUNCA cair no invalidDetail: a linha-selo divergente
+    // não é "linha que não pôde ser lida", é o próprio marcador da divergência.
     const detail =
       reconciliation.calculated_amount !== null &&
       reconciliation.declared_amount !== null
         ? `Calculado ${brlExact(reconciliation.calculated_amount)} × declarado ${brlExact(reconciliation.declared_amount)}.`
-        : invalidDetail
+        : undefined
     return {
       tone: 'critical',
       headline: `Os totais calculados não batem com o documento enviado${broken > 0 ? ` — ${broken} ${plural(broken, 'totalizador', 'totalizadores')} ${plural(broken, 'diverge', 'divergem')}` : ''}.`,

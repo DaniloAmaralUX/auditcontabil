@@ -42,6 +42,22 @@ from pg_proc where proname = 'publish_audit';
 
 ---
 
+## Passo 2b — Migração 9 (grants explícitos dos Data API roles)
+
+Idempotente em produção (os grants legados já existem lá) — aplicar mesmo assim para o banco ficar auto-documentado e não depender do comportamento legado:
+
+Colar TODO o conteúdo de [docs/deploy/9-grants-data-api.sql](../deploy/9-grants-data-api.sql) → Run.
+
+Verificar:
+
+```sql
+select has_table_privilege('authenticated', 'audits', 'select') as auth_select,
+       has_function_privilege('anon', 'public.publish_audit(uuid)', 'execute') as anon_publish;
+-- deve retornar: auth_select = true, anon_publish = false
+```
+
+---
+
 ## Passo 3 — Corrigir mojibake do escritório piloto
 
 ```sql
@@ -118,6 +134,8 @@ Abrir uma aba anônima em https://auditcontabil.vercel.app:
 Migração 7 (P0 — falso alarme R001/R002)
   ↓
 Migração 8 (P0 — selo real depende da estrutura da 7 estar aplicada)
+  ↓
+Migração 9 (P2 — grants explícitos; idempotente, auto-documentação)
   ↓
 Mojibake + republicar (P1 — visual, só afeta snapshots novos)
   ↓

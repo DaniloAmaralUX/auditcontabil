@@ -164,9 +164,9 @@ describe('deriveDataQualitySummary — confiabilidade separada do desempenho', (
     expect(s.detail).toContain('declarado')
   })
 
-  it('divergent com amounts null (multi-doc) não inventa cifra', () => {
+  it('divergent com amounts null (multi-doc) não inventa cifra nem detail', () => {
     const s = deriveDataQualitySummary(
-      { processed: 120, invalid: 0 },
+      { processed: 120, invalid: 1 },
       reconciliation({
         status: 'divergent',
         broken_checks: 1,
@@ -177,7 +177,10 @@ describe('deriveDataQualitySummary — confiabilidade separada do desempenho', (
       })
     )
     expect(s.tone).toBe('critical')
-    expect(s.detail ?? '').not.toContain('R$')
+    // Regressão do achado #4: o fallback para invalidDetail dizia "1 linha
+    // não pôde ser lida" quando a verdade era divergência de totais.
+    expect(s.detail).toBeUndefined()
+    expect(s.headline).toContain('1 totalizador diverge')
   })
 
   it('not_applicable sem inválidas → good SEM alegar conferência', () => {

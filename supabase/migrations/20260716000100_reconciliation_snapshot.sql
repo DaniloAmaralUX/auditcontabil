@@ -16,6 +16,13 @@
 --   · broken_checks: soma dos totalizadores quebrados.
 -- Snapshots antigos são imutáveis e não têm o campo; o front trata como
 -- opcional (sem selo). Republicar regenera com o dado real.
+--
+-- O summary EXCLUI as linhas-selo: elas são marcadores sintéticos de
+-- conferência, não linhas do arquivo — contá-las como 'invalid' fazia o
+-- deck dizer "N linhas não puderam ser lidas" quando a verdade era uma
+-- divergência de totais. Casts usam app.safe_num: normalized é jsonb
+-- gravado pelo cliente via ingest_rows, e um valor não-numérico não pode
+-- derrubar a publicação inteira.
 
 create or replace function public.publish_audit(p_audit_id uuid) returns uuid
 language plpgsql security definer set search_path = public, app, extensions as $$
@@ -47,12 +54,14 @@ begin
                   'coerced', count(*) filter (where status = 'coerced'),
                   'invalid', count(*) filter (where status = 'invalid'),
                   'processed', count(*) filter (where status in ('ok','coerced')))
-                from normalized_rows where audit_id = p_audit_id),
+                from normalized_rows
+                where audit_id = p_audit_id
+                  and not (normalized ? 'resultado_calculado')),
     'reconciliation', (
       with selos as (
         select nr.status,
-               (nr.normalized->>'resultado_calculado')::numeric          as calc,
-               nullif(nr.normalized->>'resultado_declarado','')::numeric as decl,
+               app.safe_num(nr.normalized->>'resultado_calculado')       as calc,
+               app.safe_num(nr.normalized->>'resultado_declarado')       as decl,
                coalesce((nr.original->>'checks_quebrados')::int, 0)      as broken,
                nr.normalized->>'origem'                                  as origem
         from normalized_rows nr
