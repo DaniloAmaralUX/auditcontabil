@@ -17,9 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { buildIncomeStatement } from '@/features/audits/analytics/statement'
 import {
-  deriveDataQualitySummary,
-  derivePerformanceSummary,
-  deriveProfessionalConclusion,
+  deriveSectionSummaries,
   type SectionSummary,
 } from '@/features/audits/analytics/insights'
 import { hasAnalyticsData, pct } from '@/features/audits/analytics/types'
@@ -90,9 +88,10 @@ const toneColor = (s: SectionSummary) =>
 function ReportPdf({ snapshot }: { snapshot: PublicSnapshot }) {
   const { audit, summary, items } = snapshot
   const a = hasAnalyticsData(snapshot.analytics) ? snapshot.analytics! : null
-  const performance = derivePerformanceSummary(a)
-  const quality = deriveDataQualitySummary(summary, snapshot.reconciliation ?? null)
-  const review = deriveProfessionalConclusion({
+  const { performance, quality, review } = deriveSectionSummaries({
+    analytics: a,
+    counts: summary,
+    reconciliation: snapshot.reconciliation ?? null,
     conclusion: audit.conclusion,
     attention: items.length,
   })

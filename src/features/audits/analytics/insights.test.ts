@@ -214,8 +214,7 @@ describe('deriveProfessionalConclusion — a voz do escritório', () => {
 
 describe('separação das camadas', () => {
   it('attention alto NÃO rebaixa o tom do desempenho', () => {
-    // Antes: deriveVerdict(analytics(), 3) → attention. Agora o desempenho
-    // é good e os pontos vivem na conclusão profissional.
+    // Pontos de atenção não rebaixam o desempenho — vivem na conclusão profissional.
     expect(derivePerformanceSummary(analytics()).tone).toBe('good')
     expect(
       deriveProfessionalConclusion({ conclusion: null, attention: 3 }).tone

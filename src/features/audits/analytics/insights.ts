@@ -3,6 +3,8 @@
 // Voz de cliente: PT-BR plano, sem jargão, nunca inventar cifra sem dado.
 import {
   brl,
+  brlExact,
+  hasAnalyticsData,
   mesLabel,
   pct,
   type AnalyticsConta,
@@ -41,9 +43,8 @@ export type SectionSummary = {
   detail?: string
 }
 
-/** R$ ao centavo — a frase de conferência precisa da cifra exata. */
-const brlExact = (v: number): string =>
-  v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+/** Concordância PT-BR: plural(2, 'linha', 'linhas') → 'linhas'. */
+const plural = (n: number, one: string, many: string) => (n > 1 ? many : one)
 
 /**
  * Resultado do período — ladder: Crítica > resultado < 0 > apertado
@@ -116,7 +117,7 @@ export function deriveDataQualitySummary(
   const processed = counts.processed.toLocaleString('pt-BR')
   const invalidDetail =
     counts.invalid > 0
-      ? `${counts.invalid} linha${counts.invalid > 1 ? 's' : ''} não ${counts.invalid > 1 ? 'puderam' : 'pôde'} ser lida${counts.invalid > 1 ? 's' : ''} e não ${counts.invalid > 1 ? 'entram' : 'entra'} nesta análise.`
+      ? `${counts.invalid} ${plural(counts.invalid, 'linha', 'linhas')} não ${plural(counts.invalid, 'pôde', 'puderam')} ser ${plural(counts.invalid, 'lida', 'lidas')} e não ${plural(counts.invalid, 'entra', 'entram')} nesta análise.`
       : undefined
   if (reconciliation?.status === 'reconciled') {
     return {
@@ -135,7 +136,7 @@ export function deriveDataQualitySummary(
         : invalidDetail
     return {
       tone: 'critical',
-      headline: `Os totais calculados não batem com o documento enviado${broken > 0 ? ` — ${broken} totalizador${broken > 1 ? 'es' : ''} diverge${broken > 1 ? 'm' : ''}` : ''}.`,
+      headline: `Os totais calculados não batem com o documento enviado${broken > 0 ? ` — ${broken} ${plural(broken, 'totalizador', 'totalizadores')} ${plural(broken, 'diverge', 'divergem')}` : ''}.`,
       short: 'Totais divergem do documento',
       detail,
     }
@@ -150,7 +151,7 @@ export function deriveDataQualitySummary(
     : {
         tone: 'attention',
         headline: invalidDetail!,
-        short: `${counts.invalid} linha${counts.invalid > 1 ? 's' : ''} sem leitura`,
+        short: `${counts.invalid} ${plural(counts.invalid, 'linha', 'linhas')} sem leitura`,
       }
 }
 
@@ -167,8 +168,8 @@ export function deriveProfessionalConclusion(input: {
   if (attention > 0) {
     return {
       tone: 'attention',
-      headline: `${attention} ponto${attention > 1 ? 's' : ''} deste período ${attention > 1 ? 'precisam' : 'precisa'} da sua atenção.`,
-      short: `${attention} ponto${attention > 1 ? 's' : ''} de atenção`,
+      headline: `${attention} ${plural(attention, 'ponto', 'pontos')} deste período ${plural(attention, 'precisa', 'precisam')} da sua atenção.`,
+      short: `${attention} ${plural(attention, 'ponto', 'pontos')} de atenção`,
     }
   }
   if (conclusion) {
@@ -183,6 +184,33 @@ export function deriveProfessionalConclusion(input: {
     tone: 'good',
     headline: 'Nenhum ponto exige a sua atenção neste período.',
     short: 'Nenhum ponto de atenção',
+  }
+}
+
+/**
+ * Fachada das três camadas — deck público, PDF e pré-visualização derivam
+ * pelo MESMO caminho; mudar a composição acontece num lugar só. Aplica o
+ * guard hasAnalyticsData internamente (aceita analytics cru ou já filtrado).
+ */
+export function deriveSectionSummaries(input: {
+  analytics: AuditAnalytics | null | undefined
+  counts: { processed: number; invalid: number }
+  reconciliation: ReconciliationSummary | null | undefined
+  conclusion: string | null | undefined
+  attention: number
+}): {
+  performance: SectionSummary
+  quality: SectionSummary
+  review: SectionSummary
+} {
+  const a = hasAnalyticsData(input.analytics) ? input.analytics! : null
+  return {
+    performance: derivePerformanceSummary(a),
+    quality: deriveDataQualitySummary(input.counts, input.reconciliation),
+    review: deriveProfessionalConclusion({
+      conclusion: input.conclusion,
+      attention: input.attention,
+    }),
   }
 }
 

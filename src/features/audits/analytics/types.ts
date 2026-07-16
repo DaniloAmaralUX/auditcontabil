@@ -92,6 +92,11 @@ export function brl(v: number | null | undefined, compact = false): string {
   })
 }
 
+/** R$ ao centavo — conferência com o documento exige a cifra exata. */
+export function brlExact(v: number): string {
+  return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
 export function pct(v: number | null | undefined): string {
   if (v === null || v === undefined) return '—'
   return `${v.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`

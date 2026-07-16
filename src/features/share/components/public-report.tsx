@@ -19,9 +19,7 @@ import {
 import {
   composicaoInsight,
   contasInsight,
-  deriveDataQualitySummary,
-  derivePerformanceSummary,
-  deriveProfessionalConclusion,
+  deriveSectionSummaries,
   dreInsight,
   evolucaoInsight,
   principalGastoPorEmpresa,
@@ -71,9 +69,10 @@ export function PublicReport({
   const { audit, summary, items } = snapshot
   const attention = items.length
   const a = hasAnalyticsData(snapshot.analytics) ? snapshot.analytics! : null
-  const performance = derivePerformanceSummary(a)
-  const quality = deriveDataQualitySummary(summary, snapshot.reconciliation ?? null)
-  const review = deriveProfessionalConclusion({
+  const { performance, quality, review } = deriveSectionSummaries({
+    analytics: a,
+    counts: summary,
+    reconciliation: snapshot.reconciliation ?? null,
     conclusion: audit.conclusion,
     attention,
   })

@@ -9,13 +9,8 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { deriveSectionSummaries } from '@/features/audits/analytics/insights'
 import {
-  deriveDataQualitySummary,
-  derivePerformanceSummary,
-  deriveProfessionalConclusion,
-} from '@/features/audits/analytics/insights'
-import {
-  hasAnalyticsData,
   type AuditAnalytics,
   type ReconciliationSummary,
 } from '@/features/audits/analytics/types'
@@ -79,6 +74,16 @@ export function RelatorioPanel({ auditId }: { auditId: string }) {
     )
   }
 
+  // As MESMAS três derivações do deck público — paridade da promessa
+  // "é isto que a cliente verá": desempenho, dados e conclusão.
+  const { performance, quality, review } = deriveSectionSummaries({
+    analytics: data.analytics,
+    counts: data.summary,
+    reconciliation: data.reconciliation ?? null,
+    conclusion: data.audit.conclusion,
+    attention: data.items.length,
+  })
+
   return (
     <div className='space-y-4'>
       <Card>
@@ -89,31 +94,14 @@ export function RelatorioPanel({ auditId }: { auditId: string }) {
           </CardDescription>
         </CardHeader>
         <CardContent className='space-y-2 text-sm'>
-          {/* As MESMAS três derivações do deck público — paridade da promessa
-              "é isto que a cliente verá": desempenho, dados e conclusão. */}
           <p>
-            <strong>Resultado do período:</strong>{' '}
-            {
-              derivePerformanceSummary(
-                hasAnalyticsData(data.analytics) ? data.analytics : null
-              ).headline
-            }
+            <strong>Resultado do período:</strong> {performance.headline}
           </p>
           <p>
-            <strong>Confiabilidade dos dados:</strong>{' '}
-            {
-              deriveDataQualitySummary(data.summary, data.reconciliation ?? null)
-                .headline
-            }
+            <strong>Confiabilidade dos dados:</strong> {quality.headline}
           </p>
           <p>
-            <strong>Pontos que exigem revisão:</strong>{' '}
-            {
-              deriveProfessionalConclusion({
-                conclusion: data.audit.conclusion,
-                attention: data.items.length,
-              }).headline
-            }
+            <strong>Pontos que exigem revisão:</strong> {review.headline}
           </p>
         </CardContent>
       </Card>
