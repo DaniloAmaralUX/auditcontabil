@@ -1,6 +1,6 @@
-neverBuiltDependencies:
-  - esbuild
 # pnpm >= 11 exige reconhecer explicitamente cada build script;
-# false = nunca executar (coerente com neverBuiltDependencies acima).
+# false = nunca executar o postinstall do esbuild (o binário vem via
+# optionalDependencies). Não combinar com neverBuiltDependencies —
+# o pnpm trata como conflito (ERR_PNPM_CONFIG_CONFLICT_BUILT_DEPENDENCIES).
 allowBuilds:
   esbuild: false
