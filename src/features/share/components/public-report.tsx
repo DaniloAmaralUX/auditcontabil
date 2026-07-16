@@ -19,7 +19,9 @@ import {
 import {
   composicaoInsight,
   contasInsight,
-  deriveVerdict,
+  deriveDataQualitySummary,
+  derivePerformanceSummary,
+  deriveProfessionalConclusion,
   dreInsight,
   evolucaoInsight,
   principalGastoPorEmpresa,
@@ -29,6 +31,7 @@ import { brl, hasAnalyticsData } from '@/features/audits/analytics/types'
 import { type PublicSnapshot } from '../data/api'
 import { fmtPeriod, fmtMoney, humanizeKey } from '../report-format'
 import { DeckSection } from './deck/deck-section'
+import { SummaryBlock } from './deck/summary-block'
 import { useRevealOnScroll } from './deck/use-reveal-on-scroll'
 
 const DownloadPdfButton = lazy(() =>
@@ -68,7 +71,12 @@ export function PublicReport({
   const { audit, summary, items } = snapshot
   const attention = items.length
   const a = hasAnalyticsData(snapshot.analytics) ? snapshot.analytics! : null
-  const verdict = deriveVerdict(a, attention)
+  const performance = derivePerformanceSummary(a)
+  const quality = deriveDataQualitySummary(summary, snapshot.reconciliation ?? null)
+  const review = deriveProfessionalConclusion({
+    conclusion: audit.conclusion,
+    attention,
+  })
   const gastos = a ? principalGastoPorEmpresa(a.top_despesa_por_grupo) : []
   const deckRef = useRef<HTMLDivElement>(null)
   useRevealOnScroll(deckRef)
@@ -82,7 +90,8 @@ export function PublicReport({
         Pular para o conteúdo
       </a>
 
-      {/* Capa — o veredito é a manchete; um número não decide nada, a frase sim. */}
+      {/* Capa — a manchete é o DESEMPENHO; confiabilidade e conclusão
+          profissional vêm em blocos próprios: são perguntas diferentes. */}
       <header className='brand-mesh border-b'>
         <div className='animate-rise mx-auto flex max-w-2xl flex-col gap-6 px-4 py-12 md:py-16'>
           <div className='flex items-center justify-between'>
@@ -106,28 +115,25 @@ export function PublicReport({
               id='deck-title'
               className='text-3xl leading-tight font-bold tracking-tight text-balance sm:text-4xl'
             >
-              {verdict.headline}
+              {performance.headline}
             </h1>
-            <p className='text-lg text-muted-foreground'>
-              {audit.title} · analisamos{' '}
-              <span className='font-medium tabular-nums'>
-                {summary.processed.toLocaleString('pt-BR')}
-              </span>{' '}
-              movimentos neste período.
-            </p>
+            <p className='text-lg text-muted-foreground'>{audit.title}</p>
           </div>
+
+          <section
+            aria-label='Resumo do período'
+            className='grid gap-3 sm:grid-cols-3'
+          >
+            <SummaryBlock label='Resultado do período' summary={performance} />
+            <SummaryBlock label='Confiabilidade dos dados' summary={quality} />
+            <SummaryBlock label='Pontos que exigem revisão' summary={review} />
+          </section>
 
           <div className='flex flex-wrap items-center gap-3'>
             {allowDownload && (
               <Suspense fallback={<Skeleton className='h-9 w-36' />}>
                 <DownloadPdfButton snapshot={snapshot} />
               </Suspense>
-            )}
-            {summary.invalid > 0 && (
-              <span className='text-xs text-muted-foreground'>
-                Algumas linhas não puderam ser lidas e não entram nesta análise —
-                o escritório está tratando esses casos.
-              </span>
             )}
           </div>
         </div>
@@ -148,7 +154,7 @@ export function PublicReport({
           >
             <IncomeStatement
               consolidado={a.consolidado}
-              reconciled={summary.invalid === 0}
+              reconciliation={snapshot.reconciliation?.status}
             />
           </DeckSection>
         )}

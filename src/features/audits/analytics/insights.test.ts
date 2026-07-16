@@ -4,7 +4,9 @@ import { describe, expect, it } from 'vitest'
 import {
   composicaoInsight,
   contasInsight,
-  deriveVerdict,
+  deriveDataQualitySummary,
+  derivePerformanceSummary,
+  deriveProfessionalConclusion,
   dreInsight,
   evolucaoInsight,
   groupLabel,
@@ -16,6 +18,7 @@ import {
   type AnalyticsConsolidado,
   type AnalyticsEmpresa,
   type AuditAnalytics,
+  type ReconciliationSummary,
 } from './types'
 
 const consolidado = (over: Partial<AnalyticsConsolidado> = {}): AnalyticsConsolidado => ({
@@ -50,46 +53,173 @@ const analytics = (over: Partial<AuditAnalytics> = {}): AuditAnalytics => ({
   ...over,
 })
 
-describe('deriveVerdict — ladder de severidade', () => {
-  it('sem analytics decide só por attention, nunca inventa cifra', () => {
-    expect(deriveVerdict(null, 0).tone).toBe('good')
-    const v = deriveVerdict(null, 2)
-    expect(v.tone).toBe('attention')
-    expect(v.headline).toContain('2 pontos')
+const reconciliation = (
+  over: Partial<ReconciliationSummary> = {}
+): ReconciliationSummary => ({
+  status: 'reconciled',
+  calculated_amount: 232_696.03,
+  declared_amount: 232_696.03,
+  broken_checks: 0,
+  source: 'balancete-csv',
+  documents: 1,
+  ...over,
+})
+
+describe('derivePerformanceSummary — só desempenho', () => {
+  it('sem analytics → neutral, nunca inventa cifra', () => {
+    const s = derivePerformanceSummary(null)
+    expect(s.tone).toBe('neutral')
+    expect(s.headline).not.toContain('R$')
   })
 
-  it('empresa Crítica vence tudo', () => {
-    const a = analytics({
-      empresas: [
-        empresa({}),
-        empresa({ codigo: '0103', nome: 'Gráfica Exemplo', status: 'Crítica', resultado: -37000 }),
-      ],
+  it('empresa Crítica vence tudo (azul e vermelho)', () => {
+    const critica = empresa({
+      codigo: '0103',
+      nome: 'Gráfica Exemplo',
+      status: 'Crítica',
+      resultado: -37000,
     })
-    const v = deriveVerdict(a, 0)
-    expect(v.tone).toBe('critical')
-    expect(v.headline).toContain('Gráfica Exemplo')
-    expect(v.headline).toContain('no azul, mas')
+    const azul = derivePerformanceSummary(
+      analytics({ empresas: [empresa({}), critica] })
+    )
+    expect(azul.tone).toBe('critical')
+    expect(azul.headline).toContain('Gráfica Exemplo')
+    expect(azul.headline).toContain('no azul, mas')
+    const vermelho = derivePerformanceSummary(
+      analytics({
+        consolidado: consolidado({ resultado: -68000 }),
+        empresas: [critica],
+      })
+    )
+    expect(vermelho.tone).toBe('critical')
+    expect(vermelho.headline).toContain('no vermelho')
   })
 
-  it('resultado negativo → vermelho com a cifra', () => {
-    const a = analytics({ consolidado: consolidado({ resultado: -68000 }) })
-    const v = deriveVerdict(a, 0)
-    expect(v.tone).toBe('critical')
-    expect(v.headline).toContain('no vermelho')
-    expect(v.headline).toContain('R$ 68 mil')
+  it('resultado negativo → vermelho com a cifra e short de déficit', () => {
+    const s = derivePerformanceSummary(
+      analytics({ consolidado: consolidado({ resultado: -68000 }) })
+    )
+    expect(s.tone).toBe('critical')
+    expect(s.headline).toContain('R$ 68 mil')
+    expect(s.short).toContain('Déficit')
   })
 
-  it('D/R > 95 → azul apertado', () => {
-    const a = analytics({
-      consolidado: consolidado({ despesa_receita_pct: 98.3, resultado: 20000 }),
+  it('D/R > 95 → azul apertado; Deficitária também', () => {
+    expect(
+      derivePerformanceSummary(
+        analytics({
+          consolidado: consolidado({ despesa_receita_pct: 98.3, resultado: 20000 }),
+        })
+      ).tone
+    ).toBe('attention')
+    expect(
+      derivePerformanceSummary(
+        analytics({
+          empresas: [empresa({}), empresa({ codigo: '0102', status: 'Deficitária' })],
+        })
+      ).tone
+    ).toBe('attention')
+  })
+
+  it('saudável → good com a cifra no short', () => {
+    const s = derivePerformanceSummary(analytics())
+    expect(s.tone).toBe('good')
+    expect(s.headline).toContain('no azul')
+    expect(s.short).toContain('Superávit')
+  })
+})
+
+describe('deriveDataQualitySummary — confiabilidade separada do desempenho', () => {
+  it('reconciled → good "ao centavo"', () => {
+    const s = deriveDataQualitySummary(
+      { processed: 120, invalid: 0 },
+      reconciliation()
+    )
+    expect(s.tone).toBe('good')
+    expect(s.headline).toContain('ao centavo')
+    expect(s.headline).toContain('120')
+  })
+
+  it('divergent cita os totalizadores quebrados e as cifras', () => {
+    const s = deriveDataQualitySummary(
+      { processed: 120, invalid: 1 },
+      reconciliation({
+        status: 'divergent',
+        broken_checks: 2,
+        calculated_amount: 232_696.03,
+        declared_amount: 231_000,
+      })
+    )
+    expect(s.tone).toBe('critical')
+    expect(s.headline).toContain('2 totalizadores divergem')
+    expect(s.detail).toContain('Calculado')
+    expect(s.detail).toContain('declarado')
+  })
+
+  it('divergent com amounts null (multi-doc) não inventa cifra', () => {
+    const s = deriveDataQualitySummary(
+      { processed: 120, invalid: 0 },
+      reconciliation({
+        status: 'divergent',
+        broken_checks: 1,
+        calculated_amount: null,
+        declared_amount: null,
+        source: 'multiplos',
+        documents: 2,
+      })
+    )
+    expect(s.tone).toBe('critical')
+    expect(s.detail ?? '').not.toContain('R$')
+  })
+
+  it('not_applicable sem inválidas → good SEM alegar conferência', () => {
+    const s = deriveDataQualitySummary(
+      { processed: 80, invalid: 0 },
+      reconciliation({ status: 'not_applicable', documents: 0 })
+    )
+    expect(s.tone).toBe('good')
+    expect(s.headline).not.toContain('centavo')
+    expect(s.headline).toContain('sem erros de leitura')
+  })
+
+  it('snapshot legado (undefined) com inválidas → attention', () => {
+    const s = deriveDataQualitySummary({ processed: 80, invalid: 3 }, undefined)
+    expect(s.tone).toBe('attention')
+    expect(s.headline).toContain('3 linhas')
+  })
+})
+
+describe('deriveProfessionalConclusion — a voz do escritório', () => {
+  it('itens pendentes de atenção dominam', () => {
+    const s = deriveProfessionalConclusion({ conclusion: 'ok', attention: 2 })
+    expect(s.tone).toBe('attention')
+    expect(s.headline).toContain('2 pontos')
+  })
+
+  it('conclusão escrita + zero itens → aponta para o final do relatório', () => {
+    const s = deriveProfessionalConclusion({
+      conclusion: 'Período regular.',
+      attention: 0,
     })
-    const v = deriveVerdict(a, 0)
-    expect(v.tone).toBe('attention')
-    expect(v.headline).toContain('apertado')
+    expect(s.tone).toBe('good')
+    expect(s.headline).toContain('conclusão')
   })
 
-  it('tudo certo quando saudável e sem pontos', () => {
-    expect(deriveVerdict(analytics(), 0).tone).toBe('good')
+  it('nem itens nem conclusão → good simples', () => {
+    const s = deriveProfessionalConclusion({ conclusion: null, attention: 0 })
+    expect(s.tone).toBe('good')
+    expect(s.headline).toContain('Nenhum ponto')
+  })
+})
+
+describe('separação das camadas', () => {
+  it('attention alto NÃO rebaixa o tom do desempenho', () => {
+    // Antes: deriveVerdict(analytics(), 3) → attention. Agora o desempenho
+    // é good e os pontos vivem na conclusão profissional.
+    expect(derivePerformanceSummary(analytics()).tone).toBe('good')
+    expect(
+      deriveProfessionalConclusion({ conclusion: null, attention: 3 }).tone
+    ).toBe('attention')
   })
 })
 

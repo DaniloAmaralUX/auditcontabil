@@ -9,6 +9,16 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  deriveDataQualitySummary,
+  derivePerformanceSummary,
+  deriveProfessionalConclusion,
+} from '@/features/audits/analytics/insights'
+import {
+  hasAnalyticsData,
+  type AuditAnalytics,
+  type ReconciliationSummary,
+} from '@/features/audits/analytics/types'
 import { SeverityBadge, type Severity } from '../../components/status-badge'
 import { PanelErrorState } from './panel-error-state'
 
@@ -28,6 +38,9 @@ type SnapshotPayload = {
     account_code: string | null
     note: string | null
   }>
+  analytics?: AuditAnalytics
+  /** Ausente em snapshots publicados antes da migração 8. */
+  reconciliation?: ReconciliationSummary
 }
 
 function snapshotQuery(auditId: string) {
@@ -75,16 +88,32 @@ export function RelatorioPanel({ auditId }: { auditId: string }) {
             Versão {data.audit.version} · {data.audit.cliente}
           </CardDescription>
         </CardHeader>
-        <CardContent className='space-y-3'>
-          <p className='text-sm'>
-            Analisamos{' '}
-            <strong className='tabular-nums'>
-              {data.summary.processed.toLocaleString('pt-BR')}
-            </strong>{' '}
-            movimentos do período.{' '}
-            {data.items.length === 0
-              ? 'Está tudo certo — nenhum ponto precisa da sua atenção.'
-              : `${data.items.length} ponto(s) precisam da sua atenção.`}
+        <CardContent className='space-y-2 text-sm'>
+          {/* As MESMAS três derivações do deck público — paridade da promessa
+              "é isto que a cliente verá": desempenho, dados e conclusão. */}
+          <p>
+            <strong>Resultado do período:</strong>{' '}
+            {
+              derivePerformanceSummary(
+                hasAnalyticsData(data.analytics) ? data.analytics : null
+              ).headline
+            }
+          </p>
+          <p>
+            <strong>Confiabilidade dos dados:</strong>{' '}
+            {
+              deriveDataQualitySummary(data.summary, data.reconciliation ?? null)
+                .headline
+            }
+          </p>
+          <p>
+            <strong>Pontos que exigem revisão:</strong>{' '}
+            {
+              deriveProfessionalConclusion({
+                conclusion: data.audit.conclusion,
+                attention: data.items.length,
+              }).headline
+            }
           </p>
         </CardContent>
       </Card>

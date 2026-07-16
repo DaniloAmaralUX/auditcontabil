@@ -52,6 +52,23 @@ export type AuditAnalytics = {
   por_periodo: AnalyticsPeriodo[]
 }
 
+export type ReconciliationStatus = 'reconciled' | 'divergent' | 'not_applicable'
+
+/**
+ * Shape de payload.reconciliation no snapshot publicado (snake_case como o
+ * resto do payload). Ausente em snapshots publicados antes da migração 8.
+ */
+export type ReconciliationSummary = {
+  status: ReconciliationStatus
+  /** Preenchidos apenas quando há exatamente 1 documento conferido. */
+  calculated_amount: number | null
+  declared_amount: number | null
+  broken_checks: number
+  /** 'balancete-csv' | 'dre-pdf' | 'multiplos' | null */
+  source: string | null
+  documents: number
+}
+
 export function hasAnalyticsData(a: AuditAnalytics | null | undefined): boolean {
   if (!a) return false
   const c = a.consolidado

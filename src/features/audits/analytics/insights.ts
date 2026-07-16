@@ -11,6 +11,7 @@ import {
   type AnalyticsPeriodo,
   type AnalyticsTopGrupoEmpresa,
   type AuditAnalytics,
+  type ReconciliationSummary,
 } from './types'
 
 /** Relabel de exibição: nomes de grupo do DB lidos em voz de keynote. */
@@ -25,66 +26,163 @@ export function groupLabel(grupo: string): string {
   return GROUP_LABELS[grupo] ?? grupo
 }
 
-type Verdict = {
-  tone: 'good' | 'attention' | 'critical'
+/* ------------------- Resumo em três camadas (capa/PDF) ------------------- */
+// Desempenho, confiabilidade e conclusão profissional são perguntas
+// DIFERENTES: lucro não prova demonstração correta, e prejuízo não prova
+// erro. Cada camada tem a sua derivação — nenhuma rebaixa o tom da outra.
+
+export type SectionTone = 'good' | 'attention' | 'critical' | 'neutral'
+
+export type SectionSummary = {
+  tone: SectionTone
   headline: string
+  /** Versão curta para o bloco da capa (a manchete usa headline). */
+  short?: string
+  detail?: string
 }
 
+/** R$ ao centavo — a frase de conferência precisa da cifra exata. */
+const brlExact = (v: number): string =>
+  v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+
 /**
- * Veredito da capa — ladder de severidade (o mais grave vence):
- * 1. empresa Crítica · 2. resultado < 0 · 3. azul com ressalva (D/R > 95,
- * Deficitária ou pontos de atenção) · 4. tudo certo.
- * Sem analytics, decide só por `attention` (nunca inventa cifra).
+ * Resultado do período — ladder: Crítica > resultado < 0 > apertado
+ * (D/R > 95 ou Deficitária) > azul. Só desempenho: pontos de atenção
+ * pertencem à conclusão profissional. Sem analytics → neutral, sem cifra.
  */
-export function deriveVerdict(
-  a: AuditAnalytics | null | undefined,
-  attention: number
-): Verdict {
+export function derivePerformanceSummary(
+  a: AuditAnalytics | null | undefined
+): SectionSummary {
   if (!a) {
-    return attention === 0
-      ? {
-          tone: 'good',
-          headline:
-            'Está tudo certo: nenhum ponto precisa da sua atenção neste período.',
-        }
-      : {
-          tone: 'attention',
-          headline: `${attention} ponto${attention > 1 ? 's' : ''} deste período ${attention > 1 ? 'precisam' : 'precisa'} da sua atenção.`,
-        }
+    return {
+      tone: 'neutral',
+      headline:
+        'Os números consolidados deste período não estão disponíveis neste relatório.',
+      short: '—',
+    }
   }
   const c = a.consolidado
+  const short =
+    c.resultado < 0
+      ? `Déficit de ${brl(Math.abs(c.resultado), true)}`
+      : `Superávit de ${brl(c.resultado, true)}`
   const critica = a.empresas.find((e) => e.status === 'Crítica')
   if (critica) {
     return c.resultado < 0
       ? {
           tone: 'critical',
           headline: `O grupo fechou no vermelho e a ${critica.nome} está em situação crítica.`,
+          short,
         }
       : {
           tone: 'critical',
           headline: `O grupo fechou no azul, mas a ${critica.nome} está no vermelho e precisa de atenção.`,
+          short,
         }
   }
   if (c.resultado < 0) {
     return {
       tone: 'critical',
       headline: `O grupo fechou no vermelho: as despesas superaram a receita em ${brl(Math.abs(c.resultado), true)}.`,
+      short,
     }
   }
   const apertado =
     (c.despesa_receita_pct !== null && c.despesa_receita_pct > 95) ||
-    a.empresas.some((e) => e.status === 'Deficitária') ||
-    attention > 0
+    a.empresas.some((e) => e.status === 'Deficitária')
   if (apertado) {
     return {
       tone: 'attention',
       headline: `O grupo fechou no azul, mas apertado: sobraram ${brl(c.resultado, true)} depois de todas as despesas.`,
+      short,
     }
   }
   return {
     tone: 'good',
-    headline:
-      'Está tudo certo: o grupo fechou no azul e nenhum ponto precisa da sua atenção.',
+    headline: `O grupo fechou no azul: sobraram ${brl(c.resultado, true)} depois de todas as despesas.`,
+    short,
+  }
+}
+
+/**
+ * Confiabilidade dos dados — linhas processadas + reconciliação REAL com o
+ * documento. Snapshot antigo (sem reconciliation) fala só de leitura:
+ * nunca alega conferência quando não houve.
+ */
+export function deriveDataQualitySummary(
+  counts: { processed: number; invalid: number },
+  reconciliation: ReconciliationSummary | null | undefined
+): SectionSummary {
+  const processed = counts.processed.toLocaleString('pt-BR')
+  const invalidDetail =
+    counts.invalid > 0
+      ? `${counts.invalid} linha${counts.invalid > 1 ? 's' : ''} não ${counts.invalid > 1 ? 'puderam' : 'pôde'} ser lida${counts.invalid > 1 ? 's' : ''} e não ${counts.invalid > 1 ? 'entram' : 'entra'} nesta análise.`
+      : undefined
+  if (reconciliation?.status === 'reconciled') {
+    return {
+      tone: 'good',
+      headline: `Conferimos ${processed} movimentos e os totais batem ao centavo com o documento enviado.`,
+      short: 'Totais conferidos ao centavo',
+      detail: invalidDetail,
+    }
+  }
+  if (reconciliation?.status === 'divergent') {
+    const broken = reconciliation.broken_checks
+    const detail =
+      reconciliation.calculated_amount !== null &&
+      reconciliation.declared_amount !== null
+        ? `Calculado ${brlExact(reconciliation.calculated_amount)} × declarado ${brlExact(reconciliation.declared_amount)}.`
+        : invalidDetail
+    return {
+      tone: 'critical',
+      headline: `Os totais calculados não batem com o documento enviado${broken > 0 ? ` — ${broken} totalizador${broken > 1 ? 'es' : ''} diverge${broken > 1 ? 'm' : ''}` : ''}.`,
+      short: 'Totais divergem do documento',
+      detail,
+    }
+  }
+  // not_applicable ou snapshot antigo: só qualidade de leitura.
+  return counts.invalid === 0
+    ? {
+        tone: 'good',
+        headline: `Processamos ${processed} movimentos sem erros de leitura.`,
+        short: `${processed} movimentos processados`,
+      }
+    : {
+        tone: 'attention',
+        headline: invalidDetail!,
+        short: `${counts.invalid} linha${counts.invalid > 1 ? 's' : ''} sem leitura`,
+      }
+}
+
+/**
+ * Conclusão profissional — o que o escritório afirma após revisar. Todo
+ * snapshot publicado é pós-aprovação humana (publish_audit exige
+ * status = 'approved'), então aqui só modulamos itens × conclusão.
+ */
+export function deriveProfessionalConclusion(input: {
+  conclusion: string | null | undefined
+  attention: number
+}): SectionSummary {
+  const { conclusion, attention } = input
+  if (attention > 0) {
+    return {
+      tone: 'attention',
+      headline: `${attention} ponto${attention > 1 ? 's' : ''} deste período ${attention > 1 ? 'precisam' : 'precisa'} da sua atenção.`,
+      short: `${attention} ponto${attention > 1 ? 's' : ''} de atenção`,
+    }
+  }
+  if (conclusion) {
+    return {
+      tone: 'good',
+      headline:
+        'O escritório revisou o período — a conclusão está ao final do relatório.',
+      short: 'Revisado pelo escritório',
+    }
+  }
+  return {
+    tone: 'good',
+    headline: 'Nenhum ponto exige a sua atenção neste período.',
+    short: 'Nenhum ponto de atenção',
   }
 }
 
