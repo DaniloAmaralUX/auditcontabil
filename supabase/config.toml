@@ -21,10 +21,9 @@ max_rows = 1000
 # without explicit GRANTs. When unset, new entities are NOT auto-exposed, matching the new cloud
 # default. Set to `true` to keep the legacy behaviour of auto-exposing new entities; this is
 # deprecated and the field is removed on 2026-10-30 once the always-revoked behaviour is permanent.
-# Ligado localmente para o pgTAP conseguir SELECT sob role authenticated/anon —
-# produção herdou os grants explícitos do setup inicial do projeto. Tech debt: até
-# 2026-10-30, adicionar migration com grants explícitos e voltar essa flag para comentada.
-auto_expose_new_tables = true
+# Flag NÃO usada: os GRANTs dos Data API roles são explícitos na migração
+# 20260716000300_grants_data_api.sql (produção-safe, sem depender de flag com sunset).
+# auto_expose_new_tables = true
 
 [api.tls]
 # Enable HTTPS endpoints locally using a self-signed certificate.

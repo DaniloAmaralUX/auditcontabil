@@ -70,8 +70,10 @@ export function PasswordGate({
               <div className='flex gap-2'>
                 <Input
                   id='share-password'
+                  name='password'
                   type={show ? 'text' : 'password'}
                   autoComplete='current-password'
+                  spellCheck={false}
                   aria-invalid={error ? true : undefined}
                   aria-describedby={error ? 'share-password-error' : undefined}
                   value={password}
@@ -96,7 +98,9 @@ export function PasswordGate({
                 {error}
               </p>
             )}
-            <Button type='submit' disabled={loading || password.length === 0}>
+            {/* Habilitado até o request começar: submit vazio mostra a
+                validação nativa do `required` — melhor que botão morto. */}
+            <Button type='submit' disabled={loading}>
               {loading && <Spinner className='size-4' />}
               Acessar
             </Button>

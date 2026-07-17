@@ -18,9 +18,17 @@ jobs:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
         with:
-          # O default do action (2.20.x) é mais velho que o config.toml deste
-          # repo e falha com "invalid keys" antes de subir o banco.
-          version: latest
+          # Pinado: merge gate não pode flutuar com releases do CLI (o default
+          # do action, 2.20.x, já quebrou uma vez com "invalid keys" no
+          # config.toml). Bump deliberado em PR próprio.
+          version: 2.109.1
+      # Espelhos de deploy manual (docs/deploy/N) precisam ser byte-idênticos
+      # às migrações (fora o cabeçalho de 2 linhas) — o SQL Editor de produção
+      # aplica o espelho, e um drift instalaria uma função divergente.
+      - name: Espelhos de deploy em sincronia com as migrações
+        run: |
+          diff <(tail -n +3 docs/deploy/8-selo-reconciliacao.sql) supabase/migrations/20260716000100_reconciliation_snapshot.sql
+          diff <(tail -n +3 docs/deploy/9-grants-data-api.sql) supabase/migrations/20260716000300_grants_data_api.sql
       - run: supabase db start
       - run: supabase test db
 

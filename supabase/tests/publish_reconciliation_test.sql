@@ -3,7 +3,7 @@
 -- Identificação por normalized ? 'resultado_calculado', nunca por account_name.
 
 begin;
-select plan(9);
+select plan(12);
 
 -- Fixtures: tenant, owner, cliente e 4 auditorias aprovadas (1 por cenário).
 insert into escritorios (id, name) values
@@ -28,7 +28,9 @@ insert into audits (id, escritorio_id, cliente_id, title, status) values
   ('a1aaaaaa-0000-4000-8000-000000000083', 'aaaaaaaa-0000-4000-8000-000000000008',
      'caaaaaaa-0000-4000-8000-000000000008', 'Dois docs, um divergente', 'approved'),
   ('a1aaaaaa-0000-4000-8000-000000000084', 'aaaaaaaa-0000-4000-8000-000000000008',
-     'caaaaaaa-0000-4000-8000-000000000008', 'Nome de selo sem a chave', 'approved');
+     'caaaaaaa-0000-4000-8000-000000000008', 'Nome de selo sem a chave', 'approved'),
+  ('a1aaaaaa-0000-4000-8000-000000000085', 'aaaaaaaa-0000-4000-8000-000000000008',
+     'caaaaaaa-0000-4000-8000-000000000008', 'Selo com valor lixo', 'approved');
 
 insert into files (id, escritorio_id, audit_id, original_name, status) values
   ('f1aaaaaa-0000-4000-8000-000000000082', 'aaaaaaaa-0000-4000-8000-000000000008',
@@ -38,7 +40,9 @@ insert into files (id, escritorio_id, audit_id, original_name, status) values
   ('f2aaaaaa-0000-4000-8000-000000000083', 'aaaaaaaa-0000-4000-8000-000000000008',
      'a1aaaaaa-0000-4000-8000-000000000083', 'dre.pdf', 'ingested'),
   ('f1aaaaaa-0000-4000-8000-000000000084', 'aaaaaaaa-0000-4000-8000-000000000008',
-     'a1aaaaaa-0000-4000-8000-000000000084', 'planilha.xlsx', 'ingested');
+     'a1aaaaaa-0000-4000-8000-000000000084', 'planilha.xlsx', 'ingested'),
+  ('f1aaaaaa-0000-4000-8000-000000000085', 'aaaaaaaa-0000-4000-8000-000000000008',
+     'a1aaaaaa-0000-4000-8000-000000000085', 'hostil.csv', 'ingested');
 
 -- Cenário 2: uma linha-selo OK (balancete conciliado ao centavo).
 insert into normalized_rows (escritorio_id, audit_id, file_id, row_number, original, normalized,
@@ -64,6 +68,16 @@ insert into normalized_rows (escritorio_id, audit_id, file_id, row_number, origi
    'Conferência com o documento', 'invalid',
    'DIVERGÊNCIA na conferência: 3 totalizador(es) não batem.');
 
+-- Cenário 5: selo com resultado_calculado NÃO-numérico (hostil/malformado) —
+-- app.safe_num impede que a publicação inteira aborte com cast error.
+insert into normalized_rows (escritorio_id, audit_id, file_id, row_number, original, normalized,
+                             account_name, status, message) values
+  ('aaaaaaaa-0000-4000-8000-000000000008', 'a1aaaaaa-0000-4000-8000-000000000085',
+   'f1aaaaaa-0000-4000-8000-000000000085', 1,
+   '{"checks_total": 0, "checks_quebrados": 0}'::jsonb,
+   '{"origem": "balancete-csv", "resultado_calculado": "abc", "resultado_declarado": ""}'::jsonb,
+   'Conferência com o documento', 'ok', '');
+
 -- Cenário 4: linha com o NOME do selo mas sem a chave estrutural → não conta.
 insert into normalized_rows (escritorio_id, audit_id, file_id, row_number, original, normalized,
                              account_name, status, message) values
@@ -81,7 +95,8 @@ create temp table snaps on commit drop as
   select public.publish_audit('a1aaaaaa-0000-4000-8000-000000000081') as s1,
          public.publish_audit('a1aaaaaa-0000-4000-8000-000000000082') as s2,
          public.publish_audit('a1aaaaaa-0000-4000-8000-000000000083') as s3,
-         public.publish_audit('a1aaaaaa-0000-4000-8000-000000000084') as s4;
+         public.publish_audit('a1aaaaaa-0000-4000-8000-000000000084') as s4,
+         public.publish_audit('a1aaaaaa-0000-4000-8000-000000000085') as s5;
 
 reset role;
 
@@ -121,6 +136,22 @@ select ok(
 select is(
   (select payload->'reconciliation'->>'status' from published_snapshots where id = (select s4 from snaps)),
   'not_applicable', 'matching é pela chave estrutural, não pelo account_name');
+
+-- 5) Valor lixo no selo não derruba a publicação (app.safe_num) e vira null.
+select is(
+  (select payload->'reconciliation'->>'status' from published_snapshots where id = (select s5 from snaps)),
+  'reconciled', 'selo com valor não-numérico publica sem abortar (status pelo row_status)');
+select ok(
+  (select payload->'reconciliation'->>'calculated_amount' is null
+      and payload->'reconciliation'->>'declared_amount' is null
+   from published_snapshots where id = (select s5 from snaps)),
+  'cifras não-numéricas viram null, nunca erro de cast');
+
+-- 6) Regressão do achado #4: linhas-selo NÃO contam no summary — a selo
+-- divergente do cenário 3 não pode virar "linha que não pôde ser lida".
+select is(
+  (select (payload->'summary'->>'invalid')::int from published_snapshots where id = (select s3 from snaps)),
+  0, 'linha-selo divergente não infla summary.invalid');
 
 select * from finish();
 rollback;
